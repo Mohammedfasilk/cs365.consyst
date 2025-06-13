@@ -39,9 +39,9 @@ app.use('/api/signature', Signature);
 app.use('/api/projects',Project);
 
 
-
-const PORT = process.env.PORT || 3001;
-app.listen(PORT,()=>{
-    console.log("running at",PORT);
+// const PORT = process.env.PORT || 3001;
+// app.listen(PORT,()=>{
+//     console.log("running at",PORT);
     
-})
+// })
+module.exports = app;
