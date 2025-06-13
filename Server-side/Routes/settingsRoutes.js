@@ -1,6 +1,6 @@
 const express = require('express')
 const  router = express.Router();
-const { saveSettings, getSettings } = require('../Controllers/settingsController');
+const { saveSettings, getSettings } = require('../Controllers/SettingsController');
 
 router.post('/',saveSettings)
 router.get('/',getSettings)
