@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "../UI/Button";
 import {Input} from "../UI/Input";
-import { Textarea } from "../UI/Textarea";
+import { Textarea } from "../UI/TextArea";
 import {
   Dialog,
   DialogContent,

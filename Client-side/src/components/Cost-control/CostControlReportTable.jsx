@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { bottomLine, emptyTextCell, headerCell, nonEditable, numberCell, percentCell, textCell } from "../../lib/cells";
+import { bottomLine, emptyTextCell, headerCell, nonEditable, numberCell, percentCell, textCell } from "../../lib/Cells";
 import { ReactGrid } from "@silevis/reactgrid";
 import "@silevis/reactgrid/styles.css";
 

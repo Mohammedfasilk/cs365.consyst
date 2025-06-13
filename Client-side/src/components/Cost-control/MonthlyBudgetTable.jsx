@@ -6,7 +6,7 @@ import {
   nonEditable,
   numberCell,
   textCell
-} from "../../lib/cells";
+} from "../../lib/Cells";
 import {  ReactGrid } from "@silevis/reactgrid";
 import "@silevis/reactgrid/styles.css";
 import { useState } from "react";

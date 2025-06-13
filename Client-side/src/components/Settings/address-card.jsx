@@ -24,7 +24,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../UI/Alert-dialog";
-import { Textarea } from "../UI/Textarea";
+import { Textarea } from "../UI/TextArea";
 
 const editAddress = async (updatedData, originalLabel) => {
   try {
