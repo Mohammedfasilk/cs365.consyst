@@ -99,19 +99,19 @@ export function SettingsSheet() {
       });
     } catch (err) {
       if (err.response?.data?.code === 11000) {
-        toast({
-          title: "User Already Exists",
-          description: "A user with this email already exists.",
-          variant: "destructive",
-          icon: <CircleAlertIcon className="mr-4" color="red" />,
-        });
+        // toast({
+        //   title: "User Already Exists",
+        //   description: "A user with this email already exists.",
+        //   variant: "destructive",
+        //   icon: <CircleAlertIcon className="mr-4" color="red" />,
+        // });
       } else {
-        toast({
-          title: "User Not Created",
-          description: "There was an error creating the user.",
-          variant: "destructive",
-          icon: <CircleXIcon className="mr-4" color="red" />,
-        });
+        // toast({
+        //   title: "User Not Created",
+        //   description: "There was an error creating the user.",
+        //   variant: "destructive",
+        //   icon: <CircleXIcon className="mr-4" color="red" />,
+        // });
       }
     }
 
