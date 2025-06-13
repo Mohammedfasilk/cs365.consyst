@@ -1,4 +1,4 @@
-const EmailSignature = require('../models/emailSignatureModel');
+const EmailSignature = require('../Models/emailSignatureModel');
 
 exports.saveEmailSignature = async (req, res) => {
   try {
