@@ -8,7 +8,7 @@ const {getGlobalSettings,updateGlobalSettings,} = require('../Controllers/EmailS
 //   destination: (req, file, cb) => cb(null, 'uploads'),
 //   filename: (req, file, cb) => cb(null, `company-banner${path.extname(file.originalname)}`) 
 // });
-const upload = multer({ storage });
+// const upload = multer({ storage });
 
 router.get('/', getGlobalSettings);
 // router.post('/', upload.single("banner"), updateGlobalSettings);
