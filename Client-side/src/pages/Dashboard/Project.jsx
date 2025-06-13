@@ -9,7 +9,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../components/UI/select";
+} from "../../components/UI/Select";
 import { Tabs, TabsList, TabsTrigger } from "../../components/UI/Tabs";
 import { SquareChartGantt } from "lucide-react";
 // import { useRequireAuth } from "../../hooks/Authenticate";
