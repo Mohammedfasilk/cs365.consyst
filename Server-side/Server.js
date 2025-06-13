@@ -25,7 +25,11 @@ const Auth = require('./Routes/AuthRoute')
 //middlewares
 
 app.use(express.json())
-app.use(cors())
+app.use(cors({
+    origin: 'https://cs365consyst.vercel.app',
+    methods: 'GET,POST',
+    optionsSuccessStatus: 200,
+  }))
 // app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 //routes
