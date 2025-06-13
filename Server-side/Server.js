@@ -24,14 +24,12 @@ const Auth = require('./Routes/AuthRoute')
 
 //middlewares
 
-app.use(express.json(
-    {
-    origin: `${AZURE_REDIRECT_URI}`,
+app.use(express.json())
+app.use(cors({
+    origin: 'https://cs365consyst.vercel.app/',
     methods: 'GET,POST',
     optionsSuccessStatus: 200,
-  };
-))
-app.use(cors())
+  }))
 // app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 //routes
@@ -46,8 +44,9 @@ app.use('/api/signature', Signature);
 app.use('/api/projects',Project);
 
 
+// const PORT = process.env.PORT || 3001;
 app.listen(()=>{
-    console.log("running");
+    console.log("running at");
     
 })
 // module.exports = app;
