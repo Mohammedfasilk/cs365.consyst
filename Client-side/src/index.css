@@ -1,0 +1,81 @@
+@import "tailwindcss";
+@import "tailwindcss/utilities";
+
+/* Custom Variables for Colors */
+:root {
+  --background: #ffffff; /* Replace with your background color */
+  --foreground: #000000; /* Replace with your foreground color */
+  --card: #f7f7f7; /* Replace with your card color */
+  --card-foreground: #333333; /* Replace with your card foreground color */
+  --popover: #ffffff;
+  --popover-foreground: #333333;
+  --primary: #0070f3;
+  --primary-foreground: #ffffff;
+  --secondary: #6b7280;
+  --secondary-foreground: #ffffff;
+  --muted: #e5e7eb;
+  --muted-foreground: #6b7280;
+  --accent: #ff5722;
+  --accent-foreground: #ffffff;
+  --destructive: #e13e13;
+  --destructive-foreground: #ffffff;
+  --csred: #e13e13;
+  --csblue: #336699;
+  --csgray: #f0f0f0;
+  --border: #d1d5db;
+  --input: #f3f4f6;
+  --ring: #60a5fa;
+  --chart-1: #f43f5e;
+  --chart-2: #f59e0b;
+  --chart-3: #10b981;
+  --chart-4: #3b82f6;
+  --chart-5: #8b5cf6;
+  --radius: 8px; /* Example radius */
+}
+
+/* Custom Border Radius */
+:root {
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+}
+
+/* Keyframes for Accordion */
+@layer utilities {
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes fade-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+
+  @keyframes slide-in-from-right {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+  }
+
+  @keyframes slide-out-to-right {
+    from { transform: translateX(0); }
+    to { transform: translateX(100%); }
+  }
+
+  .fade-in {
+    animation: fade-in 0.5s ease forwards;
+  }
+
+  .fade-out {
+    animation: fade-out 0.5s ease forwards;
+  }
+
+  .slide-in-from-right {
+    animation: slide-in-from-right 0.5s ease forwards;
+  }
+
+  .slide-out-to-right {
+    animation: slide-out-to-right 0.5s ease forwards;
+  }
+}
+@plugin 'tailwindcss-animate'
