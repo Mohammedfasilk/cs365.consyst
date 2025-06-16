@@ -32,7 +32,7 @@ app.use(cors())
 //     methods: 'GET,POST',
 //     optionsSuccessStatus: 200,
 //   }
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 //routes
 app.use('/api/auth',Auth);
