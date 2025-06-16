@@ -1,13 +1,10 @@
-import { useIsAuthenticated } from "@azure/msal-react";
 import {
   ChartNoAxesCombined,
   DollarSign,
   FolderGit2,
   TableProperties,
 } from "lucide-react";
-import { useEffect } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
-// import { useRequireAuth } from "../hooks/Authenticate";
+import { Link } from "react-router-dom";
 
 const AppIconButton = ({ title, icon, path, className }) => (
   <Link to={path}>
@@ -26,15 +23,6 @@ const AppIconButton = ({ title, icon, path, className }) => (
 
 export default  function Home() {
   
- const isAuthenticated = useIsAuthenticated();
- 
-   const navigate = useNavigate();
- 
-   useEffect(() => {
-     if (!isAuthenticated) {
-       navigate("/");
-     }
-   }, [isAuthenticated, navigate]);
 
   return (
     <div className="w-full h-[100vh] justify-center bg-[var(--csgray)]">
