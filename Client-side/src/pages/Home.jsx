@@ -5,6 +5,7 @@ import {
   TableProperties,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuthRedirect } from "../Hooks/useAuthRedirect";
 
 const AppIconButton = ({ title, icon, path, className }) => (
   <Link to={path}>
@@ -22,8 +23,7 @@ const AppIconButton = ({ title, icon, path, className }) => (
 );
 
 export default  function Home() {
-  
-
+  useAuthRedirect();
   return (
     <div className="w-full h-[100vh] justify-center bg-[var(--csgray)]">
       <div className="flex justify-center ml-24 pt-24 gap-12">

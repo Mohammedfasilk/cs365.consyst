@@ -16,10 +16,10 @@ import {
   FormLabel,
   FormMessage,
 } from "../UI/Form";
-// import { useToast } from "../Hooks/use-toast";
+import { useToast } from "../../Hooks/use-toast";
 
 export default function GeneralSettings() {
-  // const { toast } = useToast();
+  const { toast } = useToast();
 
   const form = useForm({
     defaultValues: {

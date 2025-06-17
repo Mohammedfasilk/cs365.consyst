@@ -32,8 +32,7 @@ const UserActions = ({ row }) => {
   async function fetchUsers() {
     const res = await axios.get(`${import.meta.env.VITE_CS365_URI}/api/user`, { 
       headers: { 'Cache-Control': 'no-store' } });
-    const response = await res.json();
-    dispatch(setUserList(response));
+    dispatch(setUserList(res.data));
 
   }
 
@@ -41,8 +40,6 @@ const UserActions = ({ row }) => {
     const res = await axios.post(`${import.meta.env.VITE_CS365_URI}/api/user/delete`, {
       email: emailId ,
     });
-
-    await res.json();
     fetchUsers();
   }
 

@@ -3,6 +3,8 @@ import ReactApexChart from "react-apexcharts";
 import { Label } from "../UI/Label";
 import { Switch } from "../UI/Switch";
 import { Card } from "../UI/Card";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchSettings } from "../../Redux/Slices/settingsSlice";
 
 const options = {
   chart: {
@@ -45,14 +47,17 @@ const options = {
 };
 
 const OrderBookingFYTD = ({ company, value: initialValue, isGroup }) => {
-  const settings = {
-    cdipl_target_inr:19610000,
-    ctipl_target_inr:92700000,
-    cmef_target_aed:8438700,
-    group_target_usd:9808334.15,
-    usd_aed_rate:3.67,
-    usd_inr_rate:83
-  }
+
+  const dispatch = useDispatch()
+  const { settings } = useSelector((state) => state.settings)
+
+  useEffect(() => {
+    if (!settings || Object.keys(settings).length == 0) {
+      dispatch(fetchSettings())
+    }
+  }, [dispatch, settings])
+
+
   const [value, setValue] = useState(initialValue);
   const [series, setSeries] = useState([0]);
   const [isUsd, setIsUsd] = useState(false);
@@ -62,16 +67,16 @@ const OrderBookingFYTD = ({ company, value: initialValue, isGroup }) => {
 
     switch (companyName) {
       case "CONSYST Digital Industries Pvt. Ltd":
-        percent = (initialValue / settings.cdipl_target_inr) * 100;
+        percent = (initialValue / settings?.cdiplTarget) * 100;
         break;
       case "CONSYST Technologies (India) Pvt. Ltd.":
-        percent = (initialValue / settings.ctipl_target_inr) * 100;
+        percent = (initialValue / settings?.ctiplTarget) * 100;
         break;
       case "CONSYST Middle East FZ-LLC":
-        percent = (initialValue / settings.cmef_target_aed) * 100;
+        percent = (initialValue / settings?.cmefTarget) * 100;
         break;
       case "Consyst Group":
-        percent = (initialValue / settings.group_target_usd) * 100;
+        percent = (initialValue / settings?.groupTarget) * 100;
         break;
       default:
         percent = 0;
@@ -86,7 +91,7 @@ const OrderBookingFYTD = ({ company, value: initialValue, isGroup }) => {
 
   useEffect(() => {
     if (company === "CONSYST Middle East FZ-LLC") {
-      const converted = initialValue / settings.usd_aed_rate;
+      const converted = initialValue / settings?.usdToaed;
       setValue(converted);
       setIsUsd(true);
     }
@@ -96,8 +101,8 @@ const OrderBookingFYTD = ({ company, value: initialValue, isGroup }) => {
     const currency = isUsd
       ? "USD"
       : company === "CONSYST Middle East FZ-LLC"
-      ? "AED"
-      : "INR";
+        ? "AED"
+        : "INR";
 
     return val >= 1e6
       ? `${currency} ${(val / 1e6).toFixed(3)}M`
@@ -110,8 +115,8 @@ const OrderBookingFYTD = ({ company, value: initialValue, isGroup }) => {
     if (checked) {
       const rate =
         company === "CONSYST Middle East FZ-LLC"
-          ? settings.usd_aed_rate
-          : settings.usd_inr_rate;
+          ? settings?.usdToaed
+          : settings?.usdToinr;
       setValue(initialValue / rate);
     } else {
       setValue(initialValue);
@@ -122,7 +127,7 @@ const OrderBookingFYTD = ({ company, value: initialValue, isGroup }) => {
     <Card className="flex-1 p-4 flex flex-col justify-between">
       <div className="flex justify-between items-start">
         <div>
-            
+
           <p className="mb-2 font-medium">Order Booking - This FY</p>
           <p className="mb-6 text-sm">{company}</p>
         </div>
@@ -154,11 +159,10 @@ const OrderBookingFYTD = ({ company, value: initialValue, isGroup }) => {
         <ReactApexChart options={options} series={series} type="radialBar" />
       </div>
       <p className="text-center font-medium text-2xl mt-4 text-csblue">
-        {`USD ${
-          initialValue >= 1e6
+        {`USD ${initialValue >= 1e6
             ? (initialValue / 1e6).toFixed(3) + "M"
             : (initialValue / 1e3).toFixed(3) + "K"
-        }`}
+          }`}
       </p>
     </Card>
   );

@@ -1,13 +1,25 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import ReactApexChart from "react-apexcharts";
 import { Card } from "../UI/Card";
 import { Switch } from "../UI/Switch";
 import { Label } from "../UI/Label";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchSettings } from "../../Redux/Slices/settingsSlice";
 
 export function SalesOrderByPeriodGraph(props) {
   const [values, setValues] = useState(props.values);
   const [dates, setDates] = useState(props.dates);
+  const { settings } = useSelector((state) => state.settings)
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (!settings || Object.keys(settings).length == 0) {
+      dispatch(fetchSettings())
+    }
+  }, [dispatch, settings])
+
+
 
   const series = [
     {
@@ -108,9 +120,9 @@ export function SalesOrderByPeriodGraph(props) {
 
   const handleSwitch = async (isSwitchedOn) => {
     if (isSwitchedOn) {
-      let fyDate = "2025-04-01";
-      let usd = 82;
-      let aed = 3.67;
+      const fyDate = settings?.currentFyStartDate;
+      const usd = settings?.usdToinr;
+      const aed = settings?.usdToaed;
       const response = await axios.post(
         `${import.meta.env.VITE_CS365_URI}/api/sales-analysis/order-booking`,
         { fyDate, usd, aed }
@@ -120,9 +132,9 @@ export function SalesOrderByPeriodGraph(props) {
       setValues(data.valueList);
       setDates(data.dateList);
     } else {
-      let fyDate = "2025-04-01";
-      let usd = 82;
-      let aed = 3.67;
+      const fyDate = settings?.currentFyStartDate;
+      const usd = settings?.usdToinr;
+      const aed = settings?.usdToaed;
       const response = await axios.post(`${import.meta.env.VITE_CS365_URI}/api/sales-analysis/order-booking-monthly`, {
         fyDate,
         usd,
@@ -134,6 +146,9 @@ export function SalesOrderByPeriodGraph(props) {
       setDates(data.dateList);
     }
   };
+  useEffect(()=>{
+    handleSwitch();
+  },[])
 
   return (
     <Card className="w-full">

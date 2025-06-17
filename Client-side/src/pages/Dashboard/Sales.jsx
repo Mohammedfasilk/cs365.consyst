@@ -12,32 +12,22 @@ import { CurrentOpportunityPipeline } from "../../components/Sales-Pipeline/Curr
 import OrderBookingFYTD from "../../components/Sales-Pipeline/OrderBookingFYTD";
 import { OpportunityDataTable } from "../../components/Sales-Pipeline/OpportunityDataTable";
 import { opportunityDataColumns } from "../../components/top-opportunity/OpportunityDataColumns";
-import { SalesOrderByPeriodGraph } from "../../components/Sales-Pipeline/SalesOrderByPeriodGraph"
-import { useIsAuthenticated } from "@azure/msal-react";
-import { useNavigate } from "react-router-dom";
+import { SalesOrderByPeriodGraph } from "../../components/Sales-Pipeline/SalesOrderByPeriodGraph";
+import { useSelector, useDispatch } from "react-redux";
+import { fetchSettings } from "../../Redux/Slices/settingsSlice";
 
 function SalesPipeline() {
-
-  const isAuthenticated = useIsAuthenticated();
-    const navigate = useNavigate();
-  
-    useEffect(() => {
-      if (!isAuthenticated) {
-        navigate("/");
-      }
-    }, [isAuthenticated, navigate]);
-
-
-
   const [topOpportunities, setTopOpportunities] = useState([]);
-    const settings = {
-      cdipl_target_inr: 19610000,
-      ctipl_target_inr: 92700000,
-      cmef_target_aed: 8438700,
-      group_target_usd: 9808334.15,
-      usd_aed_rate: 3.67,
-      usd_inr_rate: 82,
-    };
+  const dispatch = useDispatch()
+  const {settings} = useSelector((state)=>state.settings)
+
+    useEffect(() => {
+    if (!settings || Object.keys(settings).length == 0) {
+      dispatch(fetchSettings())
+    }
+  }, [dispatch, settings])
+
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -112,9 +102,9 @@ function SalesPipeline() {
   function getOrderBookingGroupedValueUSD(orderBookingData) {
 
     const usdRates = {
-      "CONSYST Digital Industries Pvt. Ltd": settings?.usd_inr_rate,
-      "CONSYST Technologies (India) Pvt. Ltd.": settings?.usd_inr_rate,
-      "CONSYST Middle East FZ-LLC": settings?.usd_aed_rate,
+      "CONSYST Digital Industries Pvt. Ltd": settings?.usdToinr,
+      "CONSYST Technologies (India) Pvt. Ltd.": settings?.usdToinr,
+      "CONSYST Middle East FZ-LLC": settings?.usdToaed,
     };
 
     let totalValue = 0;
@@ -135,14 +125,14 @@ function SalesPipeline() {
     dateList: [],
     valueList: [],
   });
+
   useEffect(() => {
-    const fetchData = async () => { 
-          
+    const fetchData = async () => {
       try {
-        
-        const fyDate = "2025-04-01";
-        const usd = settings.usd_inr_rate;
-        const aed = settings.usd_aed_rate;
+        const fyDate = settings?.currentFyStartDate;
+        const usd = settings?.usdToinr;
+        const aed = settings?.usdToaed;
+
         const response = await axios.post(
           `${
             import.meta.env.VITE_CS365_URI

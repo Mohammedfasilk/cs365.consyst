@@ -11,7 +11,7 @@ import {
   DialogTitle,
 } from "../UI/Dialog";
 import { Label } from "../UI/Label";
-// import { useToast } from "../Hooks/use-toast";
+import { useToast } from "../../Hooks/use-toast";
 import { CircleCheckIcon, CircleXIcon, EditIcon, PlusCircleIcon } from "lucide-react";
 import axios from "axios";
 import { AddressCard } from "./address-card";
@@ -24,7 +24,7 @@ export default function EmailSignatureSettings() {
   const [hideImage, setHideImage] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
-  // const { toast } = useToast();
+  const { toast } = useToast();
 
   async function fetchSettings() {
     try {

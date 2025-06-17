@@ -183,7 +183,7 @@ export const MultiSelect = React.forwardRef((props, ref) => {
             </div>
           ) : (
             <div className="flex items-center justify-between w-full mx-auto">
-              <span className="text-sm text-muted-foreground mx-3">{placeholder}</span>
+              <span className="text-sm text-[var(--muted-foreground)] mx-3">{placeholder}</span>
               <ChevronDown className="h-4 cursor-pointer text-muted-foreground mx-2" />
             </div>
           )}

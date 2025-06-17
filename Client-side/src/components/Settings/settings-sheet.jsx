@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Button } from "../UI/Button";
-import  {Input}  from "../UI/Input";
+import { Input } from "../UI/Input";
 import {
   BoltIcon,
   CircleAlertIcon,
@@ -41,13 +41,16 @@ import {
 import { UserDataTable } from "./UserManagement/UserDataTable";
 import { userDataColumns } from "./UserManagement/UserDataColumns";
 import { MultiSelect } from "../UI/MultiSelect";
-import { LoadingOverlay } from "../LoadingOverlay";
-// import { useToast } from "../Hooks/use-toast";
+import { useToast } from "../../Hooks/use-toast";
 import { useSelector, useDispatch } from "react-redux";
 import { setUserList } from "../../Redux/Slices/usersSlice";
 import { Separator } from "../UI/Separator";
-import  GeneralSettings  from "./general-settings";
-import  EmailSignatureSettings  from "./email-signature-settings";
+import GeneralSettings from "./general-settings";
+import EmailSignatureSettings from "./email-signature-settings";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMsal } from "@azure/msal-react";
+import { fetchSettings } from "../../Redux/Slices/settingsSlice";
 
 const userRoles = [
   { value: "admin", label: "Admin" },
@@ -68,9 +71,20 @@ export function SettingsSheet() {
 
   const userList = useSelector((state) => state.users.userList);
   const dispatch = useDispatch();
-  // const { toast } = useToast();
+  const { toast } = useToast();
+
+  const { accounts } = useMsal();
+  const userEmail = accounts[0]?.username;
+  const userName = accounts[0]?.name;
+
+  const userSchema = z.object({
+    email: z.string().min(1, "Email is required").email("Invalid email"),
+    name: z.string().optional(),
+    roles: z.array(z.string()).min(1, "Please select at least one role"),
+  });
 
   const form = useForm({
+    resolver: zodResolver(userSchema),
     defaultValues: {
       name: "",
       email: "",
@@ -86,9 +100,6 @@ export function SettingsSheet() {
       roles: user.roles,
     };
 
-    console.log(doc);
-    
-
     try {
       const res = await axios.post(`${import.meta.env.VITE_CS365_URI}/api/user`, doc);
 
@@ -99,19 +110,19 @@ export function SettingsSheet() {
       });
     } catch (err) {
       if (err.response?.data?.code === 11000) {
-        // toast({
-        //   title: "User Already Exists",
-        //   description: "A user with this email already exists.",
-        //   variant: "destructive",
-        //   icon: <CircleAlertIcon className="mr-4" color="red" />,
-        // });
+        toast({
+          title: "User Already Exists",
+          description: "A user with this email already exists.",
+          variant: "destructive",
+          icon: <CircleAlertIcon className="mr-4" color="red" />,
+        });
       } else {
-        // toast({
-        //   title: "User Not Created",
-        //   description: "There was an error creating the user.",
-        //   variant: "destructive",
-        //   icon: <CircleXIcon className="mr-4" color="red" />,
-        // });
+        toast({
+          title: "User Not Created",
+          description: "There was an error creating the user.",
+          variant: "destructive",
+          icon: <CircleXIcon className="mr-4" color="red" />,
+        });
       }
     }
 
@@ -136,7 +147,32 @@ export function SettingsSheet() {
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+     const updateDisplayNameIfMissing = async () => {
+    if (!userEmail || !userName) return;
+
+    try {
+      // Get current list of users (or refetch if needed)
+      const user = userList.find(u => u.email === userEmail);
+
+      if (user && !user.name) {
+        // If user exists and has no name, update it
+        await axios.post(`${import.meta.env.VITE_CS365_URI}/api/user`, {
+          email: userEmail,
+          name: userName,
+          roles: user.roles, // retain current roles
+        });
+        
+        fetchUsers(); 
+      }
+    } catch (err) {
+      console.error("Error updating display name", err);
+    }
+  };
+
+  if (userList.length > 0) {
+    updateDisplayNameIfMissing();
+  }
+  }, [userEmail, userName, userList]);
 
   return (
     <Sheet>
@@ -146,7 +182,6 @@ export function SettingsSheet() {
         </Button>
       </SheetTrigger>
       <SheetContent className="min-w-[800px] overflow-auto">
-        {loading && <LoadingOverlay />}
         <SheetHeader>
           <SheetTitle className="text-2xl font-bold mb-10">Settings</SheetTitle>
           <div className="mt-0">
@@ -174,7 +209,7 @@ export function SettingsSheet() {
                       <h1>User Details</h1>
                       <div className="flex flex-col gap-2">
                         <Button
-                          className="bg-[var(--csblue)] hover:bg-[var(--csblue/90)] px-8"
+                          className="bg-[var(--csblue)] hover:bg-[var(--csblue)]/90 px-8"
                           type="submit"
                           disabled={loading}
                         >
@@ -187,7 +222,6 @@ export function SettingsSheet() {
                       <FormField
                         control={form.control}
                         name="email"
-                        rules={{ required: "Email is required" }}
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Email</FormLabel>
@@ -201,7 +235,7 @@ export function SettingsSheet() {
 
                       <FormField
                         control={form.control}
-                        name="username"
+                        name="name"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Display Name</FormLabel>
@@ -215,7 +249,7 @@ export function SettingsSheet() {
 
                       <div className="flex justify-end">
                         <Button
-                          className="bg-[var(--csblue)] hover:bg-[var(--csblue/90)] px-8"
+                          className="bg-[var(--csblue)] hover:bg-[var(--csblue)]/90 px-8"
                           type="submit"
                           disabled={loading}
                         >
@@ -227,9 +261,6 @@ export function SettingsSheet() {
                         <FormField
                           control={form.control}
                           name="roles"
-                          rules={{
-                            validate: (value) => value.length > 0 || "Please select at least one role",
-                          }}
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Roles</FormLabel>
@@ -262,7 +293,7 @@ export function SettingsSheet() {
                     data={userList}
                     onRowClick={(row) => {
                       form.setValue("email", row.email);
-                      form.setValue("username", row.name);
+                      form.setValue("name", row.name);
                       form.setValue("roles", row.roles);
                       setResetKey((prevKey) => prevKey + 1);
                     }}

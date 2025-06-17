@@ -6,6 +6,7 @@ import MainLayout from '../src/components/UI/Mainlayout'
 import Banking from './routes/home/Banking/Banking'
 import Project_management from './routes/home/Project_management'
 import Signature_management from './routes/Signature_management'
+import { Toaster } from './components/UI/Toaster'
 function App() {
 
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route path='/signature-management/*' element={<Signature_management/>}/>
         </Route>
       </Routes>
+      <Toaster/>
     </BrowserRouter>
   )
 }
