@@ -20,7 +20,8 @@ function SignInButton() {
     });
 
     const account = loginResponse.account;
-
+    console.log(account.username);
+    
     if (!account) {
       console.error("No account returned after login.");
       return;
@@ -31,7 +32,6 @@ function SignInButton() {
       account,
     });
 
-    console.log("Access Token:", tokenResponse.accessToken);
 
     const res = await axios.post(
       `${import.meta.env.VITE_CS365_URI}/api/auth`,
@@ -39,7 +39,6 @@ function SignInButton() {
     );
 
     const userExist = res.data;
-    console.log("exist",userExist);
 
     if (userExist.success) {
       sessionStorage.setItem("user", JSON.stringify(userExist.user));
