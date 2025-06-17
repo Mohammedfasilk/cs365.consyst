@@ -26,7 +26,7 @@ const Auth = require('./Routes/AuthRoute')
 
 app.use(express.json())
 app.use(cors({
-    origin: 'https://cs365consyst.vercel.app',
+    origin: 'http://localhost:5173',
     methods: 'GET,POST',
     optionsSuccessStatus: 200,
   }))
