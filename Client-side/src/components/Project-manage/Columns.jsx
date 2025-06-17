@@ -62,7 +62,7 @@ const Actions = ({ row , onDelete}) => {
                 try {
                   await axios.post(
                     `${import.meta.env.VITE_CS365_URI}/api/projects/delete`,
-                    projectname
+                    {project_name:projectname}
                   );
                   onDelete();
                   // toast({

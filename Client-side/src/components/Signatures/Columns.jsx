@@ -63,7 +63,7 @@ const Actions = ({ row, onDelete }) => {
                 try {
                   await axios.post(
                     `${import.meta.env.VITE_CS365_URI}/api/signature/delete`,
-                    fullName
+                    {full_name:fullName}
                   );
                   onDelete();
                   // toast({

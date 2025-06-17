@@ -28,9 +28,9 @@ exports.getSignature = async (req,res) =>{
 //  delete
 
 exports.deleteSignature = async (req,res) =>{
-  const fullname = req.body
+  const {full_name} = req.body
     try {
-        const signatures = await Signature.findOneAndDelete({fullname})
+        const signatures = await Signature.findOneAndDelete({full_name:full_name})
         res.status(200).json(signatures)
     }catch(err){
         res.status(500).json({error:'Failed to Delete Signature'})

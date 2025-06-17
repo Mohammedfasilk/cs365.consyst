@@ -117,9 +117,10 @@ exports.updateBudget = async (req, res) => {
 //Delete Project //
 
 exports.deleteProject = async (req,res) =>{
-  const projectname = req.body
+  const {project_name} = req.body
+  
     try {
-        const Projects = await Project.findOneAndDelete({projectname})
+        const Projects = await Project.findOneAndDelete({project_name:project_name})
         res.status(200).json(Projects)
     }catch(err){
         res.status(500).json({error:'Failed to delete Project'})
