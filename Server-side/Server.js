@@ -18,9 +18,9 @@ const Auth = require('./Routes/AuthRoute')
 
 
 //Ensure uploads folder exists
-if (!fs.existsSync('uploads')) {
-  fs.mkdirSync('uploads');
-}
+// if (!fs.existsSync('uploads')) {
+//   fs.mkdirSync('uploads');
+// }
 
 //middlewares
 
@@ -34,7 +34,7 @@ app.use(cors(
 ))
 
 
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 //routes
 app.use('/api/auth',Auth);
