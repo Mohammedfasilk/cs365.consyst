@@ -394,7 +394,7 @@ function CostEstimationTable({ project }) {
           case "installation-subcontract": update(setDirectExpensesData, "installation_subcontract"); break;
           case "extended-warranty-cost": update(setDirectExpensesData, "extended_warranty_cost"); break;
           case "miscellaneous-direct-expense": update(setDirectExpensesData, "miscellaneous_direct_expense"); break;
-          case "investor-profit-share-percent": setInvestorProfitSharePercent(val); break;
+          case "investor-profit-share-percent": setInvestorProfitSharePercent(val/100); break;
           case "miscellaneous-indirect-expense": setMiscellaneousIndirectExpense(val); break;
         }
       }
