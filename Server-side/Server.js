@@ -41,11 +41,3 @@ app.use('/api/user',User)
 app.use('/api/emailSignature',emailSignature)
 app.use('/api/emailSignatureGlobal', emailSignatureGlobal);
 app.use('/api/signature', Signature);
-app.use('/api/projects',Project);
-
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT,()=>{
-    console.log("running at",PORT);
-    
-})

@@ -1,21 +1,25 @@
 const Settings = require('../Models/settingsModel')
 
-exports.saveSettings = async (req,res) => {
+exports.saveSettings = async (req, res) => {
 
     try {
-        const data = req.body;        
-        const updated = await Settings.findOneAndUpdate({},data,{upsert:true,new:true});
+        const data = req.body;
+        if (data.currentFyStartDate) {
+            const date = new Date(data.currentFyStartDate);
+            data.currentFyStartDate = date.toLocaleDateString('en-CA');
+        }
+        const updated = await Settings.findOneAndUpdate({}, data, { upsert: true, new: true });
         res.json(updated)
-    } catch (err){
-        res.status(500).json({error:'Failed to save settings'})
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to save settings' })
     }
 }
 
-exports.getSettings = async (req,res) =>{
+exports.getSettings = async (req, res) => {
     try {
         const settings = await Settings.findOne({})
         res.status(200).json(settings)
-    }catch(err){
-        res.status(500).json({error:'Failed to get settings'})
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to get settings' })
     }
 }
