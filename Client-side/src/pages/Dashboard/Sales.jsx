@@ -154,7 +154,7 @@ function SalesPipeline() {
   }, []);
 
   return (
-    <div className="w-full">
+    <div>
       <div className="mb-16 ml-20 mt-16 mx-8">
         <h1 className="text-2xl font-bold">Sales</h1>
       </div>
