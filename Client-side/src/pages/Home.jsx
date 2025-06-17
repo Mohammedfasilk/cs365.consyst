@@ -5,7 +5,7 @@ import {
   TableProperties,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useAuthRedirect } from "../Hooks/useAuthRedirect";
+import { useAuthRedirect } from "../Hooks/useAuthRoute";
 
 const AppIconButton = ({ title, icon, path, className }) => (
   <Link to={path}>
