@@ -7,7 +7,7 @@ import { Plus, SquareChartGantt } from "lucide-react";
 // import { ChooseProject } from "@/components/ChooseProject";
 import { MonthPickerComponent } from "../UI/MonthPickerComponent";
 import MonthlyBudgetTable from "./MonthlyBudgetTable";
-import { ChooseProject } from "../UI/ChooseProject";
+import ChooseCostControlProject from "./ChooseCostControlProject";
 // import { MonthlyBudgetTable } from "@/components/MonthlyBudgetTable";
 
 export function CostControlSheet() {
@@ -23,7 +23,7 @@ export function CostControlSheet() {
         <SheetHeader>
           <SheetTitle className="text-2xl font-bold">Cost Control</SheetTitle>
 
-          <ChooseProject />
+          {<ChooseCostControlProject/>}
 
           <div>
             <Tabs defaultValue="cost-control-details">
@@ -35,7 +35,7 @@ export function CostControlSheet() {
 
               <TabsContent value="cost-control-details">
                 <div className="flex justify-between items-center">
-                  <h1>Monthly Budget Table</h1>
+                  <h1 className="font-bold">Monthly Cost Control Sheet</h1>
                   <Button className="bg-[var(--csblue)] hover:bg-[var(--csblue)]/90 px-8" type="submit">
                     Save
                   </Button>

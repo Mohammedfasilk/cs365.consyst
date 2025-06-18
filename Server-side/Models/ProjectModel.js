@@ -57,6 +57,8 @@ const projectSchema = new mongoose.Schema(
 
     project_name: { type: String, required: true },
 
+    project_title: { type: String, required: true },
+
     stage: { type: String },
 
     status: { type: String },

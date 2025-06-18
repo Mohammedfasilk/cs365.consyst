@@ -6,6 +6,8 @@ const db = require('./Config/db')
 const app = express ()
 const path = require('path');
 const fs = require('fs');
+
+const Auth = require('./Routes/AuthRoute')
 const Sales_pipeline = require("./Routes/Sales_pipeline")
 const SalesAnalysis = require("./Routes/SalesAnalysisRoute")
 const Settings  = require('./Routes/settingsRoutes')
@@ -14,7 +16,7 @@ const emailSignature = require('./Routes/emailSignatureRoutes')
 const emailSignatureGlobal = require('./Routes/emailSignatureGlobalRoutes')
 const Signature= require('./Routes/SignatureRoute')
 const Project= require('./Routes/ProjectRoutes')
-const Auth = require('./Routes/AuthRoute')
+const costControl = require('./Routes/costControlRoute')
 
 
 // Ensure uploads folder exists
@@ -42,6 +44,7 @@ app.use('/api/emailSignature',emailSignature)
 app.use('/api/emailSignatureGlobal', emailSignatureGlobal);
 app.use('/api/signature', Signature);
 app.use('/api/projects',Project);
+app.use('/api/cost-control',costControl);
 
 
 const PORT = process.env.PORT || 3000;

@@ -3,12 +3,10 @@ import { Separator } from "../../components/UI/Separator";
 import { CostControlSheet } from "../../components/Cost-control/CostControlSheet";
 import { DataTable } from "../../components/Project/data_column";
 import { columns } from "../../components/Project/Columns";
-// import { useRequireAuth } from "../../hooks/Authenticate";
 
 function Cost_Control() {
 
-  // const redirect = useRequireAuth();
-  // if (redirect) return redirect;
+ 
 
 
   const snapShotsData = [
@@ -18,24 +16,7 @@ function Cost_Control() {
       status: "draft",
       stage: "open",
     },
-    {
-      id: "728ed52d",
-      month: "month",
-      status: "submitted",
-      stage: "approved",
-    },
-    {
-      id: "728ed22f",
-      month: "month",
-      status: "submitted",
-      stage: "approved",
-    },
-    {
-      id: "728ed12f",
-      month: "month",
-      status: "draft",
-      stage: "open",
-    },
+   
   ];
   return (
     <div className="ml-20 mt-16 mx-8">

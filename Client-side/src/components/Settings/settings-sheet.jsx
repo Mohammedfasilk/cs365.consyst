@@ -172,7 +172,7 @@ export function SettingsSheet() {
   if (userList.length > 0) {
     updateDisplayNameIfMissing();
   }
-  }, [userEmail, userName, userList]);
+  }, [userEmail, userName]);
 
   return (
     <Sheet>

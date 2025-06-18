@@ -17,7 +17,7 @@ const HEADING_ROW_HEIGHT = 40;
 const getPurchaseOrderData = () => {
   return {
     po_value: 333,
-    additional_po_value: 333,
+    additional_po_value: 0,
   };
 };
 
@@ -48,7 +48,7 @@ const getColumns = () => [
     columnId: "titles-column",
     width: 300,
   },
-  { columnId: "this-month", width: 150 },
+  { columnId: "Current", width: 150 },
   { columnId: "projected", width: 150 },
 ];
 
@@ -56,9 +56,9 @@ const headerRow = {
   rowId: "header",
   height: HEADING_ROW_HEIGHT,
   cells: [
-    headerCell("Accounting Head", "justify-content-center rounded-tl"),
-    headerCell("This Month", "justify-content-center"),
-    headerCell("Projected", "justify-content-center rounded-tr"),
+    headerCell("Accounting Head", "justify-center rounded-tl"),
+    headerCell("Current", "justify-center"),
+    headerCell("Projected", "justify-center rounded-tr"),
   ],
 };
 
@@ -72,6 +72,14 @@ const getBillingTotal = (billingData) => {
 
 const getTotalDirectExpenses = (directExpensesData) => {
   return Object.values(directExpensesData).reduce((total, expense) => total + expense, 0);
+};
+const getNetProfitLoss = (billingData, directExpensesData) => {
+  return getBillingTotal(billingData) - getTotalDirectExpenses(directExpensesData);
+};
+const getNetProfitLossPercent = (billingData, directExpensesData) => {
+  const totalBilling = getBillingTotal(billingData);
+  if (totalBilling === 0) return 0;
+  return ((getNetProfitLoss(billingData, directExpensesData) / totalBilling) * 100).toFixed(2);
 };
 
 const getRows = (purchaseOrderData, billingData, directExpensesData) => {
@@ -93,7 +101,7 @@ const getRows = (purchaseOrderData, billingData, directExpensesData) => {
     isEditable = true,
     isBold = false,
     color,
-    isLastRow = false
+    isLastRow = false,
   ) => ({
     rowId: label.toLowerCase().replace(/\s+/g, "-"),
     height: ROW_HEIGHT,
@@ -101,7 +109,7 @@ const getRows = (purchaseOrderData, billingData, directExpensesData) => {
       nonEditable(
         textCell(
           label,
-          "padding-left-lg" + (isBold ? " font-bold" : "") + (isLastRow ? " rounded-bl" : "")
+          "padding-left-lg" + (isBold ? " font-bold" : "") + (isLastRow ? " rounded-bl" : ""),color ? {color:`${color}`} : ''
         )
       ),
       isEditable
@@ -160,8 +168,12 @@ const getRows = (purchaseOrderData, billingData, directExpensesData) => {
       true
     ),
   ];
+  const netProfitRows= [
+    createDataRow("Net Profit/Loss",getNetProfitLoss(billingData, directExpensesData),false,true,"#336699"),
+    createDataRow("Net Profit/Loss (Percent)", getNetProfitLossPercent(billingData,directExpensesData),false,true,"#336699"),
+  ]
 
-  return [headerRow, ...purchaseOrderRows, ...billingRows, ...directExpensesRows];
+  return [headerRow, ...purchaseOrderRows, ...billingRows, ...directExpensesRows,...netProfitRows];
 };
 
 function MonthlyBudgetTable() {

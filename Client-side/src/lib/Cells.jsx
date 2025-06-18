@@ -79,7 +79,7 @@ export const noSideBorders = (cell) => ({
 
 export function headerCell(month, additionalClassNames = "") {
   return nonEditable(
-    textCell(month, `text-lg font-bold ${additionalClassNames}`, {
+    textCell(month, `flex text-lg font-bold ${additionalClassNames}`, {
       background: "#336699",
       color: "white",
       border: {

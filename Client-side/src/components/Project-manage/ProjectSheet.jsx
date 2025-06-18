@@ -39,7 +39,7 @@ import { format } from "date-fns";
 import { Textarea } from "../UI/TextArea";
 import { Calendar } from "../UI/Calender";
 import CostEstimationTable from "../CostEstimationTable";
-import { ChooseProject } from "../UI/ChooseProject";
+import { ChooseProject } from "../Project-manage/ChooseProject";
 import { useDispatch, useSelector } from "react-redux";
 import {
   clearSelectedProject,
@@ -52,7 +52,8 @@ const ProjectSheet = ({fetchData}) => {
   const [project, setProject] = useState(null);
   const dispatch = useDispatch();
 
-  const selectedProject = useSelector((state) => state.selectedProject.project);  
+  const selectedProject = useSelector((state) => state.selectedProject.project);
+  
   const selectedProjectName = useSelector((state)=> state.selectedProject.selectedProjectName)
   
   const isOpen = useSelector((state) => state.selectedProject.isOpen);
@@ -85,10 +86,11 @@ const ProjectSheet = ({fetchData}) => {
       company: "",
     },
   });
-
+ 
   async function onSubmit(values) {
     const projectValues = {
       project_name: selectedProjectName,
+      project_title: selectedProject.project_name,
       customer_name: values.customerName,
       customer_po_value: values.customerPoValue,
       customer_po_date: values.customerPoDate,
@@ -186,7 +188,7 @@ const ProjectSheet = ({fetchData}) => {
           );
   
           const projects = res.data ;
-         
+          
           
           const data = projects.filter((project)=> project?.project_name == project_name)[0]
           

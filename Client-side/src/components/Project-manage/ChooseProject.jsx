@@ -7,8 +7,8 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "./Command";
-import { Popover, PopoverContent, PopoverTrigger } from "./Popover";
+} from "../UI/Command";
+import { Popover, PopoverContent, PopoverTrigger } from "../UI/Popover";
 import { Check } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useDispatch, useSelector } from "react-redux";
@@ -73,7 +73,7 @@ export function ChooseProject({ project_name }) {
     <Popover open={dropdownOpen} onOpenChange={setDropdownOpen}>
       <PopoverTrigger asChild>
         <div className="text-left text-2xl text-gray-400 cursor-pointer border-b-2 border-transparent hover:border-gray-200">
-          {project_name || selectedProjectName || "Choose Project"}
+          {selectedProjectName || "Choose Project"}
         </div>
       </PopoverTrigger>
       <PopoverContent className="w-[760px] p-0">
@@ -89,11 +89,10 @@ export function ChooseProject({ project_name }) {
             <CommandGroup>
               {projectList.map((project) => (
                 <CommandItem
-                  key={project.name}
-                  value={project.name}
-                  onSelect={(currentValue) => {
-                    const newName = currentValue === selectedProject?.name ? "" : currentValue;
-                    dispatch(setSelectedProjectName(newName));                    
+                  key={project._id}
+                  value={project.project_name}
+                  onSelect={() => { 
+                    dispatch(setSelectedProjectName(project.name));                    
                     dispatch(setSelectedProject(project));
                     setDropdownOpen(false);
                     // fetchSalesOrderData(project.sales_order);
