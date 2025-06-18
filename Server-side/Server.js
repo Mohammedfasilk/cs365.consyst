@@ -23,7 +23,6 @@ app.use(express.json())
 app.use(cors({
     origin: 'https://cs365consyst.vercel.app',
     methods: 'GET,POST',
-    optionsSuccessStatus: 200,
   }))
 
 //routes
