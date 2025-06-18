@@ -13,7 +13,7 @@ exports.fetchProjectList = async (req, res) => {
       };
     }
     
-    const projects = await Project.find(query).select("project_title").limit(15);
+    const projects = await Project.find(query).select("project_title -_id").limit(15);
     
           res.status(200).json(projects)
   } catch (error) {
