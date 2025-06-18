@@ -15,11 +15,11 @@ exports.getGlobalSettings = async (req, res) => {
 exports.updateGlobalSettings = async (req, res) => {
   try {
 
-    const bannerPath = req.file ? `/uploads/${req.file.filename}` : undefined;
+    const bannerBase64 = req.file ? `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}` : undefined;
     const { legalDisclaimer } = req.body;
 
     const updateFields = {};
-    if (bannerPath) updateFields.banner = bannerPath;
+    if (bannerBase64) updateFields.banner = bannerBase64;
     if (legalDisclaimer !== undefined) updateFields.legalDisclaimer = legalDisclaimer;
 
     const updatedGlobal = await EmailSignatureGlobal.findOneAndUpdate(
@@ -33,3 +33,4 @@ exports.updateGlobalSettings = async (req, res) => {
     res.status(500).json({ error: 'Failed to update global settings' });
   }
 };
+

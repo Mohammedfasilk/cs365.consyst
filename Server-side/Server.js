@@ -18,21 +18,13 @@ const Signature= require('./Routes/SignatureRoute')
 const Project= require('./Routes/ProjectRoutes')
 const costControl = require('./Routes/costControlRoute')
 
-
-// Ensure uploads folder exists
-// if (!fs.existsSync('uploads')) {
-//   fs.mkdirSync('uploads');
-// }
-
 //middlewares
-
 app.use(express.json())
 app.use(cors({
     origin: 'https://cs365consyst.vercel.app',
     methods: 'GET,POST',
     optionsSuccessStatus: 200,
   }))
-// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 //routes
 app.use('/api/auth',Auth);
