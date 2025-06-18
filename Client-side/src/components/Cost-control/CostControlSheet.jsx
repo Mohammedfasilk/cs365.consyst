@@ -23,7 +23,7 @@ export function CostControlSheet() {
         <SheetHeader>
           <SheetTitle className="text-2xl font-bold">Cost Control</SheetTitle>
 
-          <ChooseCostControlProject/>
+          {<ChooseCostControlProject/>}
 
           <div>
             <Tabs defaultValue="cost-control-details">

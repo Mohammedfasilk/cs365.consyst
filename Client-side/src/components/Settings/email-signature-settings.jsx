@@ -33,12 +33,12 @@ export default function EmailSignatureSettings() {
         headers: { "Cache-Control": "no-store" },
       });
       setAddresses(signatures?.length ? signatures : []);
-
+      
       // Fetch global settings for legal disclaimer and banner
       const { data: global } = await axios.get(`${import.meta.env.VITE_CS365_URI}/api/emailSignatureGlobal`);
       setNewLegalDisclaimer(global.legalDisclaimer ?? "");
       setHideImage(!global.banner); // Hide image if no banner exists
-      setBannerImageFile(global.banner)
+      setBannerImageFile(global.banner)      
 
     } catch (error) {
       console.error("Error fetching settings:", error.response?.data || error.message);
@@ -242,7 +242,7 @@ export default function EmailSignatureSettings() {
                 alt="company-banner"
                 width={250}
                 height={250}
-                src={`${import.meta.env.VITE_CS365_URI}${bannerImageFile}?cacheBust=${new Date().getTime()}`}
+                src={bannerImageFile}
                 onError={() => setHideImage(true)}
               />
               <span  className="absolute inset-0 flex items-center justify-center text-white bg-black bg-opacity-50 opacity-0 hover:opacity-100 transition-opacity">
@@ -282,3 +282,4 @@ export default function EmailSignatureSettings() {
     </>
   );
 }
+

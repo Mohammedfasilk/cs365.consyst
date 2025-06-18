@@ -145,8 +145,12 @@ export function SettingsSheet() {
     createUser(values);
   };
 
-  useEffect(() => {
+  useEffect(()=>{
     fetchUsers();
+
+  },[])
+
+  useEffect(() => {
      const updateDisplayNameIfMissing = async () => {
     if (!userEmail || !userName) return;
 

@@ -25,7 +25,7 @@ function ChooseCostControlProject({ project_name }) {
   const [search, setSearch] = useState({ search: "" });
 
   const setSalesOrder = []; //from redux
-  const [selectedCostControlProject,setSelectedCostControlProject] = useState(''); //useSelector((state) => state.selectedProject.project);
+  const selectedCostControlProject = ""; //useSelector((state) => state.selectedProject.project);
   const selectedCostControlProjectName = useSelector(
     (state) => state.selectedProject.selectedProjectName
   );
@@ -52,7 +52,7 @@ function ChooseCostControlProject({ project_name }) {
     <Popover open={dropdownOpen} onOpenChange={setDropdownOpen}>
       <PopoverTrigger asChild>
         <div className="text-left text-2xl text-gray-400 cursor-pointer border-b-2 border-transparent hover:border-gray-200">
-          {selectedCostControlProject || "Choose a Project"}
+          {project_name || "Choose a Project"}
         </div>
       </PopoverTrigger>
       <PopoverContent className="w-[760px] p-0">
@@ -76,8 +76,7 @@ function ChooseCostControlProject({ project_name }) {
                         ? ""
                         : currentValue;
                     dispatch(setSelectedProjectName(newName));
-                    // dispatch(setSelectedProject(project));
-                    setSelectedCostControlProject(project.project_title)
+                    dispatch(setSelectedProject(project));
                     setDropdownOpen(false);
                   }}
                 >

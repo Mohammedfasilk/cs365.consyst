@@ -1,11 +1,16 @@
 import React, { useRef } from "react";
 import { Button } from "../UI/Button";
-// import { useToast } from "@/hooks/use-toast";
+import { useToast } from "../../Hooks/use-toast"
 import { CircleCheckIcon, CircleXIcon, CopyIcon } from "lucide-react";
+import LinkedIn from '../../assets/linkedin-logo.png'
+import Facebook from '../../assets/facebook-logo.png'
+import instagram from '../../assets/instagram-logo.png'
+import YouTube from '../../assets/youtube-logo.png'
+import Consyst_Logo from '../../assets/consyst_logo.png'
 
-const EmailSignature = ({ name, designation, addresses, phone, disclaimer }) => {
+const EmailSignature = ({ name, designation, addresses, phone, disclaimer,banner }) => {
   const signatureRef = useRef(null);
-  // const { toast } = useToast();
+  const { toast } = useToast();
 
   const copyToClipboard = () => {
     if (signatureRef.current) {
@@ -17,38 +22,38 @@ const EmailSignature = ({ name, designation, addresses, phone, disclaimer }) => 
 
         navigator.clipboard.write(data).then(
           () => {
-            // toast({
-            //   title: "Signature Copied",
-            //   description: "The signature has been copied to clipboard.",
-            //   icon: <CircleCheckIcon className="mr-4" color="green" />,
-            // });
+            toast({
+              title: "Signature Copied",
+              description: "The signature has been copied to clipboard.",
+              icon: <CircleCheckIcon className="mr-4" color="green" />,
+            });
           },
           (err) => {
-            // toast({
-            //   title: "Failed to Copy Signature",
-            //   description: "Something went wrong copying the signature.",
-            //   variant: "destructive",
-            //   icon: <CircleXIcon className="mr-4" color="red" />,
-            // });
+            toast({
+              title: "Failed to Copy Signature",
+              description: "Something went wrong copying the signature.",
+              variant: "destructive",
+              icon: <CircleXIcon className="mr-4" color="red" />,
+            });
             console.error(err);
           }
         );
       } else {
         navigator.clipboard.writeText(signatureHTML).then(
           () => {
-            // toast({
-            //   title: "Signature Copied (Plain Text)",
-            //   description: "Copied using fallback method.",
-            //   icon: <CircleCheckIcon className="mr-4" color="green" />,
-            // });
+            toast({
+              title: "Signature Copied (Plain Text)",
+              description: "Copied using fallback method.",
+              icon: <CircleCheckIcon className="mr-4" color="green" />,
+            });
           },
           (err) => {
-            // toast({
-            //   title: "Failed to Copy Signature",
-            //   description: "Something went wrong copying the signature.",
-            //   variant: "destructive",
-            //   icon: <CircleXIcon className="mr-4" color="red" />,
-            // });
+            toast({
+              title: "Failed to Copy Signature",
+              description: "Something went wrong copying the signature.",
+              variant: "destructive",
+              icon: <CircleXIcon className="mr-4" color="red" />,
+            });
             console.error(err);
           }
         );
@@ -82,7 +87,7 @@ const EmailSignature = ({ name, designation, addresses, phone, disclaimer }) => 
                 }}
               >
                 <img
-                  src="/images/consyst_logo.png"
+                  src={Consyst_Logo}
                   alt="Consyst Logo"
                   style={{
                     height: "50px",
@@ -215,22 +220,22 @@ const EmailSignature = ({ name, designation, addresses, phone, disclaimer }) => 
                               </td>
                               <td style={{ width: "25px" }}>
                                 <a href="https://www.linkedin.com/company/con-syst/" title="LinkedIn">
-                                  <img src="/images/linkedin-logo.png" alt="LinkedIn" style={{ width: "20px" }} />
+                                  <img src={LinkedIn} alt="LinkedIn" style={{ width: "20px" }} />
                                 </a>
                               </td>
                               <td style={{ width: "25px" }}>
                                 <a href="https://www.facebook.com/consyst.biz" title="Facebook">
-                                  <img src="/images/facebook-logo.png" alt="Facebook" style={{ width: "20px" }} />
+                                  <img src={Facebook} alt="Facebook" style={{ width: "20px" }} />
                                 </a>
                               </td>
                               <td style={{ width: "25px" }}>
                                 <a href="https://www.youtube.com/@CONSYSTGroup" title="YouTube">
-                                  <img src="/images/youtube-logo.png" alt="YouTube" style={{ width: "20px" }} />
+                                  <img src={YouTube} alt="YouTube" style={{ width: "20px" }} />
                                 </a>
                               </td>
                               <td style={{ width: "25px" }}>
                                 <a href="https://www.instagram.com/consyst.biz/" title="Instagram">
-                                  <img src="/images/instagram-logo.png" alt="Instagram" style={{ width: "20px" }} />
+                                  <img src={instagram} alt="Instagram" style={{ width: "20px" }} />
                                 </a>
                               </td>
                             </tr>
@@ -245,7 +250,7 @@ const EmailSignature = ({ name, designation, addresses, phone, disclaimer }) => 
 
             <tr>
               <td colSpan={2}>
-                <img src="/uploads/company-banner.png" alt="Company Banner" style={{ width: "600px" }} />
+                <img src={banner} alt="Company Banner" style={{ width: "600px" }} />
               </td>
             </tr>
 
@@ -270,3 +275,4 @@ const EmailSignature = ({ name, designation, addresses, phone, disclaimer }) => 
 };
 
 export default EmailSignature;
+

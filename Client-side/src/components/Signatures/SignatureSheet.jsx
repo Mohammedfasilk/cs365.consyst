@@ -64,14 +64,22 @@ export const SignatureSheet = ({ onSuccess }) => {
   );
 
   const [addresses, setAddresses] = useState([
-    { label: "demo" },
-    { label: "sample" },
-  ]);
+
+ 0]);
+    
+  useEffect(()=>{
+    async function fetchAddress(){
+      const res = await axios.get(`${import.meta.env.VITE_CS365_URI}/api/emailSignature`)
+      setAddresses(res.data)
+    }
+    fetchAddress()
+  },[isOpen])
 
   const [filteredAddresses, setFilteredAddresses] = useState([]);
   const [legalDisclaimer, setLegalDisclaimer] = useState("");
   const [resetKey, setResetKey] = useState(0);
   const [triggerRender, toggleTriggerRender] = useState(false);
+  const [bannerImage, setBannerImage] = useState()
 
   // const { toast } = useToast()
 
@@ -135,17 +143,18 @@ export const SignatureSheet = ({ onSuccess }) => {
     fetchSelectedSignature(selectedSignatureName);
   }, [selectedSignatureName]);
 
-  // useEffect(() => {
-  //   async function fetchSettings() {
-  //     const response = await fetch("/api/settings", { cache: "no-store" })
-  //     const data = await response.json()
+  useEffect(() => {
+    async function fetchSettings() {
+      const res = await axios.get( `${import.meta.env.VITE_CS365_URI}/api/emailSignatureGlobal`,
+        { cache: "no-store" })
+        const data = res.data;
 
-  //     setAddresses(data.addresses || [])
-  //     setLegalDisclaimer(data.legal_disclaimer || "")
-  //   }
+      setLegalDisclaimer(data.legalDisclaimer || "")  
+      setBannerImage(data.banner)    
+    }
 
-  //   fetchSettings()
-  // }, [isOpen])
+    fetchSettings()
+  }, [])
 
   const generateSignature = async () => {
     const selected = form.getValues("addresses");
@@ -291,6 +300,7 @@ export const SignatureSheet = ({ onSuccess }) => {
                         addresses={filteredAddresses}
                         phone={formValues.phNumber}
                         disclaimer={legalDisclaimer}
+                        banner={bannerImage}
                       />
                     </div>
                   )}
