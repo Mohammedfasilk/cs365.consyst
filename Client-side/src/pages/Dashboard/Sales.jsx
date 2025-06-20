@@ -27,6 +27,15 @@ function SalesPipeline() {
     }
   }, [dispatch, settings])
 
+  const [sumFunnelData, setSumFunnelData] = useState([]);
+  const [countFunnelData, setCountFunnelData] = useState([]);
+  const [orderBookingData, setOrderBookingData] = useState([]);
+   const [monthlyOrderBookingData, setMonthlyOrderBookingData] = useState({
+    dateList: [],
+    valueList: [],
+  });
+
+
   
   useEffect(() => {
     const fetchData = async () => {
@@ -41,14 +50,7 @@ function SalesPipeline() {
       } catch (error) {
         console.error("Error fetching Top Opportunities:", error);
       }
-    };
 
-    fetchData();
-  }, []);
-
-  const [sumFunnelData, setSumFunnelData] = useState([]);
-  useEffect(() => {
-    const fetchData = async () => {
       try {
         const res = await axios.get(
           `${import.meta.env.VITE_CS365_URI}/api/sales-pipeline/sum`
@@ -58,15 +60,7 @@ function SalesPipeline() {
       } catch (error) {
         console.error("Error fetching funnel Value:", error);
       }
-    };
 
-    fetchData();
-  }, []);
-
-  const [countFunnelData, setCountFunnelData] = useState([]);
-
-  useEffect(() => {
-    const fetchData = async () => {
       try {
         const res = await axios.get(
           `${import.meta.env.VITE_CS365_URI}/api/sales-pipeline/count`
@@ -76,15 +70,7 @@ function SalesPipeline() {
       } catch (error) {
         console.error("Error fetching funnel Count:", error);
       }
-    };
 
-    fetchData();
-  }, []);
-
-  const [orderBookingData, setOrderBookingData] = useState([]);
-
-  useEffect(() => {
-    const fetchData = async () => {
       try {
         const res = await axios.get(
           `${import.meta.env.VITE_CS365_URI}/api/sales-analysis`
@@ -94,44 +80,11 @@ function SalesPipeline() {
       } catch (error) {
         console.error("Error fetching sales Order:", error);
       }
-    };
 
-    fetchData();
-  }, []);
-
-  function getOrderBookingGroupedValueUSD(orderBookingData) {
-
-    const usdRates = {
-      "CONSYST Digital Industries Pvt. Ltd": settings?.usdToinr,
-      "CONSYST Technologies (India) Pvt. Ltd.": settings?.usdToinr,
-      "CONSYST Middle East FZ-LLC": settings?.usdToaed,
-    };
-
-    let totalValue = 0;
-
-    orderBookingData.map((item) => {
-      const rate = usdRates[item.company];
-      const valueInUSD = item.value / rate;
-
-      totalValue += valueInUSD;
-    });
-
-    return totalValue;
-  }
-  const orderBookingGroupedValueUSD =
-    getOrderBookingGroupedValueUSD(orderBookingData);
-
-  const [monthlyOrderBookingData, setMonthlyOrderBookingData] = useState({
-    dateList: [],
-    valueList: [],
-  });
-
-  useEffect(() => {
-    const fetchData = async () => {
       try {
         const fyDate = settings?.currentFyStartDate;
-        const usd = settings?.usdToinr;
-        const aed = settings?.usdToaed;
+        const usd = settings?.usdToinr || 0;
+        const aed = settings?.usdToaed || 0;
 
         const response = await axios.post(
           `${
@@ -153,6 +106,32 @@ function SalesPipeline() {
     fetchData();
   }, []);
 
+  
+
+
+  function getOrderBookingGroupedValueUSD(orderBookingData) {
+
+    const usdRates = {
+      "CONSYST Digital Industries Pvt. Ltd": settings?.usdToinr || 0,
+      "CONSYST Technologies (India) Pvt. Ltd.": settings?.usdToinr || 0,
+      "CONSYST Middle East FZ-LLC": settings?.usdToaed || 0,
+    };
+
+    let totalValue = 0;
+
+    orderBookingData.map((item) => {
+      const rate = usdRates[item.company];
+      const valueInUSD = item.value / rate;
+
+      totalValue += valueInUSD;
+    });
+
+    return totalValue;
+  }
+  const orderBookingGroupedValueUSD =
+    getOrderBookingGroupedValueUSD(orderBookingData);
+
+ 
   return (
     <div>
       <div className="mb-16 ml-20 mt-16 mx-8">

@@ -27,9 +27,14 @@ import { Button } from "../UI/Button";
 import {Input} from "../UI/Input";
 import { ChevronDownIcon } from "lucide-react";
 import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { setIsOpen, setSelectedMonth, setSelectedProjectName } from "../../Redux/Slices/costControlsheet";
 // import { useProjectSheetStore } from "@/utils/zustandStore";
 
-export function DataTable({ data, columns }) {
+
+export function DataTable({ data, columns , noFilter }) {
+  const dispatch = useDispatch()
+  const {choosenProject} = useSelector((state)=>state.costControlSheet)
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
   const [columnVisibility, setColumnVisibility] = useState({});
@@ -60,6 +65,7 @@ export function DataTable({ data, columns }) {
   return (
     <div>
       <div className="flex items-center py-4">
+        { noFilter ? null :
         <Input
           placeholder="Filter project..."
           value={table.getColumn("month")?.getFilterValue() ?? ""}
@@ -68,6 +74,7 @@ export function DataTable({ data, columns }) {
           }
           className="max-w-sm p-2 outline rounded"
         />
+        }
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="ml-auto">
@@ -122,8 +129,9 @@ export function DataTable({ data, columns }) {
                       key={cell.id}
                       onClick={() => {
                         if (cell.column.id !== "actions") {
-                          setIsProjectSheetOpen(true);
-                          setSelectedProjectName(row.getValue("project_name"));
+                          dispatch(setIsOpen(true))
+                          dispatch(setSelectedMonth(row.getValue("month")));
+                          dispatch(setSelectedProjectName(choosenProject));
                         }
                       }}
                     >

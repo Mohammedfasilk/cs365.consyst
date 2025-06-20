@@ -419,7 +419,6 @@ function CostEstimationTable({ project }) {
       net_profit_loss: getNetProfitLoss(billingData, directExpensesData, investorProfitSharePercent, miscellaneousIndirectExpense),
       net_profit_loss_percent: getNetProfitLossPercent(billingData, directExpensesData, investorProfitSharePercent, miscellaneousIndirectExpense) || 0
     };
-    console.log(data);
 
     const updateProject = async (data)=>{
       try{
@@ -430,16 +429,16 @@ function CostEstimationTable({ project }) {
 
         if (result?.error) {
       toast({
-        title: "Project Not Saved",
-        description: "There was an error saving the project.",
+        title: "Budget Not Saved",
+        description: "There was an error saving the budget.",
         variant: "destructive",
         icon: <CircleXIcon className="mr-4" color="red" />
       });
       return;
     }
     toast({
-      title: "Project Saved",
-      description: "The project has been successfully saved.",
+      title: "Budget Saved",
+      description: "The budget has been successfully saved.",
       icon: <CircleCheckIcon className="mr-4" color="green" />
     });
       }catch(error) {

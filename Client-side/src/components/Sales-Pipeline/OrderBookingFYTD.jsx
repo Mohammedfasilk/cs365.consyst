@@ -67,16 +67,16 @@ const OrderBookingFYTD = ({ company, value: initialValue, isGroup }) => {
 
     switch (companyName) {
       case "CONSYST Digital Industries Pvt. Ltd":
-        percent = (initialValue / settings?.cdiplTarget) * 100;
+        percent = (initialValue / settings?.cdiplTarget || 0) * 100;
         break;
       case "CONSYST Technologies (India) Pvt. Ltd.":
-        percent = (initialValue / settings?.ctiplTarget) * 100;
+        percent = (initialValue / settings?.ctiplTarget || 0) * 100;
         break;
       case "CONSYST Middle East FZ-LLC":
-        percent = (initialValue / settings?.cmefTarget) * 100;
+        percent = (initialValue / settings?.cmefTarget || 0) * 100;
         break;
       case "Consyst Group":
-        percent = (initialValue / settings?.groupTarget) * 100;
+        percent = (initialValue / settings?.groupTarget || 0) * 100;
         break;
       default:
         percent = 0;
@@ -91,7 +91,7 @@ const OrderBookingFYTD = ({ company, value: initialValue, isGroup }) => {
 
   useEffect(() => {
     if (company === "CONSYST Middle East FZ-LLC") {
-      const converted = initialValue / settings?.usdToaed;
+      const converted = initialValue / settings?.usdToaed || 0;
       setValue(converted);
       setIsUsd(true);
     }
@@ -115,8 +115,8 @@ const OrderBookingFYTD = ({ company, value: initialValue, isGroup }) => {
     if (checked) {
       const rate =
         company === "CONSYST Middle East FZ-LLC"
-          ? settings?.usdToaed
-          : settings?.usdToinr;
+          ? settings?.usdToaed || 1
+          : settings?.usdToinr || 1;
       setValue(initialValue / rate);
     } else {
       setValue(initialValue);

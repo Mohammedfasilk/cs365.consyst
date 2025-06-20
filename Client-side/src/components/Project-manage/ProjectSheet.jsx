@@ -47,6 +47,7 @@ import {
   setSelectedProjectName,
 } from "../../Redux/Slices/SelectedProject";
 import GanttChart from "./GanttChart";
+import { useToast } from "../../Hooks/use-toast";
 
 const ProjectSheet = ({fetchData}) => {
   const [project, setProject] = useState(null);
@@ -57,7 +58,7 @@ const ProjectSheet = ({fetchData}) => {
   const selectedProjectName = useSelector((state)=> state.selectedProject.selectedProjectName)
   
   const isOpen = useSelector((state) => state.selectedProject.isOpen);
-  //   const { toast } = useToast();
+  const { toast } = useToast();
   const formSchema = z.object({
   customerName: z.string(),
   customerPoValue: z.number(),
@@ -114,6 +115,21 @@ const ProjectSheet = ({fetchData}) => {
         );
 
         fetchData();
+         if ( res==null || res?.error ) {
+      toast({
+        title: "Project Not Saved",
+        description: "There was an error saving the project.",
+        variant: "destructive",
+        icon: <CircleXIcon className="mr-4" color="red" />,
+      });
+      return;
+    }
+
+    toast({
+      title: "Project Saved",
+      description: "The project has been successfully saved.",
+      icon: <CircleCheckIcon className="mr-4" color="green" />,
+    });
         
       } catch (error) {
         console.error("Error Saving Project:", error);
@@ -123,21 +139,7 @@ const ProjectSheet = ({fetchData}) => {
     createProject();
     
       
-    // if (result?.error) {
-    //   toast({
-    //     title: "Project Not Saved",
-    //     description: "There was an error saving the project.",
-    //     variant: "destructive",
-    //     icon: <CircleXIcon className="mr-4" color="red" />,
-    //   });
-    //   return;
-    // }
-
-    toast({
-      title: "Project Saved",
-      description: "The project has been successfully saved.",
-      icon: <CircleCheckIcon className="mr-4" color="green" />,
-    });
+   
   }
 
   useEffect(() => {

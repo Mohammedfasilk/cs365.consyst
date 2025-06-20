@@ -1,4 +1,3 @@
-
 import {
   bottomLine,
   emptyTextCell,
@@ -7,47 +6,52 @@ import {
   numberCell,
   textCell
 } from "../../lib/Cells";
-import {  ReactGrid } from "@silevis/reactgrid";
+import { ReactGrid } from "@silevis/reactgrid";
 import "@silevis/reactgrid/styles.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const ROW_HEIGHT = 25;
 const HEADING_ROW_HEIGHT = 40;
 
-const getPurchaseOrderData = () => {
+const getMonthlyData = (project, selectedMonth) => {
+  if (!Array.isArray(project?.monthly_cost_control)) return {};
+  return project.monthly_cost_control.find(entry => entry.month === selectedMonth) || {};
+};
+
+const getPurchaseOrderData = (project, selectedMonth) => {
+  const monthlyData = getMonthlyData(project, selectedMonth);
   return {
-    po_value: 333,
-    additional_po_value: 0,
+    po_value: project?.budget?.po_value || 0,
+    additional_po_value: monthlyData?.additional_po_value || 0,
   };
 };
 
-const getBillingData = () => {
+const getBillingData = (project, selectedMonth) => {
+  const monthlyData = getMonthlyData(project, selectedMonth);
   return {
-    invoice_supply: 50000,
-    invoice_service: 25000,
-    additional_invoice: 0,
+    invoice_supply: monthlyData?.invoice_supply || 0,
+    invoice_service: monthlyData?.invoice_service || 0,
+    additional_invoice: monthlyData?.additional_invoice || 0,
   };
 };
 
-const getDirectExpenses = () => {
+const getDirectExpenses = (project, selectedMonth) => {
+  const monthlyData = getMonthlyData(project, selectedMonth);
   return {
-    cogs: 25000,
-    packing_and_forwarding: 1000,
-    travel_expenses: 2000,
-    travel_allowances: 2000,
-    commissioning: 2500,
-    programming_outsourced: 2000,
-    installation_subcontract: 2000,
-    extended_warranty_cost: 1000,
-    miscellaneous_direct_expense: 500,
+    cogs: monthlyData?.cogs || 0,
+    packing_and_forwarding: monthlyData?.packing_and_forwarding || 0,
+    travel_expenses: monthlyData?.travel_expenses || 0,
+    travel_allowances: monthlyData?.travel_allowances || 0,
+    commissioning: monthlyData?.commissioning || 0,
+    programming_outsourced: monthlyData?.programming_outsourced || 0,
+    installation_subcontract: monthlyData?.installation_subcontract || 0,
+    extended_warranty_cost: monthlyData?.extended_warranty_cost || 0,
+    miscellaneous_direct_expense: monthlyData?.miscellaneous_direct_expense || 0,
   };
 };
 
 const getColumns = () => [
-  {
-    columnId: "titles-column",
-    width: 300,
-  },
+  { columnId: "titles-column", width: 300 },
   { columnId: "Current", width: 150 },
   { columnId: "projected", width: 150 },
 ];
@@ -62,24 +66,22 @@ const headerRow = {
   ],
 };
 
-const getTotalPoValue = (purchaseOrderData) => {
-  return purchaseOrderData.po_value + purchaseOrderData.additional_po_value;
-};
+const getTotalPoValue = (purchaseOrderData) =>
+  purchaseOrderData.po_value + purchaseOrderData.additional_po_value;
 
-const getBillingTotal = (billingData) => {
-  return billingData.invoice_supply + billingData.invoice_service + billingData.additional_invoice;
-};
+const getBillingTotal = (billingData) =>
+  billingData.invoice_supply + billingData.invoice_service + billingData.additional_invoice;
 
-const getTotalDirectExpenses = (directExpensesData) => {
-  return Object.values(directExpensesData).reduce((total, expense) => total + expense, 0);
-};
-const getNetProfitLoss = (billingData, directExpensesData) => {
-  return getBillingTotal(billingData) - getTotalDirectExpenses(directExpensesData);
-};
+const getTotalDirectExpenses = (directExpensesData) =>
+  Object.values(directExpensesData).reduce((total, expense) => total + expense, 0);
+
+const getNetProfitLoss = (billingData, directExpensesData) =>
+  getBillingTotal(billingData) - getTotalDirectExpenses(directExpensesData);
+
 const getNetProfitLossPercent = (billingData, directExpensesData) => {
   const totalBilling = getBillingTotal(billingData);
   if (totalBilling === 0) return 0;
-  return ((getNetProfitLoss(billingData, directExpensesData) / totalBilling) * 100).toFixed(2);
+  return Number(((getNetProfitLoss(billingData, directExpensesData) / totalBilling) * 100).toFixed(2));
 };
 
 const getRows = (purchaseOrderData, billingData, directExpensesData) => {
@@ -103,33 +105,22 @@ const getRows = (purchaseOrderData, billingData, directExpensesData) => {
     color,
     isLastRow = false,
   ) => ({
-    rowId: label.toLowerCase().replace(/\s+/g, "-"),
+    rowId: label.toLowerCase().replace(/[^\w\s]/g, "").replace(/\s+/g, "-") ,
     height: ROW_HEIGHT,
     cells: [
       nonEditable(
         textCell(
           label,
-          "padding-left-lg" + (isBold ? " font-bold" : "") + (isLastRow ? " rounded-bl" : ""),color ? {color:`${color}`} : ''
+          "padding-left-lg" + (isBold ? " font-bold" : "") + (isLastRow ? " rounded-bl" : ""),
+          color ? { color } : {}
         )
       ),
       isEditable
-        ? numberCell(typeof value === "string" ? parseFloat(value) : value, isLastRow ? " rounded-br" : "")
-        : nonEditable(
-            numberCell(
-              typeof value === "string" ? parseFloat(value) : value,
-              "disabled" + (isBold ? " font-bold" : "") + (isLastRow ? " rounded-br" : ""),
-              color ? { color } : {}
-            )
-          ),
+        ? numberCell(value, isLastRow ? " rounded-br" : "")
+        : nonEditable(numberCell(value, "disabled" + (isBold ? " font-bold" : "") + (isLastRow ? " rounded-br" : ""), color ? { color } : {})),
       isEditable
-        ? numberCell(typeof value === "string" ? parseFloat(value) : value, isLastRow ? " rounded-br" : "")
-        : nonEditable(
-            numberCell(
-              typeof value === "string" ? parseFloat(value) : value,
-              "disabled" + (isBold ? " font-bold" : "") + (isLastRow ? " rounded-br" : ""),
-              color ? { color } : {}
-            )
-          ),
+        ? numberCell(value, isLastRow ? " rounded-br" : "")
+        : nonEditable(numberCell(value, "disabled" + (isBold ? " font-bold" : "") + (isLastRow ? " rounded-br" : ""), color ? { color } : {})),
     ],
   });
 
@@ -159,68 +150,82 @@ const getRows = (purchaseOrderData, billingData, directExpensesData) => {
     createDataRow("Installation (Sub-Contract)", directExpensesData.installation_subcontract),
     createDataRow("Extended Warranty (Cost)", directExpensesData.extended_warranty_cost),
     createDataRow("Miscellaneous (Direct Expense)", directExpensesData.miscellaneous_direct_expense),
-    createDataRow(
-      "Direct Expenses (Total)",
-      getTotalDirectExpenses(directExpensesData),
-      false,
-      true,
-      "#ea580c",
-      true
-    ),
+    createDataRow("Direct Expenses (Total)", getTotalDirectExpenses(directExpensesData), false, true, "#ea580c", true),
   ];
-  const netProfitRows= [
-    createDataRow("Net Profit/Loss",getNetProfitLoss(billingData, directExpensesData),false,true,"#336699"),
-    createDataRow("Net Profit/Loss (Percent)", getNetProfitLossPercent(billingData,directExpensesData),false,true,"#336699"),
-  ]
 
-  return [headerRow, ...purchaseOrderRows, ...billingRows, ...directExpensesRows,...netProfitRows];
+  const netProfitRows = [
+    createDataRow("Net Profit/Loss", getNetProfitLoss(billingData, directExpensesData), false, true, "#336699"),
+    createDataRow("Net Profit/Loss (Percent)",getNetProfitLossPercent(billingData, directExpensesData), false, true, "#336699"),
+  ];  
+
+  return [headerRow, ...purchaseOrderRows, ...billingRows, ...directExpensesRows, ...netProfitRows];
 };
 
-function MonthlyBudgetTable() {
-  const [purchaseOrderData, setPurchaseOrderData] = useState(getPurchaseOrderData());
-  const [billingData, setBillingData] = useState(getBillingData());
-  const [directExpensesData, setDirectExpensesData] = useState(getDirectExpenses());
+function MonthlyBudgetTable({ project, getData, selectedMonth }) {
+  const [purchaseOrderData, setPurchaseOrderData] = useState(() =>
+    getPurchaseOrderData(project, selectedMonth)
+  );
+  const [billingData, setBillingData] = useState(() =>
+    getBillingData(project, selectedMonth)
+  );
+  const [directExpensesData, setDirectExpensesData] = useState(() =>
+    getDirectExpenses(project, selectedMonth)
+  );
 
+  // Re-fetch when project or month changes
+  useEffect(() => {
+    setPurchaseOrderData(getPurchaseOrderData(project, selectedMonth));
+    setBillingData(getBillingData(project, selectedMonth));
+    setDirectExpensesData(getDirectExpenses(project, selectedMonth));
+  }, [project, selectedMonth]);
+  
   const rows = getRows(purchaseOrderData, billingData, directExpensesData);
   const columns = getColumns();
 
   const handleChanges = (changes) => {
     const updateFunctions = {
       "po-value": (value) => setPurchaseOrderData((prev) => ({ ...prev, po_value: value })),
-      "additional-po-value": (value) =>
-        setPurchaseOrderData((prev) => ({ ...prev, additional_po_value: value })),
+      "additional-po-value": (value) => setPurchaseOrderData((prev) => ({ ...prev, additional_po_value: value })),
       "invoice-supply": (value) => setBillingData((prev) => ({ ...prev, invoice_supply: value })),
       "invoice-service": (value) => setBillingData((prev) => ({ ...prev, invoice_service: value })),
-      "additional-invoice": (value) =>
-        setBillingData((prev) => ({ ...prev, additional_invoice: value })),
+      "additional-invoice": (value) => setBillingData((prev) => ({ ...prev, additional_invoice: value })),
       cogs: (value) => setDirectExpensesData((prev) => ({ ...prev, cogs: value })),
-      "packing-and-forwarding": (value) =>
-        setDirectExpensesData((prev) => ({ ...prev, packing_and_forwarding: value })),
-      "travel-expenses": (value) =>
-        setDirectExpensesData((prev) => ({ ...prev, travel_expenses: value })),
-      "travel-allowances": (value) =>
-        setDirectExpensesData((prev) => ({ ...prev, travel_allowances: value })),
+      "packing-forwarding": (value) => setDirectExpensesData((prev) => ({ ...prev, packing_and_forwarding: value })),
+      "travel-expenses": (value) => setDirectExpensesData((prev) => ({ ...prev, travel_expenses: value })),
+      "travel-allowances": (value) => setDirectExpensesData((prev) => ({ ...prev, travel_allowances: value })),
       commissioning: (value) => setDirectExpensesData((prev) => ({ ...prev, commissioning: value })),
-      "programming-outsourced": (value) =>
-        setDirectExpensesData((prev) => ({ ...prev, programming_outsourced: value })),
-      "installation-subcontract": (value) =>
-        setDirectExpensesData((prev) => ({ ...prev, installation_subcontract: value })),
-      "extended-warranty-cost": (value) =>
-        setDirectExpensesData((prev) => ({ ...prev, extended_warranty_cost: value })),
-      "miscellaneous-direct-expense": (value) =>
-        setDirectExpensesData((prev) => ({ ...prev, miscellaneous_direct_expense: value })),
+      "programming-outsourced": (value) => setDirectExpensesData((prev) => ({ ...prev, programming_outsourced: value })),
+      "installation-subcontract": (value) => setDirectExpensesData((prev) => ({ ...prev, installation_subcontract: value })),
+      "extended-warranty-cost": (value) => setDirectExpensesData((prev) => ({ ...prev, extended_warranty_cost: value })),
+      "miscellaneous-direct-expense": (value) => setDirectExpensesData((prev) => ({ ...prev, miscellaneous_direct_expense: value })),
     };
 
     changes.forEach((change) => {
       if (
         change.type === "number" &&
-        change.columnId === "estimated-value" &&
+        change.columnId === "Current" &&
         updateFunctions[change.rowId]
       ) {
         updateFunctions[change.rowId](change.newCell.value);
       }
     });
   };
+
+  const data = {
+    month: selectedMonth,
+    ...purchaseOrderData,
+    total_po_value: getTotalPoValue(purchaseOrderData),
+    ...billingData,
+    billing_total: getBillingTotal(billingData),
+    ...directExpensesData,
+    total_direct_expenses: getTotalDirectExpenses(directExpensesData),
+    net_profit_loss: getNetProfitLoss(billingData, directExpensesData),
+    net_profit_loss_percent: getNetProfitLossPercent(billingData, directExpensesData) || 0
+  };
+
+  useEffect(() => {
+    getData(data);
+  }, [data]);
 
   return <ReactGrid rows={rows} columns={columns} onCellsChanged={handleChanges} />;
 }

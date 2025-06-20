@@ -100,7 +100,6 @@ exports.updateBudget = async (req, res) => {
   try {
     const {project_name,budget} = req.body;
     
-
      const result = await Project.findOneAndUpdate(
       { project_name: project_name },
       { $set: { budget: budget } },

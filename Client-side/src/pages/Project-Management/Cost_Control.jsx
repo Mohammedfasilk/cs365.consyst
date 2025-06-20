@@ -1,13 +1,32 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Separator } from "../../components/UI/Separator";
 import { CostControlSheet } from "../../components/Cost-control/CostControlSheet";
-import { DataTable } from "../../components/Project/data_column";
-import { columns } from "../../components/Project/Columns";
+import { DataTable } from "../../components/Cost-control/data_column";
+import { columns } from "../../components/Cost-control/Columns";
+import ChooseProject from "../../components/Cost-control/ChooseProject";
+import { useSelector } from "react-redux";
+import axios from "axios";
 
 function Cost_Control() {
 
- 
+  const {choosenProject} = useSelector((state)=>state.costControlSheet)
+  const [project,setProject] = useState([])
 
+useEffect(()=>{
+  const fetchData = async (projectName) => {
+      try {
+        const res = await axios.post(
+          `${import.meta.env.VITE_CS365_URI}/api/cost-control/monthly-budget`,
+          {project_name:projectName}
+        );
+        const data = await res.data;
+        setProject(data?.monthly_cost_control)
+      } catch (error) {
+        console.error("Error fetching Monthly Budget:", error);
+      }
+    };
+    fetchData(choosenProject);
+},[choosenProject])
 
   const snapShotsData = [
     {
@@ -16,7 +35,7 @@ function Cost_Control() {
       status: "draft",
       stage: "open",
     },
-   
+
   ];
   return (
     <div className="ml-20 mt-16 mx-8">
@@ -29,8 +48,13 @@ function Cost_Control() {
 
       <Separator className="mt-8 mb-4" />
       <h1 className="mt-6">Monthly Budget Updates</h1>
-      <div className="mt-4">
-        <DataTable data={snapShotsData} columns={columns} />
+      <div className="w-full flex absolute mt-5">
+        <div className="w-md px-5 py-1 border border-gray-400 rounded-lg hover:bg-gray-100/50">
+          <ChooseProject/>
+        </div>
+      </div>
+      <div>
+        <DataTable data={project} columns={columns} noFilter />
       </div>
     </div>
   );
