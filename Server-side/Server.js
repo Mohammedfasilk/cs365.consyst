@@ -21,7 +21,7 @@ const costControl = require('./Routes/costControlRoute')
 //middlewares
 app.use(express.json())
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: 'https://cs365consyst.vercel.app',
     methods: 'GET,POST',
   }))
 
