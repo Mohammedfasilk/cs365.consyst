@@ -4,7 +4,7 @@ const Project = require('../Models/ProjectModel')
 exports.fetchProjectList = async (req, res) => {
   try {
     const {search} = req.body
-    
+
     let query = {};
      if (search && search.trim() !== "") {
       query.project_title = {
