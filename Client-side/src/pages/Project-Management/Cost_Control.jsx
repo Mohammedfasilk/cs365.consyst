@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Separator } from "../../components/UI/Separator";
 import { CostControlSheet } from "../../components/Cost-control/CostControlSheet";
 import { DataTable } from "../../components/Cost-control/data_column";
-import { columns } from "../../components/Cost-control/Columns";
+import { columns } from "../../components/Project/Columns";
 import ChooseProject from "../../components/Cost-control/ChooseProject";
 import { useSelector } from "react-redux";
 import axios from "axios";
@@ -10,6 +10,7 @@ import axios from "axios";
 function Cost_Control() {
 
   const {choosenProject} = useSelector((state)=>state.costControlSheet)
+  const {saved} = useSelector((state)=>state.costControlSheet)
   const [project,setProject] = useState([])
 
 useEffect(()=>{
@@ -26,7 +27,7 @@ useEffect(()=>{
       }
     };
     fetchData(choosenProject);
-},[choosenProject])
+},[choosenProject,saved])
 
   const snapShotsData = [
     {
