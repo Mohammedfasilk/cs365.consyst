@@ -49,7 +49,7 @@ useEffect(()=>{
 
       <Separator className="mt-8 mb-4" />
       <h1 className="mt-6">Monthly Budget Updates</h1>
-      <div className="w-full flex absolute mt-5">
+      <div className="w-fit flex absolute mt-5">
         <div className="w-md px-5 py-1 border border-gray-400 rounded-lg hover:bg-gray-100/50">
           <ChooseProject/>
         </div>
