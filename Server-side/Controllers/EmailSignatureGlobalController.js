@@ -6,7 +6,7 @@ exports.getGlobalSettings = async (req, res) => {
     if (!global) {
       global = await EmailSignatureGlobal.create({ banner: '', legalDisclaimer: '' });
     }
-    res.status(200).json(global);
+    res.json(global);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch global settings' });
   }
@@ -28,7 +28,7 @@ exports.updateGlobalSettings = async (req, res) => {
       { upsert: true, new: true }
     );
 
-    res.status(200).json({ message: 'Global settings updated', data: updatedGlobal });
+    res.json({ message: 'Global settings updated', data: updatedGlobal });
   } catch (err) {
     res.status(500).json({ error: 'Failed to update global settings' });
   }
