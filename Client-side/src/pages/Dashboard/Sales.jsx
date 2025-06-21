@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Filter, SquareChartGantt } from "lucide-react";
 import axios from "axios";
 import {
@@ -15,102 +15,73 @@ import { opportunityDataColumns } from "../../components/top-opportunity/Opportu
 import { SalesOrderByPeriodGraph } from "../../components/Sales-Pipeline/SalesOrderByPeriodGraph";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchSettings } from "../../Redux/Slices/settingsSlice";
+import ScaleLoading from "../../components/UI/ScaleLoader";
 
 function SalesPipeline() {
+  const dispatch = useDispatch();
+  const { settings } = useSelector((state) => state.settings);
+
+  const [loading, setLoading] = useState(true);
   const [topOpportunities, setTopOpportunities] = useState([]);
-  const dispatch = useDispatch()
-  const {settings} = useSelector((state)=>state.settings)
-
-    useEffect(() => {
-    if (!settings || Object.keys(settings).length == 0) {
-      dispatch(fetchSettings())
-    }
-  }, [dispatch, settings])
-
   const [sumFunnelData, setSumFunnelData] = useState([]);
   const [countFunnelData, setCountFunnelData] = useState([]);
   const [orderBookingData, setOrderBookingData] = useState([]);
-   const [monthlyOrderBookingData, setMonthlyOrderBookingData] = useState({
+  const [monthlyOrderBookingData, setMonthlyOrderBookingData] = useState({
     dateList: [],
     valueList: [],
   });
 
-
-  
+  // Fetch settings if not already available
   useEffect(() => {
+    if (!settings || Object.keys(settings).length === 0) {
+      dispatch(fetchSettings());
+    }
+  }, [dispatch, settings]);
+
+  // Fetch data only after settings are loaded
+  useEffect(() => {
+    if (!settings || Object.keys(settings).length === 0) return;
+
     const fetchData = async () => {
-      try {
-        const res = await axios.get(
-          `${
-            import.meta.env.VITE_CS365_URI
-          }/api/sales-pipeline/top-opportunities`
-        );
-
-        setTopOpportunities(res.data);
-      } catch (error) {
-        console.error("Error fetching Top Opportunities:", error);
-      }
+      setLoading(true);
+      const base = import.meta.env.VITE_CS365_URI;
 
       try {
-        const res = await axios.get(
-          `${import.meta.env.VITE_CS365_URI}/api/sales-pipeline/sum`
-        );
+        const [
+          topRes,
+          sumRes,
+          countRes,
+          orderRes,
+          monthlyRes,
+        ] = await Promise.all([
+          axios.get(`${import.meta.env.VITE_CS365_URI}/api/sales-pipeline/top-opportunities`),
+          axios.get(`${import.meta.env.VITE_CS365_URI}/api/sales-pipeline/sum`),
+          axios.get(`${import.meta.env.VITE_CS365_URI}/api/sales-pipeline/count`),
+          axios.get(`${import.meta.env.VITE_CS365_URI}/api/sales-analysis`),
+          axios.post(`${import.meta.env.VITE_CS365_URI}/api/sales-analysis/order-booking-monthly`, {
+            fyDate: settings.currentFyStartDate,
+            usd: settings.usdToinr || 0,
+            aed: settings.usdToaed || 0,
+          }),
+        ]);
 
-        setSumFunnelData(res.data);
+        setTopOpportunities(topRes.data);
+        setSumFunnelData(sumRes.data);
+        setCountFunnelData(countRes.data);
+        setOrderBookingData(orderRes.data);
+        setMonthlyOrderBookingData(monthlyRes.data);
       } catch (error) {
-        console.error("Error fetching funnel Value:", error);
-      }
-
-      try {
-        const res = await axios.get(
-          `${import.meta.env.VITE_CS365_URI}/api/sales-pipeline/count`
-        );
-
-        setCountFunnelData(res.data);
-      } catch (error) {
-        console.error("Error fetching funnel Count:", error);
-      }
-
-      try {
-        const res = await axios.get(
-          `${import.meta.env.VITE_CS365_URI}/api/sales-analysis`
-        );
-
-        setOrderBookingData(res.data);
-      } catch (error) {
-        console.error("Error fetching sales Order:", error);
-      }
-
-      try {
-        const fyDate = settings?.currentFyStartDate;
-        const usd = settings?.usdToinr || 0;
-        const aed = settings?.usdToaed || 0;
-
-        const response = await axios.post(
-          `${
-            import.meta.env.VITE_CS365_URI
-          }/api/sales-analysis/order-booking-monthly`,
-          {
-            fyDate,
-            usd,
-            aed,
-          }
-        );
-
-        setMonthlyOrderBookingData(response.data);
-      } catch (error) {
-        console.error("Error fetching monthly order booking data:", error);
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchData();
-  }, []);
+  }, [settings]);
 
-  
-
-
-  function getOrderBookingGroupedValueUSD(orderBookingData) {
-
+  // Calculate USD group value
+  const orderBookingGroupedValueUSD = useMemo(() => {
     const usdRates = {
       "CONSYST Digital Industries Pvt. Ltd": settings?.usdToinr || 0,
       "CONSYST Technologies (India) Pvt. Ltd.": settings?.usdToinr || 0,
@@ -119,24 +90,26 @@ function SalesPipeline() {
 
     let totalValue = 0;
 
-    orderBookingData.map((item) => {
+    orderBookingData.forEach((item) => {
       const rate = usdRates[item.company];
+      if (!rate) return; // skip if no rate
       const valueInUSD = item.value / rate;
-
       totalValue += valueInUSD;
     });
 
     return totalValue;
-  }
-  const orderBookingGroupedValueUSD =
-    getOrderBookingGroupedValueUSD(orderBookingData);
+  }, [orderBookingData, settings]);
 
- 
+  if (loading) {
+    return <div className="flex items-center justify-center h-screen text-lg font-semibold"><ScaleLoading size={60}/></div>;
+  }
+
   return (
     <div>
       <div className="mb-16 ml-20 mt-16 mx-8">
         <h1 className="text-2xl font-bold">Sales</h1>
       </div>
+
       <Tabs defaultValue="sales-pipeline">
         <TabsList className="ml-20 mt-16">
           <TabsTrigger value="sales-pipeline">
@@ -147,45 +120,32 @@ function SalesPipeline() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent
-          value="sales-pipeline"
-          className="bg-[var(--csgray)] w-full"
-        >
+        {/* Sales Pipeline View */}
+        <TabsContent value="sales-pipeline" className="bg-[var(--csgray)] w-full">
           <div className="flex justify-center gap-2 ml-20 mx-8 mb-2">
             <Card className="flex-1 flex flex-col justify-center items-center">
-              <h1 className="m-4 mb-6 w-[95%]">
-                Current Opportunity Pipeline (Value)
-              </h1>
+              <h1 className="m-4 mb-6 w-[95%]">Current Opportunity Pipeline (Value)</h1>
               <div className="h-80 w-[80%]">
-                <CurrentOpportunityPipeline
-                  funnelType="sum"
-                  funnelData={sumFunnelData}
-                />
+                <CurrentOpportunityPipeline funnelType="sum" funnelData={sumFunnelData} />
               </div>
             </Card>
             <Card className="flex-1 flex flex-col justify-center items-center">
-              <h1 className="m-4 mb-6 w-[95%]">
-                Current Opportunity Pipeline (Count)
-              </h1>
+              <h1 className="m-4 mb-6 w-[95%]">Current Opportunity Pipeline (Count)</h1>
               <div className="h-80 w-[80%]">
-                <CurrentOpportunityPipeline
-                  funnelType="count"
-                  funnelData={countFunnelData}
-                />
+                <CurrentOpportunityPipeline funnelType="count" funnelData={countFunnelData} />
               </div>
             </Card>
           </div>
+
           <div className="flex justify-center mb-12 mx-8 ml-20">
             <Card className="flex-1 w-[768px] p-4">
               <h1 className="m-2 mb-6">Top Opportunities</h1>
-              <OpportunityDataTable
-                data={topOpportunities}
-                columns={opportunityDataColumns}
-              />
+              <OpportunityDataTable data={topOpportunities} columns={opportunityDataColumns} />
             </Card>
           </div>
         </TabsContent>
 
+        {/* Sales Analysis View */}
         <TabsContent value="sales-analysis" className="bg-[var(--csgray)]">
           <div className="mx-8 ml-20 mb-2 flex justify-center gap-2">
             {orderBookingData?.map((data) => (
