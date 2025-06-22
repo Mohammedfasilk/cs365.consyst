@@ -95,7 +95,7 @@ exports.salesPipelineCount = async (req, res) => {
     const response = await axios.get(
       `${process.env.ERPNEXT_BASE_URL}/api/resource/Opportunity?fields=["sales_stage","opportunity_amount"]&filters=[["sales_stage","in",["Prospecting","Qualification","Proposal/Price Quote","Negotiation/Review"]],["close_date",">=","${today}"]]&limit=5000`,
       {
-        headers: {
+        headers: {  
           Authorization: `token ${process.env.ERPNEXT_API_KEY}:${process.env.ERPNEXT_API_SECRET}`
         }
       }

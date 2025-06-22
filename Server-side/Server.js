@@ -2,10 +2,11 @@ const express = require("express")
 const mongoose = require("mongoose")
 const cors = require("cors")
 const dotenv = require('dotenv').config()
-const db = require('./Config/db')
 const app = express ()
 const path = require('path');
 const fs = require('fs');
+
+const connectDB = require("./Config/db");
 
 const Auth = require('./Routes/AuthRoute')
 const Sales_pipeline = require("./Routes/Sales_pipeline")
@@ -21,7 +22,7 @@ const costControl = require('./Routes/costControlRoute')
 //middlewares
 app.use(express.json())
 app.use(cors({
-    origin: 'https://cs365consyst.vercel.app',
+    origin: ["https://cs365consyst.vercel.app","http://localhost:5173"],
     methods: 'GET,POST',
   }))
 
@@ -39,7 +40,12 @@ app.use('/api/cost-control',costControl);
 
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT,()=>{
+connectDB().then(()=>{
+  app.listen(PORT,()=>{
     console.log("running at",PORT);
-    
+});
 })
+ .catch((err) => {
+    console.error("Failed to connect to DB. Server not started.");
+    process.exit(1);
+  });

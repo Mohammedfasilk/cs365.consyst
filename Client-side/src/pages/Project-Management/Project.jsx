@@ -4,16 +4,18 @@ import { DataTable } from "../../components/Project-manage/DataTable";
 import { columns } from "../../components/Project-manage/Columns";
 import ProjectSheet from "../../components/Project-manage/ProjectSheet";
 import axios from 'axios'
+import { div } from "framer-motion/client";
+import ScaleLoading from "../../components/UI/ScaleLoader";
 
 function Project() {
-
+  const [loading,setLoading] = useState()
   const [data,setData] = useState({})
 
   
 
       const fetchData = async () => {
         try {
-  
+          setLoading(true)
           const res = await axios.get(
             `${import.meta.env.VITE_CS365_URI}/api/projects`
           );
@@ -25,13 +27,14 @@ function Project() {
          
         } catch (error) {
           console.error("Error fetching  projects:", error);
+        } finally{
+          setLoading(false)
         }
       };
 
   useEffect(() => {
       fetchData();
     }, []);
-
 
   return (
     <div className="mx-8 ml-20 mt-16">
@@ -45,7 +48,7 @@ function Project() {
       <Separator className="mb-4" />
 
       <div>
-        <DataTable columns={columns(fetchData)} data={data} />
+        <DataTable columns={columns(fetchData)} data={data} loading={loading}/>
       </div>
     </div>
   );

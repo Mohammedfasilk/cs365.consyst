@@ -30,8 +30,9 @@ import {setSelectedProjectName,setIsOpen} from '../../Redux/Slices/SelectedProje
 
 import { useState } from "react"
 import { useDispatch } from "react-redux"
+import ScaleLoading from "../UI/ScaleLoader"
 
-export function DataTable({ columns, data }) {
+export function DataTable({ columns, data , loading }) {
 
   const dispatch = useDispatch();
   const [sorting, setSorting] = useState([])
@@ -144,7 +145,7 @@ export function DataTable({ columns, data }) {
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No results.
+                  {loading ? <ScaleLoading size={30}/> :'No results.'}
                 </TableCell>
               </TableRow>
             )}
