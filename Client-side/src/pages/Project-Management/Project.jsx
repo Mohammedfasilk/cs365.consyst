@@ -4,8 +4,6 @@ import { DataTable } from "../../components/Project-manage/DataTable";
 import { columns } from "../../components/Project-manage/Columns";
 import ProjectSheet from "../../components/Project-manage/ProjectSheet";
 import axios from 'axios'
-import { div } from "framer-motion/client";
-import ScaleLoading from "../../components/UI/ScaleLoader";
 
 function Project() {
   const [loading,setLoading] = useState()
