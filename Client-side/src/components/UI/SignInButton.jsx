@@ -7,8 +7,12 @@ import { useMsal } from "@azure/msal-react";
 import { loginRequest } from "../../utils/authConfig";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useState } from "react";
+import ScaleLoading from "./ScaleLoader";
 
 function SignInButton() {
+
+  const [loading,setLoading] = useState()
   const { instance } = useMsal();
   const navigate = useNavigate();
 
@@ -32,7 +36,7 @@ function SignInButton() {
       account,
     });
 
-
+    setLoading(true);
     const res = await axios.post(
       `${import.meta.env.VITE_CS365_URI}/api/auth`,
       { current_user: account.username }
@@ -42,6 +46,7 @@ function SignInButton() {
 
     if (userExist.success) {
       sessionStorage.setItem("user", JSON.stringify(userExist.user));
+      setLoading(false);
       navigate("/home");
     } else {
        
@@ -54,6 +59,9 @@ function SignInButton() {
   } catch (error) {
     console.error("Login failed:", error);  }
 };
+ if(loading){
+  return <div className="rounded-xl bg-[var(--card)] text-[var(card-foreground)] shadow w-[350px]"><ScaleLoading size={50}/></div>
+ }
   return (
     <div className="rounded-xl bg-[var(--card)] text-[var(card-foreground)] shadow w-[350px]">
       <div className="bg-[var(--csblue)] p-4 rounded-lg rounded-b-none">
