@@ -54,24 +54,27 @@ exports.getProjects = async (req,res) =>{
 exports.updateMonthlyCost = async (req, res) => {
   try {
     const { project_name, monthlyData } = req.body;
-
+    const { month, current, projected, status, stage } = monthlyData
     // 1. Try to update the specific month's data
-    const updateResult = await Project.findOneAndUpdate(
+    const updateProject = await Project.findOneAndUpdate(
       {
         project_name,
-        "monthly_cost_control.month": monthlyData.month,
+        "monthly_cost_control.month": month,
       },
       {
         $set: {
-          "monthly_cost_control.$": monthlyData,
+          "monthly_cost_control.$.current": current,
+          "monthly_cost_control.$.projected": projected,
+          "monthly_cost_control.$.status": status,
+          "monthly_cost_control.$.stage": stage,
         },
       },
       { new: true }
     );
 
     // 2. If month not found, push new data
-    if (!updateResult) {
-      const pushResult = await Project.findOneAndUpdate(
+    if (!updateProject) {
+      const pushProject = await Project.findOneAndUpdate(
         { project_name },
         {
           $push: { monthly_cost_control: monthlyData },
@@ -79,10 +82,10 @@ exports.updateMonthlyCost = async (req, res) => {
         { new: true }
       );
 
-      return res.status(200).json(pushResult);
+      return res.status(200).json(pushProject);
     }
 
-    return res.status(200).json(updateResult);
+    return res.status(200).json(updateProject);
   } catch (err) {
     console.error("Update Error:", err);
     res.status(500).json({ error: "Failed to update monthly cost data" });
@@ -132,5 +135,26 @@ exports.getMonthlyBudget = async (req,res) =>{
         res.status(200).json(projectData)
     }catch(err){
         res.status(500).json({error:'Failed to get Projects'})
+    }
+}
+
+exports.deleteMonthlyBudget = async (req,res) =>{
+  const { month , project_name } = req.body
+     try {
+    const updatedProject = await Project.findOneAndUpdate(
+      { project_name },
+      { $pull: { monthly_cost_control: { month } } },
+      { new: true }
+    );
+
+    if (!updatedProject) {
+      return res.status(404).json({ error: "Project not found" });
+    }
+
+    res.status(200).json({
+      message: `Monthly budget for ${month} deleted successfully.`,
+    });
+  }catch(err){
+        res.status(500).json({error:'Failed to Delete Monthly Budget'})
     }
 }

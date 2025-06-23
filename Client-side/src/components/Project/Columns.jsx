@@ -8,8 +8,85 @@ import {
 import { Button } from "../UI/Button"
 import { DotsHorizontalIcon } from "@radix-ui/react-icons"
 import { Badge } from "../UI/Badge"
+import { useState } from "react"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../UI/Alert_Dialog"
+import axios from "axios"
+import { useDispatch, useSelector } from "react-redux"
+import {
+  setSaved
+} from "../../Redux/Slices/costControlsheet";
+import { useToast } from "../../Hooks/use-toast"
+import { CircleCheckIcon } from "lucide-react"
 
-export const columns = [
+const Actions = ({ row , onDelete}) => {
+  const {toast} = useToast();
+  const dispatch = useDispatch();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [alertOpen, setAlertOpen] = useState(false);
+  const {choosenProject} = useSelector((state) => state.costControlSheet);
+  const {saved} = useSelector((state) => state.costControlSheet);
+  const month = row.getValue("month");
+
+  return (
+    <>
+      <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="h-8 w-8 p-0">
+            <span className="sr-only">Open menu</span>
+            <DotsHorizontalIcon className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          {/* <DropdownMenuItem>Release</DropdownMenuItem>
+          <DropdownMenuItem>Approve</DropdownMenuItem>
+          <DropdownMenuItem>Close Project</DropdownMenuItem> */}
+          <DropdownMenuItem onClick={() => setAlertOpen(true)}>Delete</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete <b>{month} budget</b> and remove the data from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-[var(--csred)] hover:bg-[var(--csred)]/90"
+                onClick={async () => {               
+                try {
+                  await axios.post(
+                    `${import.meta.env.VITE_CS365_URI}/api/cost-control/monthly-budget/delete`,
+                    {month:month,project_name:choosenProject}
+                  );
+                  onDelete();
+                  dispatch(setSaved(!saved));
+
+                  toast({
+                    title: `${month} Budget Removed`,
+                    description: "The Budget has been successfully removed.",
+                    icon: <CircleCheckIcon className="mr-4" color="green" />,
+                  });
+                } catch (error) {
+                  console.error("Error deleting Budget:", error);
+                  // Optional: show error toast
+                }
+              }}
+              
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+};
+
+export const columns = (fetchData)=> [
   {
     id: "select",
     header: ({ table }) => (
@@ -64,23 +141,6 @@ export const columns = [
     id: "actions",
     enableHiding: false,
     header: "Actions",
-    cell: ({ row }) => {
-      const id = row.original.id
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <DotsHorizontalIcon className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => console.log("View", id)}>View</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => console.log("Delete", id)}>Delete</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )
-    },
+    cell: ({ row }) => <Actions row={row} onDelete={fetchData}/>
   },
 ]

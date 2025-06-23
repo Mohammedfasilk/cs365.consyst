@@ -13,12 +13,12 @@ function Cost_Control() {
   const {saved} = useSelector((state)=>state.costControlSheet)
   const [project,setProject] = useState([])
 
-useEffect(()=>{
-  const fetchData = async (projectName) => {
+
+const fetchData = async () => {
       try {
         const res = await axios.post(
           `${import.meta.env.VITE_CS365_URI}/api/cost-control/monthly-budget`,
-          {project_name:projectName}
+          {project_name:choosenProject}
         );
         const data = await res.data;
         setProject(data?.monthly_cost_control)
@@ -26,7 +26,8 @@ useEffect(()=>{
         console.error("Error fetching Monthly Budget:", error);
       }
     };
-    fetchData(choosenProject);
+useEffect(()=>{
+    fetchData();
 },[choosenProject,saved])
 
   const snapShotsData = [
@@ -55,7 +56,7 @@ useEffect(()=>{
         </div>
       </div>
       <div>
-        <DataTable data={project} columns={columns} noFilter />
+        <DataTable data={project} columns={columns(fetchData)} noFilter />
       </div>
     </div>
   );

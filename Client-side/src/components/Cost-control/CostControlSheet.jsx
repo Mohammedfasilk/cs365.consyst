@@ -35,6 +35,7 @@ export function CostControlSheet() {
   const { selectedMonth } = useSelector((state) => state.costControlSheet);
   const [project, setProject] = useState({});
   const [monthlydata, setMonthlyData] = useState({});
+  const [alertMonthpick, setAlerMonthpick] = useState(false);
   const { toast } = useToast();
   useEffect(() => {
     async function fetchSelectedProject(project_name) {
@@ -54,12 +55,26 @@ export function CostControlSheet() {
     }
   }, [selectedProjectName, selectedMonth]);
 
+
+
   const handleSubmit = async () => {
+    if(selectedMonth == ""){
+        setAlerMonthpick(true)
+        toast({
+          title: "Not Saved (Please select a month)",
+          description: "There was an error saving the monthly budget.",
+          variant: "destructive",
+          icon: <CircleXIcon className="mr-4" color="red" />,
+        });
+        return
+      }
     try {
+      setAlerMonthpick(false)
       const res = await axios.post(
         `${import.meta.env.VITE_CS365_URI}/api/cost-control/monthly-data`,
         { monthlyData: monthlydata, project_name: selectedProjectName }
       );
+
       const data = res.data;
 
       dispatch(setSaved(!saved));
@@ -91,6 +106,7 @@ export function CostControlSheet() {
           dispatch(setSelectedProjectName(""));
           dispatch(setSelectedMonth(""));
           setProject({});
+          setAlerMonthpick(false)
         }
         dispatch(setIsOpen(value));
       }}
@@ -128,7 +144,7 @@ export function CostControlSheet() {
                   </Button>
                 </div>
 
-                <Label className="mt-4 block">Month</Label>
+                <Label className="mt-4 block">Month <sup className="text-red-600">*</sup></Label>
 
                 <div className="mt-2 mb-6">
                   <MonthPickerComponent
@@ -144,6 +160,7 @@ export function CostControlSheet() {
                       }
                     }}
                   />
+                  {alertMonthpick ? <p className="ml-2 mt-2text-sm text-red-600">Please select a month</p> : null}
                 </div>
 
                 <div className="budget-sheet mt-4">

@@ -32,9 +32,8 @@ const budgetSchema = new mongoose.Schema(
 
   }
 );
-const CostControlSchema = new mongoose.Schema(
+const CostControlField = new mongoose.Schema(
   {
-    month: { type: String, required: true },
     po_value: Number,
     additional_po_value: Number,
     total_po_value: Number,
@@ -54,12 +53,19 @@ const CostControlSchema = new mongoose.Schema(
     total_direct_expenses: Number,
     net_profit_loss: Number,
     net_profit_loss_percent: Number,
-    status:String,
-    stage:String,
-
-
-  }
+  },
+  { _id: false }
 );
+
+const monthlyDataSchema = new mongoose.Schema({
+  month: { type: String, required: true },
+  current: CostControlField,
+  projected: CostControlField,
+  status:{type:String,default:'draft'},
+  stage:{type:String,default:'open'},
+
+},{ _id: false })
+
 
 const projectSchema = new mongoose.Schema(
   {
@@ -93,7 +99,7 @@ const projectSchema = new mongoose.Schema(
 
     budget: budgetSchema,
 
-    monthly_cost_control: [CostControlSchema]
+    monthly_cost_control: [monthlyDataSchema]
   }
 );
 
