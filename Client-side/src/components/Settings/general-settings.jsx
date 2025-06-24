@@ -62,7 +62,7 @@ export default function GeneralSettings() {
       ...rest,
       groupTarget,
       currentFyStartDate: currentFyStartDate
-        ? dayjs(currentFyStartDate).format("YYYY-MM-DD") // ✅ convert to string safely
+        ? dayjs(currentFyStartDate).format("YYYY-MM-DD")
         : null,
     };
 

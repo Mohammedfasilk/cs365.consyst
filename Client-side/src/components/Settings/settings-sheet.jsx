@@ -74,6 +74,8 @@ export function SettingsSheet() {
   const { toast } = useToast();
 
   const { accounts } = useMsal();
+  
+  
   const userEmail = accounts[0]?.username;
   const userName = accounts[0]?.name;
 
@@ -152,13 +154,12 @@ export function SettingsSheet() {
 
   useEffect(() => {
      const updateDisplayNameIfMissing = async () => {
-    if (!userEmail || !userName) return;
 
     try {
       // Get current list of users (or refetch if needed)
       const user = userList.find(u => u.email === userEmail);
-
-      if (user && !user.name) {
+      
+      if (user && user.name === "") {
         // If user exists and has no name, update it
         await axios.post(`${import.meta.env.VITE_CS365_URI}/api/user`, {
           email: userEmail,
