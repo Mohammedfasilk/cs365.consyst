@@ -17,14 +17,11 @@ import {
   FormMessage,
 } from "../UI/Form";
 import { useToast } from "../../Hooks/use-toast";
-import { useDispatch } from "react-redux";
-import { fetchSettings } from "../../Redux/Slices/settingsSlice";
 import dayjs from "dayjs";
- 
+
 export default function GeneralSettings() {
   const { toast } = useToast();
-  const dispatch = useDispatch()
- 
+
   const form = useForm({
     defaultValues: {
       currentFyStartDate: null,
@@ -36,28 +33,36 @@ export default function GeneralSettings() {
       groupTarget: "",
     },
   });
- 
+
   const calculateGroupTargetUSD = (values) => {
-    const { usdToinr, cmefTarget, ctiplTarget, cdiplTarget } = values
-    if (!usdToinr || usdToinr === 0 || !cmefTarget || !ctiplTarget || !cdiplTarget) {
+    const { usdToinr, cmefTarget, ctiplTarget, cdiplTarget } = values;
+    if (
+      !usdToinr ||
+      usdToinr === 0 ||
+      !cmefTarget ||
+      !ctiplTarget ||
+      !cdiplTarget
+    ) {
       return 0;
     }
- 
+
     const group_value =
       Number(cmefTarget) +
       Number(ctiplTarget) / Number(usdToinr) +
       Number(cdiplTarget) / Number(usdToinr);
- 
+
     return parseFloat(group_value.toFixed(2));
   };
- 
+
   const onSubmit = async (values) => {
     try {
       const { groupTarget, ...payload } = values;
- 
-      await axios.post(`${import.meta.env.VITE_CS365_URI}/api/settings`, { groupTarget, ...payload });
-      dispatch(fetchSettings())
- 
+
+      await axios.post(`${import.meta.env.VITE_CS365_URI}/api/settings`, {
+        groupTarget,
+        ...payload,
+      });
+
       toast({
         title: "Saved Successfully",
         description: "Settings have been successfully saved.",
@@ -72,13 +77,17 @@ export default function GeneralSettings() {
       });
     }
   };
- 
+
   useEffect(() => {
     async function fetchSettings() {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_CS365_URI}/api/settings`, { cache: "no-store" });
-        const data = response.data
-        form.setValue("currentFyStartDate", data.currentFyStartDate ? dayjs(data.currentFyStartDate) : null);
+        const response = await axios.get(
+          `${import.meta.env.VITE_CS365_URI}/api/settings`,
+          { cache: "no-store" }
+        );
+        const data = response.data;
+        form.setValue("cdiplTarget", data.cdiplTarget || "");
+        form.setValue("currentFyStartDate", dayjs(data.currentFyStartDate));
         form.setValue("usdToinr", data.usdToinr || "");
         form.setValue("usdToaed", data.usdToaed || "");
         form.setValue("cmefTarget", data.cmefTarget || "");
@@ -88,19 +97,23 @@ export default function GeneralSettings() {
         console.error("Failed to fetch settings", error);
       }
     }
+
     fetchSettings();
   }, []);
- 
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <div className="flex justify-between">
           <h1>Global Settings</h1>
-          <Button className="bg-[var(--csblue)] hover:bg-[var(--csblue/90)] px-8" type="submit">
+          <Button
+            className="bg-[var(--csblue)] hover:bg-[var(--csblue/90)] px-8"
+            type="submit"
+          >
             Save
           </Button>
         </div>
- 
+
         <div className="mt-4 mb-8">
           <FormField
             control={form.control}
@@ -113,23 +126,28 @@ export default function GeneralSettings() {
                     <FormControl>
                       <Button
                         variant="outline"
-                        className={cn("w-[240px] pl-3 text-left font-normal", !field.value && "text-muted-[var(--foreground)]")}
+                        className={cn(
+                          "w-[240px] pl-3 text-left font-normal",
+                          !field.value && "text-muted-[var(--foreground)]"
+                        )}
                       >
-                        {field.value && !isNaN(dayjs(field.value))
-                          ? format(dayjs(field.value), "PPP")
-                          : <span>Pick a date</span>}
- 
+                        {field.value && !isNaN(new Date(field.value)) ? (
+                          format(new Date(field.value), "PPP")
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+
                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
+                      mode="single"
                       value={field.value}
                       onChange={field.onChange}
-                      label="Pick a date"
                       minDate={dayjs("1900-01-01")}
-                      maxDate={dayjs()}
+                      initialFocus
                     />
                   </PopoverContent>
                 </Popover>
@@ -138,7 +156,7 @@ export default function GeneralSettings() {
             )}
           />
         </div>
- 
+
         <h1>Exchange Rates</h1>
         <div className="grid w-full gap-6 grid-cols-[1fr_1fr_1fr_1fr] mt-4 mb-8">
           {["usdToinr", "usdToaed"].map((name) => (
@@ -148,7 +166,9 @@ export default function GeneralSettings() {
               name={name}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{`1 USD = ? ${name === "usdToinr" ? "INR" : "AED"}`}</FormLabel>
+                  <FormLabel>{`1 USD = ? ${
+                    name === "usdToinr" ? "INR" : "AED"
+                  }`}</FormLabel>
                   <FormControl>
                     <Input
                       className="shadow"
@@ -168,7 +188,7 @@ export default function GeneralSettings() {
             />
           ))}
         </div>
- 
+
         <h1>Sales Targets (Current FY)</h1>
         <div className="grid w-full grid-cols-[1fr_1fr_1fr] gap-6 mt-4 mb-8">
           {[
@@ -200,7 +220,7 @@ export default function GeneralSettings() {
               )}
             />
           ))}
- 
+
           <FormField
             control={form.control}
             name="groupTarget"
@@ -219,7 +239,3 @@ export default function GeneralSettings() {
     </Form>
   );
 }
- 
- 
- 
- 
