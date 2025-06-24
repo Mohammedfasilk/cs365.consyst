@@ -87,7 +87,7 @@ export default function GeneralSettings() {
         );
         const data = response.data;
         form.setValue("cdiplTarget", data.cdiplTarget || "");
-        form.setValue("currentFyStartDate", dayjs(data.currentFyStartDate));
+        form.setValue("currentFyStartDate", new Date(data.currentFyStartDate));
         form.setValue("usdToinr", data.usdToinr || "");
         form.setValue("usdToaed", data.usdToaed || "");
         form.setValue("cmefTarget", data.cmefTarget || "");
@@ -144,9 +144,9 @@ export default function GeneralSettings() {
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
-                      value={field.value}
-                      onChange={field.onChange}
-                      minDate={dayjs("1900-01-01")}
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      disabled={(date) => date < new Date("1900-01-01")}
                       initialFocus
                     />
                   </PopoverContent>

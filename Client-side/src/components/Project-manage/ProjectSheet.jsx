@@ -49,7 +49,6 @@ import {
 } from "../../Redux/Slices/SelectedProject";
 import GanttChart from "./GanttChart";
 import { useToast } from "../../Hooks/use-toast";
-import dayjs from "dayjs";
 
 const ProjectSheet = ({ fetchData }) => {
   const [project, setProject] = useState(null);
@@ -71,11 +70,11 @@ const ProjectSheet = ({ fetchData }) => {
   const formSchema = z.object({
     customerName: z.string(),
     customerPoValue: z.number(),
-    customerPoDate: z.any(),
-    commencementDate: z.any(),
-    contractEndDate: z.any(),
-    materialDeliveryDate: z.any(),
-    fatDate: z.any(),
+    customerPoDate: z.date(),
+    commencementDate: z.date(),
+    contractEndDate: z.date(),
+    materialDeliveryDate: z.date(),
+    fatDate: z.date(),
     projectCurrency: z.string(),
     projectDescription: z.string(),
     company: z.string(),
@@ -171,7 +170,7 @@ const ProjectSheet = ({ fetchData }) => {
           } = salesOrder;
           const { project_name } = selectedProject || {};
 
-          if (po_date) form.setValue("customerPoDate", dayjs(po_date));
+          if (po_date) form.setValue("customerPoDate", new Date(po_date));
           form.setValue("customerName", customer_name || "");
           form.setValue("projectCurrency", currency || "");
           form.setValue("company", company || "");
@@ -203,16 +202,16 @@ const ProjectSheet = ({ fetchData }) => {
           setProject(data);
           form.setValue("customerName", data.customer_name);
           form.setValue("projectCurrency", data.project_currency);
-          form.setValue("customerPoDate", dayjs(data.customer_po_date));
+          form.setValue("customerPoDate", new Date(data.customer_po_date));
           form.setValue("customerPoValue", data.customer_po_value);
           form.setValue("projectDescription", data.project_description);
           form.setValue("company", data.company);
-          form.setValue("commencementDate", dayjs(data.commencement_date));
-          form.setValue("contractEndDate", dayjs(data.contract_end_date));
-          form.setValue("fatDate", dayjs(data.fat_date));
+          form.setValue("commencementDate", new Date(data.commencement_date));
+          form.setValue("contractEndDate", new Date(data.contract_end_date));
+          form.setValue("fatDate", new Date(data.fat_date));
           form.setValue(
             "materialDeliveryDate",
-            dayjs(data.material_delivery_date)
+            new Date(data.material_delivery_date)
           );
         } else {
           form.reset();
@@ -346,8 +345,8 @@ const ProjectSheet = ({ fetchData }) => {
                                 >
                                   <Calendar
                                     mode="single"
-                                    value={field.value}
-                                    onChange={field.onChange}
+                                    selected={field.value}
+                                    onSelect={field.onChange}
                                     disabled={(date) =>
                                       date < new Date("1900-01-01")
                                     }
@@ -479,12 +478,12 @@ const ProjectSheet = ({ fetchData }) => {
                                   align="start"
                                 >
                                   <Calendar
-                                      mode="single"
-                                      value={field.value}
-                                      onChange={field.onChange}
-                                      minDate={dayjs("1900-01-01")}
-                                      initialFocus
-                                    />
+                                    mode="single"
+                                    selected={field.value}
+                                    onSelect={field.onChange}
+                                    // disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                                    initialFocus
+                                  />
                                 </PopoverContent>
                               </Popover>
                             </FormControl>
@@ -530,9 +529,9 @@ const ProjectSheet = ({ fetchData }) => {
                                   >
                                     <Calendar
                                       mode="single"
-                                      value={field.value}
-                                      onChange={field.onChange}
-                                      minDate={dayjs("1900-01-01")}
+                                      selected={field.value}
+                                      onSelect={field.onChange}
+                                      // disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
                                       initialFocus
                                     />
                                   </PopoverContent>
@@ -579,12 +578,12 @@ const ProjectSheet = ({ fetchData }) => {
                                   align="start"
                                 >
                                   <Calendar
-                                      mode="single"
-                                      value={field.value}
-                                      onChange={field.onChange}
-                                      minDate={dayjs("1900-01-01")}
-                                      initialFocus
-                                    />
+                                    mode="single"
+                                    selected={field.value}
+                                    onSelect={field.onChange}
+                                    // disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                                    initialFocus
+                                  />
                                 </PopoverContent>
                               </Popover>
                             </FormControl>
@@ -628,12 +627,12 @@ const ProjectSheet = ({ fetchData }) => {
                                   align="start"
                                 >
                                   <Calendar
-                                      mode="single"
-                                      value={field.value}
-                                      onChange={field.onChange}
-                                      minDate={dayjs("1900-01-01")}
-                                      initialFocus
-                                    />
+                                    mode="single"
+                                    selected={field.value}
+                                    onSelect={field.onChange}
+                                    // disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                                    initialFocus
+                                  />
                                 </PopoverContent>
                               </Popover>
                             </FormControl>

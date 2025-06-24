@@ -1,24 +1,23 @@
-import TextField from '@mui/material/TextField';
-import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
-import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
-import {DateCalendar} from '@mui/x-date-pickers/DateCalendar';
+import React, { useState } from "react";
+import { DayPicker } from "react-day-picker";
+import 'react-day-picker/dist/style.css';
+ function Calendar({onSelect , selected}) {
 
-function Calendar({
-  value,
-  onChange,
-  label = 'Select date',
-  ...props
-}) {
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <DateCalendar
-      label={label}
-      value={value}
-      onChange={onChange}
-      renderInput={(params)=><TextField {...params} fullWidth />}
-      {...props}
+    <div className=" mx-auto p-5 bg-white rounded-lg shadow">
+      <DayPicker
+        mode="single"
+        selected={selected}
+        onSelect={onSelect}
+        modifiersClassNames={{
+          selected: "bg-indigo-600 text-white rounded-full",
+          today: "text-indigo-600",
+        }}
+        className="text-center"
+        showOutsideDays
       />
-    </LocalizationProvider>
+    </div>
   );
 }
-export { Calendar };
+
+export {Calendar}
