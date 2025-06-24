@@ -57,7 +57,7 @@ function SalesPipeline() {
           axios.get(`${import.meta.env.VITE_CS365_URI}/api/sales-pipeline/top-opportunities`),
           axios.get(`${import.meta.env.VITE_CS365_URI}/api/sales-pipeline/sum`),
           axios.get(`${import.meta.env.VITE_CS365_URI}/api/sales-pipeline/count`),
-          axios.get(`${import.meta.env.VITE_CS365_URI}/api/sales-analysis`),
+          axios.post(`${import.meta.env.VITE_CS365_URI}/api/sales-analysis`,{fyDate: settings.currentFyStartDate}),
           axios.post(`${import.meta.env.VITE_CS365_URI}/api/sales-analysis/order-booking-monthly`, {
             fyDate: settings.currentFyStartDate,
             usd: settings.usdToinr || 0,

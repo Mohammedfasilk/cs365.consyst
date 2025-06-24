@@ -7,8 +7,10 @@ const companies = [
 ];
 
 exports.SalesOrderBooking = async (req, res) => {
- 
-  const currentFyStartDate = "2025-04-01"; // example
+  const {fyDate} = req.body
+  console.log(fyDate);
+  
+  const currentFyStartDate = fyDate
   const results = [];
 
   for (const company of companies) {
