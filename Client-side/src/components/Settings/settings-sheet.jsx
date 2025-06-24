@@ -152,32 +152,29 @@ export function SettingsSheet() {
 
   },[])
 
-  useEffect(() => {
-     const updateDisplayNameIfMissing = async () => {
+useEffect(() => {
+  const updateDisplayNameIfMissing = async () => {
+    const user = userList.find((u) => u.email === userEmail);
 
-    try {
-      // Get current list of users (or refetch if needed)
-      const user = userList.find(u => u.email === userEmail);
-      
-      if (user && user.name == "") {
-        // If user exists and has no name, update it
+    if (user && user.name === "") {
+      try {
         await axios.post(`${import.meta.env.VITE_CS365_URI}/api/user`, {
           email: userEmail,
           name: userName,
-          roles: user.roles, // retain current roles
+          roles: user.roles,
         });
-        
-        fetchUsers(); 
+
+        fetchUsers(); // refresh list after update
+      } catch (err) {
+        console.error("Error updating display name", err);
       }
-    } catch (err) {
-      console.error("Error updating display name", err);
     }
   };
 
-  if (userList.length > 0) {
+  if (userList.length && userEmail && userName) {
     updateDisplayNameIfMissing();
   }
-  }, [userEmail, userName]);
+}, [userList, userEmail, userName]);
 
   return (
     <Sheet>
