@@ -146,7 +146,6 @@ export default function GeneralSettings() {
                       value={field.value}
                       onChange={field.onChange}
                       minDate={dayjs("1900-01-01")}
-                      maxDate={dayjs()}
                     />
                   </PopoverContent>
                 </Popover>
