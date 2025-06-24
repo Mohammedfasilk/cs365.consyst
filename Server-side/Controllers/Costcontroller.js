@@ -82,10 +82,13 @@ exports.updateMonthlyCost = async (req, res) => {
         { new: true }
       );
 
-      return res.status(200).json(pushProject);
+
+      return res.status(200).json(pushProject);      
     }
 
+
     return res.status(200).json(updateProject);
+    
   } catch (err) {
     console.error("Update Error:", err);
     res.status(500).json({ error: "Failed to update monthly cost data" });

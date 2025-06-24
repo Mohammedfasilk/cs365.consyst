@@ -4,6 +4,7 @@ import {
   headerCell,
   nonEditable,
   numberCell,
+  percentCell,
   textCell
 } from "../../lib/Cells";
 import { ReactGrid } from "@silevis/reactgrid";
@@ -56,6 +57,8 @@ const getDirectExpenses = (project, selectedMonth, type = "current") => {
   };
 };
 
+
+
 const getColumns = () => [
   { columnId: "titles-column", width: 300 },
   { columnId: "Current", width: 150 },
@@ -80,6 +83,30 @@ const getBillingTotal = (billingData) =>
 
 const getTotalDirectExpenses = (directExpensesData) =>
   Object.values(directExpensesData).reduce((total, expense) => total + expense, 0);
+
+const getGrossProfitAmount = (billingData, directExpensesData) => {
+  return getBillingTotal(billingData) - getTotalDirectExpenses(directExpensesData);
+}
+
+const getGrossProfitPercent = (billingData, directExpensesData) => {
+  return (getBillingTotal(billingData) - getTotalDirectExpenses(directExpensesData)) / getBillingTotal(billingData);
+}
+
+const getInvestorProfitSharePercent = (project) => project?.budget?.investor_profit_share_percent || 0;
+
+const getMiscellaneousIndirectExpense = (project) => project?.budget?.miscellaneous_indirect_expense || 0;
+
+const getInvestorProfitShareAmount = (billingData, directExpensesData, investorProfitSharePercent) => {
+  return investorProfitSharePercent * getGrossProfitAmount(billingData, directExpensesData);
+};
+
+const getTotalIndirectExpenses = (billingData, directExpensesData, investorProfitSharePercent, miscellaneousIndirectExpense) => {
+  return getInvestorProfitShareAmount(billingData, directExpensesData, investorProfitSharePercent) + miscellaneousIndirectExpense;
+};
+
+const getTotalExpenses = (billingData, directExpensesData, investorProfitSharePercent, miscellaneousIndirectExpense) => {
+  return getTotalDirectExpenses(directExpensesData) + getTotalIndirectExpenses(billingData, directExpensesData, investorProfitSharePercent, miscellaneousIndirectExpense);
+};
 
 const getNetProfitLoss = (billingData, directExpensesData) =>
   getBillingTotal(billingData) - getTotalDirectExpenses(directExpensesData);
@@ -115,6 +142,7 @@ const getRows = (purchaseOrderData,
     isEditable = true,
     isBold = false,
     color,
+    isPercent = false,
     isLastRow = false,
   ) => ({
     rowId: label.toLowerCase().replace(/[^\w\s]/g, "").replace(/\s+/g, "-") ,
@@ -129,10 +157,12 @@ const getRows = (purchaseOrderData,
       ),
       isEditable
         ? numberCell(currentValue, isLastRow ? " rounded-br" : "")
-        : nonEditable(numberCell(currentValue, "disabled" + (isBold ? " font-bold" : "") + (isLastRow ? " rounded-br" : ""), color ? { color } : {})),
+        : nonEditable(isPercent ? percentCell(currentValue, "disabled" + (isBold ? " font-bold" : "") + (isLastRow ? " rounded-br" : ""), color ? { color } : {})
+        :numberCell(currentValue, "disabled" + (isBold ? " font-bold" : "") + (isLastRow ? " rounded-br" : ""), color ? { color } : {})),
       isEditable
         ? numberCell(projectedValue, isLastRow ? " rounded-br" : "")
-        : nonEditable(numberCell(projectedValue, "disabled" + (isBold ? " font-bold" : "") + (isLastRow ? " rounded-br" : ""), color ? { color } : {})),
+        : nonEditable(isPercent ? percentCell(projectedValue, "disabled" + (isBold ? " font-bold" : "") + (isLastRow ? " rounded-br" : ""), color ? { color } : {})
+        :numberCell(projectedValue, "disabled" + (isBold ? " font-bold" : "") + (isLastRow ? " rounded-br" : ""), color ? { color } : {})),
     ],
   });
 
@@ -162,18 +192,28 @@ const getRows = (purchaseOrderData,
     createDataRow("Installation (Sub-Contract)", directExpensesData.installation_subcontract, projectedDirectExpensesData.installation_subcontract),
     createDataRow("Extended Warranty (Cost)", directExpensesData.extended_warranty_cost, projectedDirectExpensesData.extended_warranty_cost),
     createDataRow("Miscellaneous (Direct Expense)", directExpensesData.miscellaneous_direct_expense , projectedDirectExpensesData.miscellaneous_direct_expense),
-    createDataRow("Direct Expenses (Total)", getTotalDirectExpenses(directExpensesData),getTotalDirectExpenses(projectedDirectExpensesData), false, true, "#ea580c", true),
+    createDataRow("Direct Expenses (Total)", getTotalDirectExpenses(directExpensesData),getTotalDirectExpenses(projectedDirectExpensesData), false, true, "#ea580c",false,true),
   ];
 
-  const netProfitRows = [
-    createDataRow("Net Profit/Loss", getNetProfitLoss(billingData, directExpensesData),getNetProfitLoss(projectedBillingData,projectedDirectExpensesData), false, true, "#336699"),
-    createDataRow("Net Profit/Loss (Percent)",getNetProfitLossPercent(billingData, directExpensesData),getNetProfitLossPercent(projectedBillingData,projectedDirectExpensesData), false, true, "#336699"),
-  ];  
+  const grossProfitRows = [
+    createSectionHeader("Gross Profit", "#15803d"),
+    createDataRow("Gross Profit (Amount)",getGrossProfitAmount(billingData,directExpensesData),getGrossProfitAmount(projectedBillingData,projectedDirectExpensesData),false,false),
+    createDataRow("Gross Profit (Percent)",getGrossProfitPercent(billingData,directExpensesData) || 0,getGrossProfitPercent(projectedBillingData,projectedDirectExpensesData) || 0,false,false,true,true),
 
-  return [headerRow, ...purchaseOrderRows, ...billingRows, ...directExpensesRows, ...netProfitRows];
+  ]
+
+  // const netProfitRows = [
+  //   createDataRow("Net Profit/Loss", getNetProfitLoss(billingData, directExpensesData),getNetProfitLoss(projectedBillingData,projectedDirectExpensesData), false, true, "#336699"),
+  //   createDataRow("Net Profit/Loss (Percent)",getNetProfitLossPercent(billingData, directExpensesData),getNetProfitLossPercent(projectedBillingData,projectedDirectExpensesData), false, true, "#336699"),
+  // ];  
+
+  return [headerRow, ...purchaseOrderRows, ...billingRows, ...directExpensesRows, ...grossProfitRows];    //...netProfitRows
 };
 
 function MonthlyBudgetTable({ project, getData, selectedMonth }) {
+
+  const [investorProfitSharePercent, setInvestorProfitSharePercent] = useState(getInvestorProfitSharePercent(project));
+  const [miscellaneousIndirectExpense, setMiscellaneousIndirectExpense] = useState(getMiscellaneousIndirectExpense(project));
 
   //current
 
@@ -200,10 +240,13 @@ const [projectedDirectExpensesData, setProjectedDirectExpensesData] = useState((
 
   // Re-fetch when project or month changes
   useEffect(() => {
+
     setPurchaseOrderData(getPurchaseOrderData(project, selectedMonth));
     setBillingData(getBillingData(project, selectedMonth));
     setDirectExpensesData(getDirectExpenses(project, selectedMonth));
 
+    setInvestorProfitSharePercent(getInvestorProfitSharePercent(project))
+    setMiscellaneousIndirectExpense(getMiscellaneousIndirectExpense(project))
     //projected
   setProjectedPurchaseOrderData(getPurchaseOrderData(project, selectedMonth, "projected"));
   setProjectedBillingData(getBillingData(project, selectedMonth , "projected"));
@@ -277,8 +320,15 @@ useEffect(() => {
       billing_total: getBillingTotal(billingData),
       ...directExpensesData,
       total_direct_expenses: getTotalDirectExpenses(directExpensesData),
-      net_profit_loss: getNetProfitLoss(billingData, directExpensesData),
-      net_profit_loss_percent: getNetProfitLossPercent(billingData, directExpensesData) || 0,
+      gross_profit_amount:getGrossProfitAmount(billingData,directExpensesData),
+      gross_profit_percent:getGrossProfitPercent(billingData,directExpensesData),
+      investor_profit_share_amount:getInvestorProfitShareAmount(billingData,directExpensesData,getInvestorProfitSharePercent(project)),
+      investor_profit_share_percent: getInvestorProfitSharePercent(project),
+      miscellaneous_indirect_expense: getMiscellaneousIndirectExpense(project),
+      total_indirect_expenses:getTotalIndirectExpenses(billingData,directExpensesData,getInvestorProfitSharePercent(project),getMiscellaneousIndirectExpense(project)),
+      total_expenses: getTotalExpenses(billingData,directExpensesData,getInvestorProfitSharePercent(project),getMiscellaneousIndirectExpense(project)),
+      net_profit_loss: getNetProfitLoss(billingData, directExpensesData,getInvestorProfitSharePercent(project),getMiscellaneousIndirectExpense(project)),
+      net_profit_loss_percent: getNetProfitLossPercent(billingData, directExpensesData,getInvestorProfitSharePercent(project),getMiscellaneousIndirectExpense(project)) || 0,
     },
     projected: {
       ...projectedPurchaseOrderData,
@@ -287,12 +337,20 @@ useEffect(() => {
       billing_total: getBillingTotal(projectedBillingData),
       ...projectedDirectExpensesData,
       total_direct_expenses: getTotalDirectExpenses(projectedDirectExpensesData),
-      net_profit_loss: getNetProfitLoss(projectedBillingData, projectedDirectExpensesData),
-      net_profit_loss_percent: getNetProfitLossPercent(projectedBillingData, projectedDirectExpensesData) || 0,
-    }
+      gross_profit_amount:getGrossProfitAmount(projectedBillingData,projectedDirectExpensesData),
+      gross_profit_percent:getGrossProfitPercent(projectedBillingData,projectedDirectExpensesData),
+      investor_profit_share_amount:getInvestorProfitShareAmount(projectedBillingData,projectedDirectExpensesData,getInvestorProfitSharePercent(project)),
+      investor_profit_share_percent: getInvestorProfitSharePercent(project),
+      miscellaneous_indirect_expense: getMiscellaneousIndirectExpense(project),
+      total_indirect_expenses:getTotalIndirectExpenses(projectedBillingData,projectedDirectExpensesData,getInvestorProfitSharePercent(project),getMiscellaneousIndirectExpense(project)),
+      total_expenses: getTotalExpenses(projectedBillingData,projectedDirectExpensesData,getInvestorProfitSharePercent(project),getMiscellaneousIndirectExpense(project)),
+      net_profit_loss: getNetProfitLoss(projectedBillingData, projectedDirectExpensesData,getInvestorProfitSharePercent(project), getMiscellaneousIndirectExpense(project)),
+      net_profit_loss_percent: getNetProfitLossPercent(projectedBillingData, projectedDirectExpensesData,getInvestorProfitSharePercent(project),getMiscellaneousIndirectExpense(project)) || 0,
+    },
   };
 
   getData(data);
+
   
 }, [
   selectedMonth,

@@ -28,39 +28,14 @@ const budgetSchema = new mongoose.Schema(
     total_expenses: Number,
     net_profit_loss: Number,
     net_profit_loss_percent: Number,
-
-
   }
 );
-const CostControlField = new mongoose.Schema(
-  {
-    po_value: Number,
-    additional_po_value: Number,
-    total_po_value: Number,
-    invoice_supply: Number,
-    invoice_service: Number,
-    additional_invoice: Number,
-    billing_total: Number,
-    cogs: Number,
-    packing_and_forwarding: Number,
-    travel_expenses: Number,
-    travel_allowances: Number,
-    commissioning: Number,
-    programming_outsourced: Number,
-    installation_subcontract: Number,
-    extended_warranty_cost: Number,
-    miscellaneous_direct_expense: Number,
-    total_direct_expenses: Number,
-    net_profit_loss: Number,
-    net_profit_loss_percent: Number,
-  },
-  { _id: false }
-);
+
 
 const monthlyDataSchema = new mongoose.Schema({
   month: { type: String, required: true },
-  current: CostControlField,
-  projected: CostControlField,
+  current: budgetSchema,
+  projected: budgetSchema,
   status:{type:String,default:'draft'},
   stage:{type:String,default:'open'},
 

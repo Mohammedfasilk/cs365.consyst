@@ -167,7 +167,7 @@ export function CostControlSheet() {
                   <MonthlyBudgetTable
                     project={project}
                     getData={(data) => {
-                      setMonthlyData(data);
+                      setMonthlyData(data);                      
                     }}
                     selectedMonth={selectedMonth}
                   />

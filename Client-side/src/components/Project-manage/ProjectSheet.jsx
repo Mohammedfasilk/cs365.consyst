@@ -246,6 +246,7 @@ const ProjectSheet = ({ fetchData }) => {
           dispatch(setSelectedProjectName(""));
           dispatch(setIsSaved(false));
           setProject(null);
+          setTabValue('project-details')
           form.reset();
         }
         dispatch(setIsOpen(value));
