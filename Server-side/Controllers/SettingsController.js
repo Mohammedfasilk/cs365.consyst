@@ -3,9 +3,6 @@ const Settings = require("../Models/settingsModel");
 exports.saveSettings = async (req, res) => {
   try {
     const data = req.body;
-    
-    if (data.currentFyStartDate) {      
-    }
     const updated = await Settings.findOneAndUpdate({}, data, {
       upsert: true,
       new: true,
