@@ -63,7 +63,7 @@ const headerRow = {
   height: HEADING_ROW_HEIGHT,
   cells: [
     headerCell("Accounting Head", "justify-content-center rounded-tl"),
-    headerCell("Estimation (Pre-Kickoff)", "justify-content-center",),
+    headerCell("Budget (Pre-Kickoff)", "justify-content-center",),
     headerCell("Latest Projection", "justify-content-center"),
     headerCell("Cumulative (Actual)", "justify-content-center rounded-tr"),
   ]

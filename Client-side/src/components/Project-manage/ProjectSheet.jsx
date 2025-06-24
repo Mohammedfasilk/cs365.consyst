@@ -44,33 +44,42 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   clearSelectedProject,
   setIsOpen,
+  setIsSaved,
   setSelectedProjectName,
 } from "../../Redux/Slices/SelectedProject";
 import GanttChart from "./GanttChart";
 import { useToast } from "../../Hooks/use-toast";
+import dayjs from "dayjs";
 
-const ProjectSheet = ({fetchData}) => {
+const ProjectSheet = ({ fetchData }) => {
   const [project, setProject] = useState(null);
   const dispatch = useDispatch();
 
   const selectedProject = useSelector((state) => state.selectedProject.project);
-  
-  const selectedProjectName = useSelector((state)=> state.selectedProject.selectedProjectName)
-  
+
+  const selectedProjectName = useSelector(
+    (state) => state.selectedProject.selectedProjectName
+  );
+
   const isOpen = useSelector((state) => state.selectedProject.isOpen);
+
+  const isSaved = useSelector((state) => state.selectedProject.isSaved);
+
+  const [tabValue, setTabValue] = useState("project-details");
+
   const { toast } = useToast();
   const formSchema = z.object({
-  customerName: z.string(),
-  customerPoValue: z.number(),
-  customerPoDate: z.date(),
-  commencementDate: z.date(),
-  contractEndDate: z.date(),
-  materialDeliveryDate: z.date(),
-  fatDate: z.date(),
-  projectCurrency: z.string(),
-  projectDescription: z.string(),
-  company: z.string(),
-})
+    customerName: z.string(),
+    customerPoValue: z.number(),
+    customerPoDate: z.any(),
+    commencementDate: z.any(),
+    contractEndDate: z.any(),
+    materialDeliveryDate: z.any(),
+    fatDate: z.any(),
+    projectCurrency: z.string(),
+    projectDescription: z.string(),
+    company: z.string(),
+  });
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -87,7 +96,7 @@ const ProjectSheet = ({fetchData}) => {
       company: "",
     },
   });
- 
+
   async function onSubmit(values) {
     const projectValues = {
       project_name: selectedProjectName,
@@ -106,40 +115,36 @@ const ProjectSheet = ({fetchData}) => {
       status: "draft",
     };
 
-   const createProject = async ()=>{
+    const createProject = async () => {
       try {
-
         const res = await axios.post(
           `${import.meta.env.VITE_CS365_URI}/api/projects/save-project`,
           projectValues
         );
-
         fetchData();
-         if ( res==null || res?.error ) {
-      toast({
-        title: "Project Not Saved",
-        description: "There was an error saving the project.",
-        variant: "destructive",
-        icon: <CircleXIcon className="mr-4" color="red" />,
-      });
-      return;
-    }
+        if (res == null || res?.error) {
+          toast({
+            title: "Project Not Saved",
+            description: "There was an error saving the project.",
+            variant: "destructive",
+            icon: <CircleXIcon className="mr-4" color="red" />,
+          });
+          return;
+        }
 
-    toast({
-      title: "Project Saved",
-      description: "The project has been successfully saved.",
-      icon: <CircleCheckIcon className="mr-4" color="green" />,
-    });
-        
+        dispatch(setIsSaved(true));
+
+        toast({
+          title: "Project Saved",
+          description: "The project has been successfully saved.",
+          icon: <CircleCheckIcon className="mr-4" color="green" />,
+        });
       } catch (error) {
         console.error("Error Saving Project:", error);
       }
     };
-    
+
     createProject();
-    
-      
-   
   }
 
   useEffect(() => {
@@ -166,7 +171,7 @@ const ProjectSheet = ({fetchData}) => {
           } = salesOrder;
           const { project_name } = selectedProject || {};
 
-          if (po_date) form.setValue("customerPoDate", new Date(po_date));
+          if (po_date) form.setValue("customerPoDate", dayjs(po_date));
           form.setValue("customerName", customer_name || "");
           form.setValue("projectCurrency", currency || "");
           form.setValue("company", company || "");
@@ -184,54 +189,68 @@ const ProjectSheet = ({fetchData}) => {
   useEffect(() => {
     async function fetchSelectedProject(project_name) {
       try {
-  
-          const res = await axios.get(
-            `${import.meta.env.VITE_CS365_URI}/api/projects`
-          );
-  
-          const projects = res.data ;
-          
-          
-          const data = projects.filter((project)=> project?.project_name == project_name)[0]
-          
-      if (data) {
-        setProject(data);
-        form.setValue("customerName", data.customer_name);
-        form.setValue("projectCurrency", data.project_currency);
-        form.setValue("customerPoDate", new Date(data.customer_po_date));
-        form.setValue("customerPoValue", data.customer_po_value);
-        form.setValue("projectDescription", data.project_description);
-        form.setValue("company", data.company);
-        form.setValue("commencementDate", new Date(data.commencement_date));
-        form.setValue("contractEndDate", new Date(data.contract_end_date));
-        form.setValue("fatDate", new Date(data.fat_date));
-        form.setValue(
-          "materialDeliveryDate",
-          new Date(data.material_delivery_date)
+        const res = await axios.get(
+          `${import.meta.env.VITE_CS365_URI}/api/projects`
         );
-      }
-      } catch (error) {
-          console.error("Error fetching  projects:", error);
+
+        const projects = res.data;
+
+        const data = projects.filter(
+          (project) => project?.project_name == project_name
+        )[0];
+        if (data) {
+          dispatch(setIsSaved(true));
+          setProject(data);
+          form.setValue("customerName", data.customer_name);
+          form.setValue("projectCurrency", data.project_currency);
+          form.setValue("customerPoDate", dayjs(data.customer_po_date));
+          form.setValue("customerPoValue", data.customer_po_value);
+          form.setValue("projectDescription", data.project_description);
+          form.setValue("company", data.company);
+          form.setValue("commencementDate", dayjs(data.commencement_date));
+          form.setValue("contractEndDate", dayjs(data.contract_end_date));
+          form.setValue("fatDate", dayjs(data.fat_date));
+          form.setValue(
+            "materialDeliveryDate",
+            dayjs(data.material_delivery_date)
+          );
+        } else {
+          form.reset();
         }
+      } catch (error) {
+        console.error("Error fetching  projects:", error);
+      }
     }
 
     if (selectedProjectName) {
       fetchSelectedProject(selectedProjectName);
-        }
+    }
   }, [selectedProjectName]);
+
+  const handleNavigation = () => {
+    if (!isSaved) {
+      toast({
+        title: "Project Not Saved !",
+        description: "Please the project",
+        variant: "destructive",
+        icon: <CircleXIcon className="mr-4" color="red" />,
+      });
+    }
+  };
 
   return (
     <Sheet
-    open={isOpen}
-    onOpenChange={(value) => {
-      if (!value) {
-       dispatch(clearSelectedProject())
-       dispatch(setSelectedProjectName(''))
-       setProject(null);
-       form.reset();
-      }
-      dispatch(setIsOpen(value));
-    }}
+      open={isOpen}
+      onOpenChange={(value) => {
+        if (!value) {
+          dispatch(clearSelectedProject());
+          dispatch(setSelectedProjectName(""));
+          dispatch(setIsSaved(false));
+          setProject(null);
+          form.reset();
+        }
+        dispatch(setIsOpen(value));
+      }}
     >
       <SheetTrigger asChild>
         <Button className="bg-[var(--csred)] hover:bg-[var(--csred)]/90">
@@ -243,20 +262,38 @@ const ProjectSheet = ({fetchData}) => {
           <SheetTitle className="text-2xl font-bold">Project</SheetTitle>
           <ChooseProject />
           <div>
-            <Tabs defaultValue="project-details">
+            <Tabs
+              value={tabValue}
+              onValueChange={(val) => {
+                if (!isSaved && val !== "project-details") {
+                  toast({
+                    title: "Project Not Saved!",
+                    description:
+                      "Please save the project before accessing this tab.",
+                    variant: "destructive",
+                    icon: <CircleXIcon className="mr-4" color="red" />,
+                  });
+                  return;
+                }
+
+                setTabValue(val);
+              }}
+            >
               <TabsList>
                 <TabsTrigger value="project-details">
                   <SquareChartGantt className="mr-2 h-4 w-4" /> Project Details
                 </TabsTrigger>
-                <TabsTrigger value="terms-and-conditions">
-                  <Handshake className="mr-2 h-4 w-4" /> Terms and Conditions
-                </TabsTrigger>
-                <TabsTrigger value="budget">
-                  <Receipt className="mr-2 h-4 w-4" /> Budget
-                </TabsTrigger>
-                <TabsTrigger value="timeline">
-                  <CalendarCheckIcon className="mr-2 h-4 w-4" /> Timeline
-                </TabsTrigger>
+                <div>
+                  <TabsTrigger value="terms-and-conditions">
+                    <Handshake className="mr-2 h-4 w-4" /> Terms and Conditions
+                  </TabsTrigger>
+                  <TabsTrigger value="budget">
+                    <Receipt className="mr-2 h-4 w-4" /> Budget
+                  </TabsTrigger>
+                  <TabsTrigger value="timeline">
+                    <CalendarCheckIcon className="mr-2 h-4 w-4" /> Timeline
+                  </TabsTrigger>
+                </div>
               </TabsList>
 
               <TabsContent value="project-details">
@@ -309,8 +346,8 @@ const ProjectSheet = ({fetchData}) => {
                                 >
                                   <Calendar
                                     mode="single"
-                                    selected={field.value}
-                                    onSelect={field.onChange}
+                                    value={field.value}
+                                    onChange={field.onChange}
                                     disabled={(date) =>
                                       date < new Date("1900-01-01")
                                     }
@@ -346,16 +383,6 @@ const ProjectSheet = ({fetchData}) => {
                             <FormLabel>Project Currency</FormLabel>
                             <FormControl>
                               <Input {...field} />
-                              {/* <Select {...field}>
-                                <SelectTrigger className="w-[180px]">
-                                  <SelectValue placeholder="Select Currency" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="INR">INR</SelectItem>
-                                  <SelectItem value="USD">USD</SelectItem>
-                                  <SelectItem value="AED">AED</SelectItem>
-                                </SelectContent>
-                              </Select> */}
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -452,12 +479,12 @@ const ProjectSheet = ({fetchData}) => {
                                   align="start"
                                 >
                                   <Calendar
-                                    mode="single"
-                                    selected={field.value}
-                                    onSelect={field.onChange}
-                                    // disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
-                                    initialFocus
-                                  />
+                                      mode="single"
+                                      value={field.value}
+                                      onChange={field.onChange}
+                                      minDate={dayjs("1900-01-01")}
+                                      initialFocus
+                                    />
                                 </PopoverContent>
                               </Popover>
                             </FormControl>
@@ -503,9 +530,9 @@ const ProjectSheet = ({fetchData}) => {
                                   >
                                     <Calendar
                                       mode="single"
-                                      selected={field.value}
-                                      onSelect={field.onChange}
-                                      // disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                                      value={field.value}
+                                      onChange={field.onChange}
+                                      minDate={dayjs("1900-01-01")}
                                       initialFocus
                                     />
                                   </PopoverContent>
@@ -552,12 +579,12 @@ const ProjectSheet = ({fetchData}) => {
                                   align="start"
                                 >
                                   <Calendar
-                                    mode="single"
-                                    selected={field.value}
-                                    onSelect={field.onChange}
-                                    // disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
-                                    initialFocus
-                                  />
+                                      mode="single"
+                                      value={field.value}
+                                      onChange={field.onChange}
+                                      minDate={dayjs("1900-01-01")}
+                                      initialFocus
+                                    />
                                 </PopoverContent>
                               </Popover>
                             </FormControl>
@@ -601,12 +628,12 @@ const ProjectSheet = ({fetchData}) => {
                                   align="start"
                                 >
                                   <Calendar
-                                    mode="single"
-                                    selected={field.value}
-                                    onSelect={field.onChange}
-                                    // disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
-                                    initialFocus
-                                  />
+                                      mode="single"
+                                      value={field.value}
+                                      onChange={field.onChange}
+                                      minDate={dayjs("1900-01-01")}
+                                      initialFocus
+                                    />
                                 </PopoverContent>
                               </Popover>
                             </FormControl>
@@ -623,7 +650,9 @@ const ProjectSheet = ({fetchData}) => {
                 <CostEstimationTable project={project} />
               </TabsContent>
 
-              <TabsContent value="timeline"><GanttChart/></TabsContent>
+              <TabsContent value="timeline">
+                <GanttChart />
+              </TabsContent>
             </Tabs>
           </div>
         </SheetHeader>

@@ -6,7 +6,7 @@ import {Input} from "../UI/Input";
 import { CalendarIcon, CircleCheckIcon, CircleXIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "../../lib/utils";
-import { Calendar } from "../UI/Calendar";
+import  {Calendar}  from "../UI/Calender";
 import { Popover, PopoverContent, PopoverTrigger } from "../UI/Popover";
 import {
   Form,

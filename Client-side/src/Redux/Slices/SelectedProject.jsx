@@ -3,7 +3,8 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
   project: '',
   isOpen: false,
-  selectedProjectName: ''
+  selectedProjectName: '',
+  isSaved:false
 };
 
 const selectedProjectSlice = createSlice({
@@ -19,11 +20,14 @@ const selectedProjectSlice = createSlice({
     setIsOpen(state, action) {
       state.isOpen = action.payload;
     },
+    setIsSaved(state, action) {
+      state.isSaved = action.payload;
+    },
     clearSelectedProject(state) {
       state.project = '';
     },
   },
 });
 
-export const { setSelectedProject, clearSelectedProject,setIsOpen,setSelectedProjectName } = selectedProjectSlice.actions;
+export const { setSelectedProject, clearSelectedProject,setIsOpen,setSelectedProjectName, setIsSaved } = selectedProjectSlice.actions;
 export default selectedProjectSlice.reducer;

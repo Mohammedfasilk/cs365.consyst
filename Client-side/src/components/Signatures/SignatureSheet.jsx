@@ -35,11 +35,6 @@ import {
   setSelectedSignatureName,
 } from "../../Redux/Slices/signatureSheetSlice";
 
-// import { useSignatureSheetStore } from "@/utils/zustandStore"
-// import { createSignature, fetchSignature } from "@/utils/actions"
-// import { useToast } from "@/hooks/use-toast"
-// import EmailSignature from "./signature"
-// import { MultiSelect } from "@/components/ui/multi-select"
 
 //Schema definition
 const formSchema = z.object({

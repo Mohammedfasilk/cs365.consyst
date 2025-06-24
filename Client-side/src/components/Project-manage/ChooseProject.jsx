@@ -12,7 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "../UI/Popover";
 import { Check } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useDispatch, useSelector } from "react-redux";
-import { setSelectedProject, setSelectedProjectName } from "../../Redux/Slices/SelectedProject";
+import { setIsSaved, setSelectedProject, setSelectedProjectName } from "../../Redux/Slices/SelectedProject";
 // import { useProjectSheetStore } from "@/utils/zustandStore";
 
 export function ChooseProject({ project_name }) {
@@ -37,6 +37,7 @@ export function ChooseProject({ project_name }) {
         const data = await res.data;
 
         setProjectList(data);
+        
       } catch (error) {
         console.error("Error fetching Project List:", error);
       }
@@ -45,29 +46,6 @@ export function ChooseProject({ project_name }) {
     fetchData();
   }, [search]);
 
-
-  // const fetchSalesOrderData = async (salesOrderId) => {
-  //   if (!salesOrderId) {
-  //     setSalesOrder("");
-  //     return;
-  //   }
-
-  //   try {
-  //     const response = await fetch("/api/sales-order", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({ salesOrderId }),
-  //     });
-
-  //     if (!response.ok) throw new Error("Network response was not ok");
-
-  //     const responseJson = await response.json();
-  //     const salesOrderData = responseJson.data.data;
-  //     setSalesOrder(salesOrderData);
-  //   } catch (error) {
-  //     console.error("Failed to fetch sales order:", error);
-  //   }
-  // };
 
   return (
     <Popover open={dropdownOpen} onOpenChange={setDropdownOpen}>
@@ -94,6 +72,7 @@ export function ChooseProject({ project_name }) {
                   onSelect={() => { 
                     dispatch(setSelectedProjectName(project.name));                    
                     dispatch(setSelectedProject(project));
+                    dispatch(setIsSaved(false))
                     setDropdownOpen(false);
                     // fetchSalesOrderData(project.sales_order);
                   }}

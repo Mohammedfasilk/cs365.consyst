@@ -26,7 +26,7 @@ import {
 import { Button } from "../UI/Button"
 import  {Input}  from "../UI/Input"
 import { ChevronDownIcon } from "lucide-react"
-import {setSelectedProjectName,setIsOpen} from '../../Redux/Slices/SelectedProject'
+import {setSelectedProjectName,setIsOpen, setIsSaved} from '../../Redux/Slices/SelectedProject'
 
 import { useState } from "react"
 import { useDispatch } from "react-redux"
@@ -131,6 +131,7 @@ export function DataTable({ columns, data , loading }) {
                           if (projectName) {
                             dispatch(setSelectedProjectName(projectName))
                             dispatch(setIsOpen(true))
+                            dispatch(setIsSaved(true))
                           }
                         }
                       }}
