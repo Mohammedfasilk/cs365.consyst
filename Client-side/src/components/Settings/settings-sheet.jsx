@@ -159,7 +159,7 @@ export function SettingsSheet() {
       // Get current list of users (or refetch if needed)
       const user = userList.find(u => u.email === userEmail);
       
-      if (user && user.name === "") {
+      if (user && user.name == "") {
         // If user exists and has no name, update it
         await axios.post(`${import.meta.env.VITE_CS365_URI}/api/user`, {
           email: userEmail,
