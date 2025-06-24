@@ -55,28 +55,33 @@ export default function GeneralSettings() {
   };
 
   const onSubmit = async (values) => {
-    try {
-      const { groupTarget, ...payload } = values;
+  try {
+    const { groupTarget, currentFyStartDate, ...rest } = values;
 
-      await axios.post(`${import.meta.env.VITE_CS365_URI}/api/settings`, {
-        groupTarget,
-        ...payload,
-      });
+    const payload = {
+      ...rest,
+      groupTarget,
+      currentFyStartDate: currentFyStartDate
+        ? dayjs(currentFyStartDate).format("YYYY-MM-DD") // ✅ convert to string safely
+        : null,
+    };
 
-      toast({
-        title: "Saved Successfully",
-        description: "Settings have been successfully saved.",
-        icon: <CircleCheckIcon className="mr-4" color="green" />,
-      });
-    } catch (error) {
-      toast({
-        title: "Save Failed",
-        description: "There was an error saving the settings.",
-        variant: "destructive",
-        icon: <CircleXIcon className="mr-4" color="red" />,
-      });
-    }
-  };
+    await axios.post(`${import.meta.env.VITE_CS365_URI}/api/settings`, payload);
+
+    toast({
+      title: "Saved Successfully",
+      description: "Settings have been successfully saved.",
+      icon: <CircleCheckIcon className="mr-4" color="green" />,
+    });
+  } catch (error) {
+    toast({
+      title: "Save Failed",
+      description: "There was an error saving the settings.",
+      variant: "destructive",
+      icon: <CircleXIcon className="mr-4" color="red" />,
+    });
+  }
+};
 
   useEffect(() => {
     async function fetchSettings() {

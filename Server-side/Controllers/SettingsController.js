@@ -3,17 +3,8 @@ const Settings = require("../Models/settingsModel");
 exports.saveSettings = async (req, res) => {
   try {
     const data = req.body;
-    console.log(data);
-
-    if (data.currentFyStartDate) {
-      const date = new Date(data.currentFyStartDate);
-
-      // Convert to local date parts (e.g. IST)
-      const yyyy = date.getFullYear();
-      const mm = String(date.getMonth() + 1).padStart(2, "0");
-      const dd = String(date.getDate()).padStart(2, "0");
-
-      data.currentFyStartDate = `${yyyy}-${mm}-${dd}`;
+    
+    if (data.currentFyStartDate) {      
     }
     const updated = await Settings.findOneAndUpdate({}, data, {
       upsert: true,
