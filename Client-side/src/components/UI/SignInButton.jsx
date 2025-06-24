@@ -60,7 +60,7 @@ function SignInButton() {
     console.error("Login failed:", error);  }
 };
  if(loading){
-  return <div><ScaleLoading size={50}/></div>
+  return <div><ScaleLoading size={60}/></div>
  }
   return (
     <div className="rounded-xl bg-[var(--card)] text-[var(card-foreground)] shadow w-[350px]">

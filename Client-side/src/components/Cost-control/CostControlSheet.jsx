@@ -9,7 +9,12 @@ import {
 import { Button } from "../UI/Button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../UI/Tabs";
 import { Label } from "../UI/Label";
-import { CircleCheckIcon, CircleXIcon, Plus, SquareChartGantt } from "lucide-react";
+import {
+  CircleCheckIcon,
+  CircleXIcon,
+  Plus,
+  SquareChartGantt,
+} from "lucide-react";
 import { MonthPickerComponent } from "../UI/MonthPickerComponent";
 import MonthlyBudgetTable from "./MonthlyBudgetTable";
 import ChooseCostControlProject from "./ChooseCostControlProject";
@@ -23,6 +28,7 @@ import {
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useToast } from "../../Hooks/use-toast";
+import { div } from "framer-motion/client";
 
 export function CostControlSheet() {
   const dispatch = useDispatch();
@@ -55,21 +61,10 @@ export function CostControlSheet() {
     }
   }, [selectedProjectName, selectedMonth]);
 
-
-
   const handleSubmit = async () => {
-    if(selectedMonth == ""){
-        setAlerMonthpick(true)
-        toast({
-          title: "Not Saved (Please select a month)",
-          description: "There was an error saving the monthly budget.",
-          variant: "destructive",
-          icon: <CircleXIcon className="mr-4" color="red" />,
-        });
-        return
-      }
+    
     try {
-      setAlerMonthpick(false)
+      setAlerMonthpick(false);
       const res = await axios.post(
         `${import.meta.env.VITE_CS365_URI}/api/cost-control/monthly-data`,
         { monthlyData: monthlydata, project_name: selectedProjectName }
@@ -78,7 +73,7 @@ export function CostControlSheet() {
       const data = res.data;
 
       dispatch(setSaved(!saved));
-      
+
       if (!data || data?.error) {
         toast({
           title: "Monthly Budget Not Saved",
@@ -106,7 +101,7 @@ export function CostControlSheet() {
           dispatch(setSelectedProjectName(""));
           dispatch(setSelectedMonth(""));
           setProject({});
-          setAlerMonthpick(false)
+          setAlerMonthpick(false);
         }
         dispatch(setIsOpen(value));
       }}
@@ -144,7 +139,9 @@ export function CostControlSheet() {
                   </Button>
                 </div>
 
-                <Label className="mt-4 block">Month <sup className="text-red-600">*</sup></Label>
+                <Label className="mt-4 block">
+                  Month <sup className="text-red-600">*</sup>
+                </Label>
 
                 <div className="mt-2 mb-6">
                   <MonthPickerComponent
@@ -160,17 +157,25 @@ export function CostControlSheet() {
                       }
                     }}
                   />
-                  {alertMonthpick ? <p className="ml-2 mt-2text-sm text-red-600">Please select a month</p> : null}
+                  {alertMonthpick ? (
+                    <p className="ml-2 mt-2text-sm text-red-600">
+                      Please select a month
+                    </p>
+                  ) : null}
                 </div>
 
                 <div className="budget-sheet mt-4">
-                  <MonthlyBudgetTable
-                    project={project}
-                    getData={(data) => {
-                      setMonthlyData(data);                      
-                    }}
-                    selectedMonth={selectedMonth}
-                  />
+                  {selectedMonth !== "" ? (
+                    <MonthlyBudgetTable
+                      project={project}
+                      getData={(data) => {
+                        setMonthlyData(data);
+                      }}
+                      selectedMonth={selectedMonth}
+                    />
+                  ) : (
+                     <div className="text-[var(--destructive)] text-xl w-full flex justify-center items-center h-[200px]">Please select a month</div>
+                  )}
                 </div>
               </TabsContent>
             </Tabs>
