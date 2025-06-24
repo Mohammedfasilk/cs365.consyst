@@ -115,8 +115,8 @@ export default function GeneralSettings() {
                         variant="outline"
                         className={cn("w-[240px] pl-3 text-left font-normal", !field.value && "text-muted-[var(--foreground)]")}
                       >
-                        {field.value && !isNaN(new Date(field.value))
-                          ? format(new Date(field.value), "PPP")
+                        {field.value && !isNaN(dayjs(field.value))
+                          ? format(dayjs(field.value), "PPP")
                           : <span>Pick a date</span>}
  
                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
