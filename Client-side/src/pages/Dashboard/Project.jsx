@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import CostControlBudgetTable from "../../components/Cost-control/CostControlReportTable";
 import LatestProjectionTable from "../../components/Project/LatestProjection";
 import { setChoosenProject } from "../../Redux/Slices/costControlsheet";
+import ScaleLoading from "../../components/UI/ScaleLoader";
 
 function Project() {
   const {choosenProject} = useSelector((state) => state.costControlSheet);
@@ -15,18 +16,20 @@ function Project() {
 
   useEffect(() => {
     return () => {
-      dispatch(setChoosenProject(''));
+      dispatch(setChoosenProject(''));      
     };
   }, [dispatch]);
 
   const [budget, setBudget] = useState({});
   const [monthWiseData, setMonthWiseData] = useState([]);
   const [latestProjection,setLatestProjection] = useState({})
+  const [loader,setLoader] = useState()
   const selectedProject = {
     project: choosenProject ,
   };
   const fetchCostcontrolReport = async () => {
     try {
+      setLoader(true)
       const res = await axios.post(
         `${import.meta.env.VITE_CS365_URI}/api/project-report`,
         selectedProject
@@ -73,6 +76,9 @@ function Project() {
 
     } catch (error) {
       console.error("Error fetching  projects:", error);
+      setLoader(false)
+    }finally{
+      setLoader(false)
     }
   };
 
@@ -100,6 +106,7 @@ function Project() {
           <ChooseProject />
         </div>
       </div>
+      {loader ? <div className="w-full h-[30vh] flex justify-center items-center"><ScaleLoading size={60}/></div> :
       <div className="flex budget-sheet mb-12 w-full overflow-x-auto">
         <div className="pointer-events-none">
             <CostControlBudgetTable project={budget} />
@@ -110,7 +117,7 @@ function Project() {
         <div className="pointer-events-none">
           <LatestProjectionTable project={latestProjection}/>
         </div>
-      </div>
+      </div>}
     </div>
    </section>
   );

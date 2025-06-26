@@ -116,6 +116,7 @@ const getRows = (
   });
 
   const createDataRow = (
+    label,
     currentValue,
     isEditable = true,
     isBold = false,
@@ -123,7 +124,7 @@ const getRows = (
     isPercent = false,
     isLastRow = false,
   ) => ({
-    rowId: 'latest-projection',
+    rowId: label,
     height: ROW_HEIGHT,
     cells: [
       isEditable
@@ -135,52 +136,52 @@ const getRows = (
 
   const purchaseOrderRows = [
     createSectionHeader("","#336699"),
-    createDataRow( purchaseOrderData.po_value,false),
-    createDataRow(purchaseOrderData.additional_po_value),
-    createDataRow(getTotalPoValue(project) ,false, true, "#336699"),
+    createDataRow("po_value",purchaseOrderData.po_value,false),
+    createDataRow("additional_po_value",purchaseOrderData.additional_po_value),
+    createDataRow("po_total",getTotalPoValue(project) ,false, true, "#336699"),
   ];
 
   const billingRows = [
     createSectionHeader("","#1e3a8a"),
-    createDataRow(billingData.invoice_supply),
-    createDataRow(billingData.invoice_service),
-    createDataRow(billingData.additional_invoice),
-    createDataRow(getBillingTotal(project),false, true, "#1e3a8a"),
+    createDataRow("invoice_supply",billingData.invoice_supply),
+    createDataRow("invoice_service",billingData.invoice_service),
+    createDataRow("additional_invoice",billingData.additional_invoice),
+    createDataRow("billing_total",getBillingTotal(project),false, true, "#1e3a8a"),
   ];
 
   const directExpensesRows = [
     createSectionHeader("", "#ea580c"),
-    createDataRow( directExpensesData.cogs),
-    createDataRow( directExpensesData.packing_and_forwarding),
-    createDataRow( directExpensesData.travel_expenses),
-    createDataRow( directExpensesData.travel_allowances),
-    createDataRow( directExpensesData.commissioning),
-    createDataRow( directExpensesData.programming_outsourced),
-    createDataRow( directExpensesData.installation_subcontract),
-    createDataRow( directExpensesData.extended_warranty_cost),
-    createDataRow( directExpensesData.miscellaneous_direct_expense),
-    createDataRow(getTotalDirectExpenses(project), false, true, "#ea580c",false,true),
+    createDataRow("cogs",directExpensesData.cogs),
+    createDataRow("packing_and_forwarding",directExpensesData.packing_and_forwarding),
+    createDataRow("travel_expenses",directExpensesData.travel_expenses),
+    createDataRow("travel_allowances",directExpensesData.travel_allowances),
+    createDataRow("commissioning",directExpensesData.commissioning),
+    createDataRow("programming_outsourced",directExpensesData.programming_outsourced),
+    createDataRow("installation_subcontract",directExpensesData.installation_subcontract),
+    createDataRow("extended_warranty_cost",directExpensesData.extended_warranty_cost),
+    createDataRow("miscellaneous_direct_expense",directExpensesData.miscellaneous_direct_expense),
+    createDataRow("total_direct_expenses",getTotalDirectExpenses(project), false, true, "#ea580c",false,true),
   ];
 
    const grossProfitRows = [
     createSectionHeader("", "#15803d"),
-    createDataRow(getGrossProfitAmount(project),false,false),
-    createDataRow(getGrossProfitPercent(project),false,false,true,true),
+    createDataRow("gross_amout",getGrossProfitAmount(project),false,false),
+    createDataRow("gross_percent",getGrossProfitPercent(project),false,false,true,true),
   ]
 
   const indirectExpensesRows = [
     createSectionHeader(""),
-    createDataRow(getInvestorProfitSharePercent(project),false,false,true,true),
-    createDataRow(getInvestorProfitShareAmount(project),),
-    createDataRow(getMiscellaneousIndirectExpense(project)),
-    createDataRow(getTotalIndirectExpenses(project), false, true,"#ea580c",false),
-    createDataRow(getTotalExpenses(project), false, true,"#ea580c",false),
+    createDataRow("invester_percent",getInvestorProfitSharePercent(project),false,false,true,true),
+    createDataRow("invester_amount",getInvestorProfitShareAmount(project),),
+    createDataRow("miscell_exp",getMiscellaneousIndirectExpense(project)),
+    createDataRow("total_indirect_exp",getTotalIndirectExpenses(project), false, true,"#ea580c",false),
+    createDataRow("total_exp",getTotalExpenses(project), false, true,"#ea580c",false),
   ];
 
 
   const netProfitRows = [
-    createDataRow(getNetProfitLoss(project), false, true, "#336699"),
-    createDataRow(getNetProfitLossPercent(project), false, true, "#336699",true),
+    createDataRow("net_profit_loss",getNetProfitLoss(project), false, true, "#336699"),
+    createDataRow("net_profit_loss_percent",getNetProfitLossPercent(project), false, true, "#336699",true),
   ];  
 
   return [headerRow1,headerRow2, ...purchaseOrderRows, ...billingRows, ...directExpensesRows, ...grossProfitRows ,...indirectExpensesRows,...netProfitRows];  
