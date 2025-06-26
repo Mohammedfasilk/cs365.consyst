@@ -18,6 +18,7 @@ const emailSignatureGlobal = require('./Routes/emailSignatureGlobalRoutes')
 const Signature= require('./Routes/SignatureRoute')
 const Project= require('./Routes/ProjectRoutes')
 const costControl = require('./Routes/costControlRoute')
+const projectReport = require('./Routes/projectReportRoute')
 
 //middlewares
 app.use(express.json())
@@ -37,6 +38,7 @@ app.use('/api/emailSignatureGlobal', emailSignatureGlobal);
 app.use('/api/signature', Signature);
 app.use('/api/projects',Project);
 app.use('/api/cost-control',costControl);
+app.use('/api/project-report',projectReport);
 
 
 const PORT = process.env.PORT || 3000;

@@ -77,17 +77,21 @@ export const noSideBorders = (cell) => ({
   },
 });
 
-export function headerCell(month, additionalClassNames = "") {
-  return nonEditable(
-    textCell(month, `flex text-lg font-bold ${additionalClassNames}`, {
-      background: "#336699",
-      color: "white",
-      border: {
-        bottom: { style: "none" },
-        left: { style: "none" },
-        right: { style: "none" },
-      },
-      overflow: "wrap",
-    })
-  );
+export function headerCell(month, additionalClassNames = "", colspan = 1,noColor= false , rowspan = false) {
+  return {
+    ...nonEditable(
+      textCell(month, `flex text-lg font-bold ${additionalClassNames}`, {
+        background:  noColor ? '' : "#336699",
+        color: "white",
+        border: {
+          bottom: { style: "" },
+          left: { style: "none" },
+          right: { style: "none" },
+        },
+        overflow: "wrap",
+      })
+    ),
+    colspan,
+    rowspan: rowspan ? 2 : 1
+  };
 }

@@ -114,7 +114,7 @@ const getNetProfitLoss = (billingData, directExpensesData) =>
 const getNetProfitLossPercent = (billingData, directExpensesData) => {
   const totalBilling = getBillingTotal(billingData);
   if (totalBilling === 0) return 0;
-  return Number(((getNetProfitLoss(billingData, directExpensesData) / totalBilling) * 100).toFixed(2));
+  return ((getNetProfitLoss(billingData, directExpensesData) / totalBilling)).toFixed(2);
 };
 
 const getRows = (purchaseOrderData,
@@ -366,3 +366,4 @@ useEffect(() => {
 }
 
 export default MonthlyBudgetTable;
+  

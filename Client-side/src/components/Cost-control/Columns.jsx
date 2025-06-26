@@ -110,6 +110,10 @@ export const columns = (fetchData)=> [
     enableHiding: false,
   },
   {
+    accessorKey: "project_name",
+    header: "Project",
+  },
+  {
     accessorKey: "month",
     header: "Month",
   },

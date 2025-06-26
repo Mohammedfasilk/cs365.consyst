@@ -46,26 +46,24 @@ const getDirectExpenses = (project) => {
 
 
 const getColumns = () => [
-  { columnId: "titles-column", width: 300 },
-  { columnId: "budget", width: 180 },
+  { columnId: "latest-projection", width: 150 },
 ];
 
 const headerRow1 = {
   rowId: "header1",
   height: HEADING_ROW_HEIGHT,
   cells: [
-    headerCell("Accounting Head", "justify-center rounded-tl",1,false,true),
-    headerCell("Budget (Pre-Kickoff)", "justify-center",1,false,true),
+    headerCell("Latest Projection", "justify-center",1,false,true),
   ],
 };
 const headerRow2 = {
   rowId: "header2",
   height: HEADING_ROW_HEIGHT,
   cells: [
-    headerCell("", "justify-center",1),
-    headerCell("", "justify-center",1),
+    headerCell("", "justify-center",1,false,true),
   ],
 };
+
 
 const getTotalPoValue = (project) => {
   return project.total_po_value || 0
@@ -114,12 +112,10 @@ const getRows = (
       nonEditable(
         bottomLine(textCell(title, "align-items-end text-lg text-center font-bold", { color }))
       ),
-      nonEditable(bottomLine(emptyTextCell)),
     ],
   });
 
   const createDataRow = (
-    label,
     currentValue,
     isEditable = true,
     isBold = false,
@@ -127,16 +123,9 @@ const getRows = (
     isPercent = false,
     isLastRow = false,
   ) => ({
-    rowId: label.toLowerCase().replace(/[^\w\s]/g, "").replace(/\s+/g, "-") ,
+    rowId: 'latest-projection',
     height: ROW_HEIGHT,
     cells: [
-      nonEditable(
-        textCell(
-          label,
-          "padding-left-lg" + (isBold ? " font-bold" : "") + (isLastRow ? " rounded-bl" : ""),
-          color ? { color } : {}
-        )
-      ),
       isEditable
         ? numberCell(currentValue, isLastRow ? " rounded-br" : "")
         : nonEditable(isPercent ? percentCell(currentValue, "disabled" + (isBold ? " font-bold" : "") + (isLastRow ? " rounded-br" : ""), color ? { color } : {})
@@ -145,57 +134,59 @@ const getRows = (
   });
 
   const purchaseOrderRows = [
-    createSectionHeader("Purchase Order", "#336699"),
-    createDataRow("PO Value", purchaseOrderData.po_value,false),
-    createDataRow("Additional PO Value", purchaseOrderData.additional_po_value),
-    createDataRow("PO Value (Total)", getTotalPoValue(project) ,false, true, "#336699"),
+    createSectionHeader("","#336699"),
+    createDataRow( purchaseOrderData.po_value,false),
+    createDataRow(purchaseOrderData.additional_po_value),
+    createDataRow(getTotalPoValue(project) ,false, true, "#336699"),
   ];
 
   const billingRows = [
-    createSectionHeader("Billing", "#1e3a8a"),
-    createDataRow("Invoice (Supply)", billingData.invoice_supply),
-    createDataRow("Invoice (Service)", billingData.invoice_service),
-    createDataRow("Additional Invoice", billingData.additional_invoice),
-    createDataRow("Billing (Total)",getBillingTotal(project),false, true, "#1e3a8a"),
+    createSectionHeader("","#1e3a8a"),
+    createDataRow(billingData.invoice_supply),
+    createDataRow(billingData.invoice_service),
+    createDataRow(billingData.additional_invoice),
+    createDataRow(getBillingTotal(project),false, true, "#1e3a8a"),
   ];
 
   const directExpensesRows = [
-    createSectionHeader("Direct Expenses", "#ea580c"),
-    createDataRow("CoGS", directExpensesData.cogs),
-    createDataRow("Packing & Forwarding", directExpensesData.packing_and_forwarding),
-    createDataRow("Travel Expenses", directExpensesData.travel_expenses),
-    createDataRow("Travel Allowances", directExpensesData.travel_allowances),
-    createDataRow("Commissioning", directExpensesData.commissioning),
-    createDataRow("Programming (Outsourced)", directExpensesData.programming_outsourced),
-    createDataRow("Installation (Sub-Contract)", directExpensesData.installation_subcontract),
-    createDataRow("Extended Warranty (Cost)", directExpensesData.extended_warranty_cost),
-    createDataRow("Miscellaneous (Direct Expense)", directExpensesData.miscellaneous_direct_expense),
-    createDataRow("Direct Expenses (Total)",getTotalDirectExpenses(project), false, true, "#ea580c",false,true),
+    createSectionHeader("", "#ea580c"),
+    createDataRow( directExpensesData.cogs),
+    createDataRow( directExpensesData.packing_and_forwarding),
+    createDataRow( directExpensesData.travel_expenses),
+    createDataRow( directExpensesData.travel_allowances),
+    createDataRow( directExpensesData.commissioning),
+    createDataRow( directExpensesData.programming_outsourced),
+    createDataRow( directExpensesData.installation_subcontract),
+    createDataRow( directExpensesData.extended_warranty_cost),
+    createDataRow( directExpensesData.miscellaneous_direct_expense),
+    createDataRow(getTotalDirectExpenses(project), false, true, "#ea580c",false,true),
   ];
+
    const grossProfitRows = [
-    createSectionHeader("Gross Profit", "#15803d"),
-    createDataRow("Gross Profit (Amount)",getGrossProfitAmount(project),false,false),
-    createDataRow("Gross Profit (Percent)",getGrossProfitPercent(project),false,false,true,true),
+    createSectionHeader("", "#15803d"),
+    createDataRow(getGrossProfitAmount(project),false,false),
+    createDataRow(getGrossProfitPercent(project),false,false,true,true),
   ]
+
   const indirectExpensesRows = [
-    createSectionHeader("Indirect Expenses", "#ea580c"),
-    createDataRow("Investor Profit Share (Percent)",getInvestorProfitSharePercent(project),false,false,true,true),
-    createDataRow("Investor Profit Share (Amount)", getInvestorProfitShareAmount(project),),
-    createDataRow("Miscellaneos (Indirect Expense)", getMiscellaneousIndirectExpense(project)),
-    createDataRow("Indirect Expenses (Total)",getTotalIndirectExpenses(project), false, true,"#ea580c",false),
-    createDataRow("Total Expenses",getTotalExpenses(project), false, true,"#ea580c",false),
+    createSectionHeader(""),
+    createDataRow(getInvestorProfitSharePercent(project),false,false,true,true),
+    createDataRow(getInvestorProfitShareAmount(project),),
+    createDataRow(getMiscellaneousIndirectExpense(project)),
+    createDataRow(getTotalIndirectExpenses(project), false, true,"#ea580c",false),
+    createDataRow(getTotalExpenses(project), false, true,"#ea580c",false),
   ];
 
 
   const netProfitRows = [
-    createDataRow("Net Profit/Loss",getNetProfitLoss(project), false, true, "#336699"),
-    createDataRow("Net Profit/Loss (Percent)",getNetProfitLossPercent(project), false, true, "#336699",true),
+    createDataRow(getNetProfitLoss(project), false, true, "#336699"),
+    createDataRow(getNetProfitLossPercent(project), false, true, "#336699",true),
   ];  
 
   return [headerRow1,headerRow2, ...purchaseOrderRows, ...billingRows, ...directExpensesRows, ...grossProfitRows ,...indirectExpensesRows,...netProfitRows];  
 };
 
-function CostControlBudgetTable({ project }) {
+function LatestProjectionTable({ project }) {
 
 
   const purchaseOrderData = getPurchaseOrderData(project)
@@ -216,5 +207,5 @@ function CostControlBudgetTable({ project }) {
   return <ReactGrid rows={rows} columns={columns} />;
 }
 
-export default CostControlBudgetTable;
+export default LatestProjectionTable;
   

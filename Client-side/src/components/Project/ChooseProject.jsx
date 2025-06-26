@@ -24,8 +24,8 @@ function ChooseProject() {
 
   const {choosenProject} = useSelector((state) => state.costControlSheet); 
   const {saved} = useSelector((state) => state.costControlSheet); 
-  
   const [projectList, setProjectList] = useState([]);
+
  
 const fetchData = async (search) => {
       try {
@@ -41,17 +41,18 @@ const fetchData = async (search) => {
     };
 
 useEffect(()=>{
+  dispatch(setChoosenProject(''))
   fetchData(search)
 },[search,saved])
 
   return (
     <Popover open={dropdownOpen} onOpenChange={setDropdownOpen}>
       <PopoverTrigger asChild>
-        <div className="text-left text-md text-gray-400 cursor-pointer  border-transparent hover:text-gray-600">
+        <div className="text-left text-md p-1 text-gray-800 cursor-pointer  border-transparent hover:text-gray-600">
           {choosenProject || "Choose a Project"}
         </div>
       </PopoverTrigger>
-      <PopoverContent className={`p-0 w-md`}>
+      <PopoverContent className={`p-0 w-lg`}>
         <Command>
           <CommandInput
             placeholder="Search with project name"

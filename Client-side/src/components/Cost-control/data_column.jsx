@@ -32,9 +32,8 @@ import { setIsOpen, setSelectedMonth, setSelectedProjectName } from "../../Redux
 // import { useProjectSheetStore } from "@/utils/zustandStore";
 
 
-export function DataTable({ data, columns , noFilter }) {
+export function DataTable({ data, columns }) {
   const dispatch = useDispatch()
-  const {choosenProject} = useSelector((state)=>state.costControlSheet)
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
   const [columnVisibility, setColumnVisibility] = useState({});
@@ -65,16 +64,15 @@ export function DataTable({ data, columns , noFilter }) {
   return (
     <div>
       <div className="flex items-center py-4">
-        { noFilter ? null :
         <Input
           placeholder="Filter project..."
-          value={table.getColumn("month")?.getFilterValue() ?? ""}
+          value={table.getColumn("project_name")?.getFilterValue() ?? ""}
           onChange={(event) =>
-            table.getColumn("month")?.setFilterValue(event.target.value)
+            table.getColumn("project_name")?.setFilterValue(event.target.value)
           }
           className="max-w-sm p-2 outline rounded"
         />
-        }
+        
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="ml-auto">
@@ -131,7 +129,7 @@ export function DataTable({ data, columns , noFilter }) {
                         if (cell.column.id !== "actions") {
                           dispatch(setIsOpen(true))
                           dispatch(setSelectedMonth(row.getValue("month")));
-                          dispatch(setSelectedProjectName(choosenProject));
+                          dispatch(setSelectedProjectName(row.getValue('project_name')));
                         }
                       }}
                     >
