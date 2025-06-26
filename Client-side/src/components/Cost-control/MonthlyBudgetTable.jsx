@@ -157,7 +157,7 @@ const getRows = (purchaseOrderData,
         : nonEditable(isPercent ? percentCell(currentValue, "disabled" + (isBold ? " font-bold" : "") + (isLastRow ? " rounded-br" : ""), color ? { color } : {})
         :numberCell(currentValue, "disabled" + (isBold ? " font-bold" : "") + (isLastRow ? " rounded-br" : ""), color ? { color } : {})),
       isEditable
-        ? numberCell(projectedValue, isLastRow ? " rounded-br" : "")
+        ? numberCell(projectedValue, isLastRow ? " rounded-br" : "" + projectedValue < currentValue ? " bg-red-500/70": "")
         : nonEditable(isPercent ? percentCell(projectedValue, "disabled" + (isBold ? " font-bold" : "") + (isLastRow ? " rounded-br" : ""), color ? { color } : {})
         :numberCell(projectedValue, "disabled" + (isBold ? " font-bold" : "") + (isLastRow ? " rounded-br" : ""), color ? { color } : {})),
     ],
