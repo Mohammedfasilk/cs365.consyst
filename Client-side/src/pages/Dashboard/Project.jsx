@@ -4,13 +4,21 @@ import { SquareChartGantt } from "lucide-react";
 import ChooseProject from "../../components/Project/ChooseProject";
 import MonthwiseTable from "../../components/Project/MonthwiseTable";
 import axios from "axios";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import CostControlBudgetTable from "../../components/Cost-control/CostControlReportTable";
 import LatestProjectionTable from "../../components/Project/LatestProjection";
+import { setChoosenProject } from "../../Redux/Slices/costControlsheet";
 
 function Project() {
   const {choosenProject} = useSelector((state) => state.costControlSheet);
-  
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    return () => {
+      dispatch(setChoosenProject(''));
+    };
+  }, [dispatch]);
+
   const [budget, setBudget] = useState({});
   const [monthWiseData, setMonthWiseData] = useState([]);
   const [latestProjection,setLatestProjection] = useState({})
@@ -96,8 +104,8 @@ function Project() {
         <div className="pointer-events-none">
             <CostControlBudgetTable project={budget} />
         </div>
-          {monthWiseData.map((months) => {
-          return <div className="mx-px pointer-events-none"><MonthwiseTable project={months} title={months?.month} /></div>
+          {monthWiseData.map((months,index) => {
+          return <div key={index} className="mx-px pointer-events-none"><MonthwiseTable project={months} title={months?.month} /></div>
         })}
         <div className="pointer-events-none">
           <LatestProjectionTable project={latestProjection}/>
