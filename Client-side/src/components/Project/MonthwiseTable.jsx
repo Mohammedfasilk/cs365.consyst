@@ -74,17 +74,20 @@ const getNetProfits = (project, type = "current") => {
   };
 };
 
-const getColumns = () => [
-  { columnId: "current", width: 150 },
-  { columnId: "projected", width: 150 },
-];
+const getColumns = (showProjected) => {
+  const columns = [{ columnId: "current", width: 150 }];
+  if (showProjected) {
+    columns.push({ columnId: "projected", width: 150 });
+  }
+  return columns;
+};
 
-const getHeaderRowsAndMergedCells = (title) => {
+const getHeaderRowsAndMergedCells = (title, showProjected) => {
   const headerRow1 = {
     rowId: "header1",
     height: HEADING_ROW_HEIGHT,
     cells: [
-      headerCell(title, "justify-center font-semibold", 2),
+      headerCell(title, "justify-center font-semibold", showProjected ? 2 : 1),
     ],
   };
 
@@ -93,7 +96,7 @@ const getHeaderRowsAndMergedCells = (title) => {
     height: HEADING_ROW_HEIGHT,
     cells: [
       headerCell("Current", "justify-center"),
-      headerCell("Projected", "justify-center"),
+      ...(showProjected ? [headerCell("Projected", "justify-center")] : []),
     ],
   };
 
@@ -101,7 +104,7 @@ const getHeaderRowsAndMergedCells = (title) => {
     {
       columnId: "current",
       rowId: "header1",
-      colspan: 2,
+      colspan: showProjected ? 2 : 1,
     },
   ];
 
@@ -110,7 +113,6 @@ const getHeaderRowsAndMergedCells = (title) => {
     mergedCells,
   };
 };
-
 const getTotalPoValue = (purchaseOrderData) =>
   purchaseOrderData.po_value + purchaseOrderData.additional_po_value;
 
@@ -148,97 +150,112 @@ const getRows = (
   projectedBillingData,
   projectedDirectExpensesData,
 projectedIndirentExpensesData,
-projectedNetProfitLoss) => {
-  const createSectionHeader = (title, color) => ({
+projectedNetProfitLoss,
+showProjected) => {
+  const createSectionHeader = (title, color) => {
+  const cells = [
+    nonEditable(
+      bottomLine(textCell(title, "align-items-end text-lg text-center font-bold", { color }))
+    ),
+  ];
+  if (showProjected) {
+    cells.push(nonEditable(textCell('',"bg-blue-500/8")));
+  }
+
+  return {
     rowId: title.toLowerCase().replace(/\s+/g, "-"),
     height: HEADING_ROW_HEIGHT,
-    cells: [
-      nonEditable(
-        bottomLine(textCell(title, "align-items-end text-lg text-center font-bold", { color }))
-      ),
-      nonEditable(bottomLine(emptyTextCell)),
-    ],
-  });
+    cells,
+  };
+};
 
-  const createDataRow = (
-    label,
-    currentValue,
+
+ const createDataRow = (
+  label,
+  currentValue,
   projectedValue,
-    isEditable = true,
-    isBold = false,
-    color,
-    isPercent = false,
-    isLastRow = false,
-  ) => ({
-    rowId: label.toLowerCase().replace(/[^\w\s]/g, "").replace(/\s+/g, "-") ,
+  isEditable = true,
+  isBold = false,
+  color,
+  isPercent = false,
+  isLastRow = false,
+  keySuffix = '',
+  showProjected = true
+) => {
+  const baseClass = "disabled" + (isBold ? " font-bold" : "") + (isLastRow ? " rounded-br" : "");
+  const currentCell = isEditable
+    ? numberCell(currentValue)
+    : nonEditable(isPercent ? percentCell(currentValue, baseClass, color ? { color } : {}) : numberCell(currentValue, baseClass, color ? { color } : {}));
+
+  const projectedCell = showProjected
+    ? (isEditable
+        ? numberCell(projectedValue,"bg-blue-500/8")
+        : nonEditable(isPercent ? percentCell(projectedValue,`bg-blue-500/8 ${baseClass}`, color ? { color } : {}) : numberCell(projectedValue,`bg-blue-500/8 ${baseClass}`, color ? { color } : {})))
+    : null;
+
+  return {
+    rowId: `${label.toLowerCase().replace(/[^\w\s]/g, "").replace(/\s+/g, "-")}-${keySuffix}`,
     height: ROW_HEIGHT,
-    cells: [
-      isEditable
-        ? numberCell(currentValue, isLastRow ? " rounded-br" : "")
-        : nonEditable(isPercent ? percentCell(currentValue, "disabled" + (isBold ? " font-bold" : "") + (isLastRow ? " rounded-br" : ""), color ? { color } : {})
-        :numberCell(currentValue, "disabled" + (isBold ? " font-bold" : "") + (isLastRow ? " rounded-br" : ""), color ? { color } : {})),
-      isEditable
-        ? numberCell(projectedValue, isLastRow ? " rounded-br" : "")
-        : nonEditable(isPercent ? percentCell(projectedValue, "disabled" + (isBold ? " font-bold" : "") + (isLastRow ? " rounded-br" : ""), color ? { color } : {})
-        :numberCell(projectedValue, "disabled" + (isBold ? " font-bold" : "") + (isLastRow ? " rounded-br" : ""), color ? { color } : {})),
-    ],
-  });
+    cells: projectedCell ? [currentCell, projectedCell] : [currentCell],
+  };
+};
 
   const purchaseOrderRows = [
-    createSectionHeader("", ""),
-    createDataRow("PO Value", purchaseOrderData.po_value,projectedPurchaseOrderData.po_value,false),
-    createDataRow("Additional PO Value", purchaseOrderData.additional_po_value,projectedPurchaseOrderData.additional_po_value),
-    createDataRow("PO Value (Total)", getTotalPoValue(purchaseOrderData),getTotalPoValue(projectedPurchaseOrderData),false, true, "#336699"),
-  ];
+  createSectionHeader("", ""),
+  createDataRow("PO Value", purchaseOrderData.po_value, projectedPurchaseOrderData.po_value, false, false, "", false, false, "po-value", showProjected),
+  createDataRow("Additional PO Value", purchaseOrderData.additional_po_value, projectedPurchaseOrderData.additional_po_value, true, false, "", false, false, "add-po", showProjected),
+  createDataRow("PO Value (Total)", getTotalPoValue(purchaseOrderData), getTotalPoValue(projectedPurchaseOrderData), false, true, "#336699", false, false, "po-total", showProjected),
+];
+
 
   const billingRows = [
-    createSectionHeader(""),
-    createDataRow("Invoice (Supply)", billingData.invoice_supply,projectedBillingData.invoice_supply),
-    createDataRow("Invoice (Service)", billingData.invoice_service,projectedBillingData.invoice_service),
-    createDataRow("Additional Invoice", billingData.additional_invoice,projectedBillingData.additional_invoice),
-    createDataRow("Billing (Total)", getBillingTotal(billingData),getBillingTotal(projectedBillingData),false, true, "#1e3a8a"),
-  ];
+  createSectionHeader(""),
+  createDataRow("Invoice (Supply)", billingData.invoice_supply, projectedBillingData.invoice_supply, true, false, undefined, false, false, "", showProjected),
+  createDataRow("Invoice (Service)", billingData.invoice_service, projectedBillingData.invoice_service, true, false, undefined, false, false, "", showProjected),
+  createDataRow("Additional Invoice", billingData.additional_invoice, projectedBillingData.additional_invoice, true, false, undefined, false, false, "", showProjected),
+  createDataRow("Billing (Total)", getBillingTotal(billingData), getBillingTotal(projectedBillingData), false, true, "#1e3a8a", false, false, "", showProjected),
+];
 
   const directExpensesRows = [
-    createSectionHeader(""),
-    createDataRow("", directExpensesData.cogs,projectedDirectExpensesData.cogs),
-    createDataRow("Packing & Forwarding", directExpensesData.packing_and_forwarding,projectedDirectExpensesData.packing_and_forwarding),
-    createDataRow("Travel Expenses", directExpensesData.travel_expenses,projectedDirectExpensesData.travel_expenses),
-    createDataRow("Travel Allowances", directExpensesData.travel_allowances,projectedDirectExpensesData.travel_allowances),
-    createDataRow("Commissioning", directExpensesData.commissioning,projectedDirectExpensesData.commissioning),
-    createDataRow("Programming (Outsourced)", directExpensesData.programming_outsourced,projectedDirectExpensesData.programming_outsourced),
-    createDataRow("Installation (Sub-Contract)", directExpensesData.installation_subcontract, projectedDirectExpensesData.installation_subcontract),
-    createDataRow("Extended Warranty (Cost)", directExpensesData.extended_warranty_cost, projectedDirectExpensesData.extended_warranty_cost),
-    createDataRow("Miscellaneous (Direct Expense)", directExpensesData.miscellaneous_direct_expense , projectedDirectExpensesData.miscellaneous_direct_expense),
-    createDataRow("Direct Expenses (Total)", getTotalDirectExpenses(directExpensesData),getTotalDirectExpenses(projectedDirectExpensesData), false, true, "#ea580c",false,true),
-  ];
+  createSectionHeader(""),
+  createDataRow("COGS", directExpensesData.cogs, projectedDirectExpensesData.cogs, true, false, undefined, false, false, "", showProjected),
+  createDataRow("Packing & Forwarding", directExpensesData.packing_and_forwarding, projectedDirectExpensesData.packing_and_forwarding, true, false, undefined, false, false, "", showProjected),
+  createDataRow("Travel Expenses", directExpensesData.travel_expenses, projectedDirectExpensesData.travel_expenses, true, false, undefined, false, false, "", showProjected),
+  createDataRow("Travel Allowances", directExpensesData.travel_allowances, projectedDirectExpensesData.travel_allowances, true, false, undefined, false, false, "", showProjected),
+  createDataRow("Commissioning", directExpensesData.commissioning, projectedDirectExpensesData.commissioning, true, false, undefined, false, false, "", showProjected),
+  createDataRow("Programming (Outsourced)", directExpensesData.programming_outsourced, projectedDirectExpensesData.programming_outsourced, true, false, undefined, false, false, "", showProjected),
+  createDataRow("Installation (Sub-Contract)", directExpensesData.installation_subcontract, projectedDirectExpensesData.installation_subcontract, true, false, undefined, false, false, "", showProjected),
+  createDataRow("Extended Warranty (Cost)", directExpensesData.extended_warranty_cost, projectedDirectExpensesData.extended_warranty_cost, true, false, undefined, false, false, "", showProjected),
+  createDataRow("Miscellaneous (Direct Expense)", directExpensesData.miscellaneous_direct_expense, projectedDirectExpensesData.miscellaneous_direct_expense, true, false, undefined, false, false, "", showProjected),
+  createDataRow("Direct Expenses (Total)", getTotalDirectExpenses(directExpensesData), getTotalDirectExpenses(projectedDirectExpensesData), false, true, "#ea580c", false, true, "", showProjected),
+];
+
 
   const grossProfitRows = [
-    createSectionHeader(""),
-    createDataRow("Gross Profit (Amount)",getGrossProfitAmount(billingData,directExpensesData),getGrossProfitAmount(projectedBillingData,projectedDirectExpensesData),false,false),
-    createDataRow("Gross Profit (Percent)",getGrossProfitPercent(billingData,directExpensesData) || 0,getGrossProfitPercent(projectedBillingData,projectedDirectExpensesData) || 0,false,false,true,true),
-
-  ]
+  createSectionHeader(""),
+  createDataRow("Gross Profit (Amount)", getGrossProfitAmount(billingData, directExpensesData), getGrossProfitAmount(projectedBillingData, projectedDirectExpensesData), false, false, undefined, false, false, "", showProjected),
+  createDataRow("Gross Profit (Percent)", getGrossProfitPercent(billingData, directExpensesData) || 0, getGrossProfitPercent(projectedBillingData, projectedDirectExpensesData) || 0, false, false, undefined, true, true, "", showProjected),
+];
   const indirectExpensesRows = [
-    createSectionHeader("", "#ea580c"),
-    createDataRow("Investor Profit Share (Percent)",indirectExpensesData.investor_profit_share_percent,projectedIndirentExpensesData.investor_profit_share_percent,false,false,true,true),
-    createDataRow("Investor Profit Share (Amount)",indirectExpensesData.investor_profit_share_amount,projectedIndirentExpensesData.investor_profit_share_amount,),
-    createDataRow("Miscellaneos (Indirect Expense)",indirectExpensesData.miscellaneous_indirect_expense,projectedIndirentExpensesData.miscellaneous_indirect_expense),
-    createDataRow("Indirect Expenses (Total)",indirectExpensesData.total_indirect_expenses,projectedIndirentExpensesData.total_indirect_expenses, false, true,"#ea580c",false),
-    createDataRow("Total Expenses",indirectExpensesData.total_expenses,projectedIndirentExpensesData.total_expenses, false, true,"#ea580c",false),
-  ];
+  createSectionHeader("", "#ea580c"),
+  createDataRow("Investor Profit Share (Percent)", indirectExpensesData.investor_profit_share_percent, projectedIndirentExpensesData.investor_profit_share_percent, false, false, undefined, true, true, "", showProjected),
+  createDataRow("Investor Profit Share (Amount)", indirectExpensesData.investor_profit_share_amount, projectedIndirentExpensesData.investor_profit_share_amount, true, false, undefined, false, false, "", showProjected),
+  createDataRow("Miscellaneous (Indirect Expense)", indirectExpensesData.miscellaneous_indirect_expense, projectedIndirentExpensesData.miscellaneous_indirect_expense, true, false, undefined, false, false, "", showProjected),
+  createDataRow("Indirect Expenses (Total)", indirectExpensesData.total_indirect_expenses, projectedIndirentExpensesData.total_indirect_expenses, false, true, "#ea580c", false, false, "", showProjected),
+  createDataRow("Total Expenses", indirectExpensesData.total_expenses, projectedIndirentExpensesData.total_expenses, false, true, "#ea580c", false, false, "", showProjected),
+];
 
 
-  const netProfitRows = [
-    createDataRow("Net Profit/Loss",NetProfitLoss.net_profit_loss,projectedNetProfitLoss.net_profit_loss, false, true, "#336699"),
-    createDataRow("Net Profit/Loss (Percent)",NetProfitLoss.net_profit_loss_percent,projectedNetProfitLoss.net_profit_loss_percent, false, true, "#336699",true),
-  ];  
+ const netProfitRows = [
+  createDataRow("Net Profit/Loss", NetProfitLoss.net_profit_loss, projectedNetProfitLoss.net_profit_loss, false, true, "#336699", false, false, "", showProjected),
+  createDataRow("Net Profit/Loss (Percent)", NetProfitLoss.net_profit_loss_percent, projectedNetProfitLoss.net_profit_loss_percent, false, true, "#336699", true, false, "", showProjected),
+];
 
 
   return [...headerRows, ...purchaseOrderRows, ...billingRows, ...directExpensesRows, ...grossProfitRows,...indirectExpensesRows,...netProfitRows];    //...netProfitRows
 };
 
-function MonthwiseTable({ project, title }) {
+function MonthwiseTable({ project, title ,showProjected }) {
   // Current data
   const purchaseOrderData =getPurchaseOrderData(project)
   const billingData = getBillingData(project);
@@ -262,7 +279,7 @@ function MonthwiseTable({ project, title }) {
   const projectedNetProfitLoss = getNetProfits(project, "projected");
 
   // Header rows with merged cells
-  const { headerRows, mergedCells } = getHeaderRowsAndMergedCells(title);
+  const { headerRows, mergedCells } = getHeaderRowsAndMergedCells(title,showProjected);
 
   const dataRows = getRows(
     headerRows,
@@ -275,11 +292,14 @@ function MonthwiseTable({ project, title }) {
     projectedBillingData,
     projectedDirectExpensesData,
     projectedIndirentExpensesData,
-    projectedNetProfitLoss
+    projectedNetProfitLoss,
+    showProjected,
   );
 
   const rows = [ ...dataRows];
-  const columns = getColumns();
+  const columns = getColumns(showProjected);
+  console.log(columns);
+  
 
   return (
     <ReactGrid

@@ -9,27 +9,28 @@ import CostControlBudgetTable from "../../components/Cost-control/CostControlRep
 import LatestProjectionTable from "../../components/Project/LatestProjection";
 import { setChoosenProject } from "../../Redux/Slices/costControlsheet";
 import ScaleLoading from "../../components/UI/ScaleLoader";
+import { Checkbox } from "../../components/UI/Checkbox";
 
 function Project() {
-  const {choosenProject} = useSelector((state) => state.costControlSheet);
+  const { choosenProject } = useSelector((state) => state.costControlSheet);
   const dispatch = useDispatch();
 
   useEffect(() => {
     return () => {
-      dispatch(setChoosenProject(''));      
+      dispatch(setChoosenProject(""));
     };
   }, [dispatch]);
-
+  const [checked, setChecked] = useState(true);
   const [budget, setBudget] = useState({});
   const [monthWiseData, setMonthWiseData] = useState([]);
-  const [latestProjection,setLatestProjection] = useState({})
-  const [loader,setLoader] = useState()
+  const [latestProjection, setLatestProjection] = useState({});
+  const [loader, setLoader] = useState();
   const selectedProject = {
-    project: choosenProject ,
+    project: choosenProject,
   };
   const fetchCostcontrolReport = async () => {
     try {
-      setLoader(true)
+      setLoader(true);
       const res = await axios.post(
         `${import.meta.env.VITE_CS365_URI}/api/project-report`,
         selectedProject
@@ -71,55 +72,81 @@ function Project() {
 
       setMonthWiseData(sortedMonthlyCostControl);
       setLatestProjection(sortedMonthlyCostControl.at(-1).projected || {});
-
-      
-
     } catch (error) {
       console.error("Error fetching  projects:", error);
-      setLoader(false)
-    }finally{
-      setLoader(false)
+      setLoader(false);
+    } finally {
+      setLoader(false);
     }
   };
 
   useEffect(() => {
     fetchCostcontrolReport();
-  },[choosenProject]);
+  }, [choosenProject]);
 
   return (
-   <section className="w-screen">
-     <div className="ml-20 mt-16 mx-8">
-      <div className="mb-16">
-        <h1 className="text-2xl font-bold">Project Report</h1>
+    <section className="w-screen">
+      <div className="ml-20 mt-16 mx-8">
+        <div className="mb-16">
+          <h1 className="text-2xl font-bold">Project Report</h1>
+        </div>
+        <Tabs defaultValue="project-details" className="mb-4">
+          <TabsList>
+            <TabsTrigger value="project-details">
+              <SquareChartGantt className="mr-2 h-4 w-4" />
+              Cost Control Report
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+        <h1 className="mb-6">Month-Wise Project Cost Control Report</h1>
+        <div className="flex mb-8 justify-between items-center">
+          <div className="border w-lg p-1 rounded hover:bg-gray-100">
+            <ChooseProject />
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              checked={checked}
+              onCheckedChange={(value) => {
+                setChecked(value);
+                console.log(checked);
+              }}
+            />{" "}
+            <span>Show Projected</span>
+          </div>
+        </div>
+        {choosenProject == "" ? (
+          <div className="w-full h-[30vh] flex justify-center items-center border border-[var(--secondary)] italic rounded text-[var(--secondary)]">
+            No Data Found
+          </div>
+        ) : loader ? (
+          <div className="w-full h-[30vh] flex justify-center items-center">
+            <ScaleLoading size={60} />
+          </div>
+        ) : (
+          <div className="flex budget-sheet mb-12 w-full">
+            <div className="pointer-events-none">
+              <CostControlBudgetTable project={budget} />
+            </div>
+            <div className="flex overflow-x-scroll" style={{scrollbarWidth:"thin"}}>
+              {monthWiseData.map((months, index) => {
+              return (
+                <div key={index} className="mx-px pointer-events-none">
+                  <MonthwiseTable
+                    project={months}
+                    title={months?.month}
+                    showProjected={checked}
+                  />
+                </div>
+              );
+            })}
+            <div className="pointer-events-none">
+              <LatestProjectionTable project={latestProjection} />
+            </div>
+            </div>
+          </div>
+        )}
       </div>
-      <Tabs defaultValue="project-details" className="mb-4">
-        <TabsList>
-          <TabsTrigger value="project-details">
-            <SquareChartGantt className="mr-2 h-4 w-4" />
-            Cost Control Report
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
-      <h1 className="mb-6">Month-Wise Project Cost Control Report</h1>
-      <div className="flex mb-8">
-        <div className="border w-lg p-1 rounded hover:bg-gray-100">
-          <ChooseProject />
-        </div>
-      </div>
-      {loader ? <div className="w-full h-[30vh] flex justify-center items-center"><ScaleLoading size={60}/></div> :
-      <div className="flex budget-sheet mb-12 w-full overflow-x-auto">
-        <div className="pointer-events-none">
-            <CostControlBudgetTable project={budget} />
-        </div>
-          {monthWiseData.map((months,index) => {
-          return <div key={index} className="mx-px pointer-events-none"><MonthwiseTable project={months} title={months?.month} /></div>
-        })}
-        <div className="pointer-events-none">
-          <LatestProjectionTable project={latestProjection}/>
-        </div>
-      </div>}
-    </div>
-   </section>
+    </section>
   );
 }
 
