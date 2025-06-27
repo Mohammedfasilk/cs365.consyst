@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { LineChart } from '@mui/x-charts/LineChart';
 import { FormControlLabel, Checkbox, Box } from '@mui/material';
+import { lineElementClasses } from '@mui/x-charts';
 
 const margin = { right: 24 };
 
 const SERIES_CONFIG = [
+  { key: 'budget_billing_total', label: 'Budget Billing' },
+  { key: 'budget_net_profit_loss', label: 'Budget Net P/L' },
   { key: 'billing_total', label: 'Billing' },
   { key: 'total_direct_expenses', label: 'Direct Exps' },
   { key: 'total_indirect_expenses', label: 'Indirect Exps' },
@@ -24,13 +27,14 @@ export default function MonthlyLineChart({ data }) {
   const activeSeries = SERIES_CONFIG
     .filter((s) => visibleSeries[s.key])
     .map((s) => ({
-      curve: "linear",
+      curve: 'linear',
       data: data?.[s.key] || [],
-      label: s.label
+      label: s.label,
+      id: s.key
     }));
 
   return (
-    <Box display="flex" alignItems='center'>
+    <Box display="flex" alignItems="center">
       <Box display="flex" flexDirection="column" gap={1}>
         {SERIES_CONFIG.map((s) => (
           <FormControlLabel
@@ -39,7 +43,7 @@ export default function MonthlyLineChart({ data }) {
               <Checkbox
                 checked={visibleSeries[s.key]}
                 onChange={() => handleToggle(s.key)}
-                size='small'
+                size="small"
               />
             }
             label={<span style={{ fontSize: '0.8rem' }}>{s.label}</span>}
@@ -47,14 +51,21 @@ export default function MonthlyLineChart({ data }) {
         ))}
       </Box>
 
-      {/* Chart */}
-      <LineChart
-        height={300}
-        series={activeSeries}
-        xAxis={[{ scaleType: 'point', data: data?.month || [] }]}
-        yAxis={[{ width: 100 }]}
-        margin={margin}
-      />
+   <LineChart
+  height={300}
+  series={activeSeries}
+  xAxis={[{ scaleType: 'point', data: data?.month || [] }]}
+  yAxis={[{ width: 100 }]}
+  margin={margin}
+  sx={{
+  '& .MuiLineElement-series-budget_billing_total': {
+    strokeDasharray: '5 5',
+  },
+  '& .MuiLineElement-series-budget_net_profit_loss': {
+    strokeDasharray: '5 5',
+  },
+}}
+/>
     </Box>
   );
 }

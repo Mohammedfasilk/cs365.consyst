@@ -93,7 +93,14 @@ function Project() {
         net_profit_loss: sortedMonthlyCostControl.map(
           (entry) => entry.current.net_profit_loss
         ),
+        budget_billing_total: sortedMonthlyCostControl.map(
+          ()=> project.budget.billing_total
+        ),
+        budget_net_profit_loss: sortedMonthlyCostControl.map(
+          ()=> project.budget.net_profit_loss
+        )
       };
+      
       setChartData(chartValues);
     } catch (error) {
       console.error("Error fetching  projects:", error);
