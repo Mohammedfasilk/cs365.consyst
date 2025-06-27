@@ -6,8 +6,8 @@ import { lineElementClasses } from '@mui/x-charts';
 const margin = { right: 24 };
 
 const SERIES_CONFIG = [
-  { key: 'budget_billing_total', label: 'Budget Billing' },
-  { key: 'budget_net_profit_loss', label: 'Budget Net P/L' },
+  { key: 'budget_billing_total', label: 'Budget (Billing)' },
+  { key: 'budget_net_profit_loss', label: 'Budget (Net P/L)' },
   { key: 'billing_total', label: 'Billing' },
   { key: 'total_direct_expenses', label: 'Direct Exps' },
   { key: 'total_indirect_expenses', label: 'Indirect Exps' },
@@ -68,7 +68,7 @@ export default function MonthlyLineChart({ data }) {
     strokeDasharray: '5 5',
   },
   '& .MuiLineElement-series-budget_net_profit_loss': {
-    strokeDasharray: '5 5',
+    strokeDasharray: '10 10',
   },
 }}
 />
