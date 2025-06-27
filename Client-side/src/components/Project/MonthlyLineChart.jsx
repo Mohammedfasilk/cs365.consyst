@@ -36,19 +36,25 @@ export default function MonthlyLineChart({ data }) {
   return (
     <Box display="flex" alignItems="center">
       <Box display="flex" flexDirection="column" gap={1}>
-        {SERIES_CONFIG.map((s) => (
-          <FormControlLabel
-            key={s.key}
-            control={
-              <Checkbox
-                checked={visibleSeries[s.key]}
-                onChange={() => handleToggle(s.key)}
-                size="small"
-              />
-            }
-            label={<span style={{ fontSize: '0.8rem' }}>{s.label}</span>}
-          />
-        ))}
+        {SERIES_CONFIG
+          .filter(
+            (s) =>
+              s.key !== 'budget_billing_total' &&
+              s.key !== 'budget_net_profit_loss'
+          )
+          .map((s) => (
+            <FormControlLabel
+              key={s.key}
+              control={
+                <Checkbox
+                  checked={visibleSeries[s.key]}
+                  onChange={() => handleToggle(s.key)}
+                  size="small"
+                />
+              }
+              label={<span style={{ fontSize: '0.8rem' }}>{s.label}</span>}
+            />
+          ))}
       </Box>
 
    <LineChart
