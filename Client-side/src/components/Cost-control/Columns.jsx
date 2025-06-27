@@ -60,7 +60,7 @@ const Actions = ({ row , onDelete}) => {
                 try {
                   await axios.post(
                     `${import.meta.env.VITE_CS365_URI}/api/cost-control/monthly-budget/delete`,
-                    {month:month,project_name:choosenProject}
+                    {month:month,project_name:row.getValue('project_name')}
                   );
                   onDelete();
                   dispatch(setSaved(!saved));

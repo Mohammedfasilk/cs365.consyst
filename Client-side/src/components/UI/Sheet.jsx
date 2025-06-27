@@ -40,6 +40,7 @@ const SheetContent = React.forwardRef(({ side = "right", className, children, ..
     <SheetOverlay />
     <SheetPrimitive.Content
       ref={ref}
+      onEscapeKeyDown={(e) => e.preventDefault()}
       className={cn(getSheetSideClasses(side), className)}
       {...props}
     >
