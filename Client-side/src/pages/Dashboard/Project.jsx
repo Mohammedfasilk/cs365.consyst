@@ -11,6 +11,7 @@ import { setChoosenProject } from "../../Redux/Slices/costControlsheet";
 import ScaleLoading from "../../components/UI/ScaleLoader";
 import { Checkbox } from "../../components/UI/Checkbox";
 import MonthlyLineChart from "../../components/Project/MonthlyLineChart";
+import { Card, CardHeader } from "../../components/UI/Card";
 
 function Project() {
   const { choosenProject } = useSelector((state) => state.costControlSheet);
@@ -103,9 +104,11 @@ function Project() {
         <div className="mb-16">
           <h1 className="text-2xl font-bold">Project Report</h1>
         </div>
-        <div>
+        <Card className='px-5'>
+          <CardHeader className="font-bold text-lg text-center">Monthly Chart</CardHeader>
           <MonthlyLineChart data={chartData}/>
-        </div>
+        </Card>
+          
         <Tabs defaultValue="project-details" className="mb-4">
           <TabsList>
             <TabsTrigger value="project-details">
