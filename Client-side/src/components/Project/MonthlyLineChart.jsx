@@ -24,6 +24,7 @@ export default function MonthlyLineChart({ data }) {
   const activeSeries = SERIES_CONFIG
     .filter((s) => visibleSeries[s.key])
     .map((s) => ({
+      curve: "linear",
       data: data?.[s.key] || [],
       label: s.label
     }));
