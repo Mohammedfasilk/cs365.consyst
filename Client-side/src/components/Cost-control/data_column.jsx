@@ -24,37 +24,46 @@ import {
 } from "../UI/Dropdown-menu";
 
 import { Button } from "../UI/Button";
-import {Input} from "../UI/Input";
+import { Input } from "../UI/Input";
 import { ChevronDownIcon } from "lucide-react";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setIsOpen, setSelectedMonth, setSelectedProjectName } from "../../Redux/Slices/costControlsheet";
+import {
+  setIsOpen,
+  setSelectedMonth,
+  setSelectedProjectName,
+} from "../../Redux/Slices/costControlsheet";
 // import { useProjectSheetStore } from "@/utils/zustandStore";
 
-
 export function DataTable({ data, columns }) {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
   const [columnVisibility, setColumnVisibility] = useState({});
   const [rowSelection, setRowSelection] = useState({});
+  const [globalFilter, setGlobalFilter] = useState("");
 
   const table = useReactTable({
     data,
     columns,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
     state: {
       sorting,
       columnFilters,
       columnVisibility,
       rowSelection,
+      globalFilter, // ← Add this
+    },
+    onGlobalFilterChange: setGlobalFilter,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getGlobalRowModel: getCoreRowModel(),
+    globalFilterFn: (row, columnId, filterValue) => {
+      const name = row.getValue("project_name")?.toLowerCase() ?? "";
+      const desc = row.getValue("project_description")?.toLowerCase() ?? "";
+      const search = filterValue.toLowerCase();
+      return name.includes(search) || desc.includes(search);
     },
   });
 
@@ -65,14 +74,12 @@ export function DataTable({ data, columns }) {
     <div>
       <div className="flex items-center py-4">
         <Input
-          placeholder="Filter project..."
-          value={table.getColumn("project_name")?.getFilterValue() ?? ""}
-          onChange={(event) =>
-            table.getColumn("project_name")?.setFilterValue(event.target.value)
-          }
+          placeholder="Search projects..."
+          value={globalFilter}
+          onChange={(e) => setGlobalFilter(e.target.value)}
           className="max-w-sm p-2 outline rounded"
         />
-        
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="ml-auto">
@@ -127,9 +134,11 @@ export function DataTable({ data, columns }) {
                       key={cell.id}
                       onClick={() => {
                         if (cell.column.id !== "actions") {
-                          dispatch(setIsOpen(true))
+                          dispatch(setIsOpen(true));
                           dispatch(setSelectedMonth(row.getValue("month")));
-                          dispatch(setSelectedProjectName(row.getValue('project_name')));
+                          dispatch(
+                            setSelectedProjectName(row.getValue("project_name"))
+                          );
                         }
                       }}
                     >

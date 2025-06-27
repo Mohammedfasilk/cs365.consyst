@@ -118,6 +118,10 @@ export const columns = (fetchData)=> [
     header: "Month",
   },
   {
+    accessorKey: "project_description",
+    header: "Project Description",
+  },
+  {
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => (
