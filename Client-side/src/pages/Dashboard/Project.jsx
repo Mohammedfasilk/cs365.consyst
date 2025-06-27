@@ -104,10 +104,7 @@ function Project() {
         <div className="mb-16">
           <h1 className="text-2xl font-bold">Project Report</h1>
         </div>
-        <Card className='px-5'>
-          <CardHeader className="font-bold text-lg text-center">Monthly Chart</CardHeader>
-          <MonthlyLineChart data={chartData}/>
-        </Card>
+        
           
         <Tabs defaultValue="project-details" className="mb-4">
           <TabsList>
@@ -133,10 +130,16 @@ function Project() {
             <span>Show Projected</span>
           </div>
         </div>
+
+        <Card className='px-5 mb-5'>
+          <CardHeader className="text-center font-bold text-lg">Monthly Chart</CardHeader>
+          <MonthlyLineChart data={chartData}/>
+        </Card>
         {choosenProject == "" ? (
-          <div className="w-full h-[30vh] flex justify-center items-center border border-[var(--secondary)] italic rounded text-[var(--secondary)]">
-            No Data Found
-          </div>
+          null
+          // <div className="w-full h-[30vh] flex justify-center items-center border border-[var(--secondary)] italic rounded text-[var(--secondary)]">
+          //   No Data Found
+          // </div>
         ) : loader ? (
           <div className="w-full h-[30vh] flex justify-center items-center">
             <ScaleLoading size={60} />
