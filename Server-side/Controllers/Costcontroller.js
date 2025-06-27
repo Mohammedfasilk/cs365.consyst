@@ -153,6 +153,7 @@ exports.getAllMonthlyBudget = async (req, res) => {
         $project: {
           _id: 0,
           project_name: 1,
+          project_description:1,
           monthly_cost_control: {
             $map: {
               input: "$monthly_cost_control",
@@ -165,6 +166,7 @@ exports.getAllMonthlyBudget = async (req, res) => {
     ]);
     
     res.status(200).json(projects);
+    
   } catch (err) {
     console.error("Error fetching monthly budget data:", err);
     res.status(500).json({ error: 'Failed to get monthly budget data' });
