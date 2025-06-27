@@ -55,7 +55,7 @@ const headerRow1 = {
   height: HEADING_ROW_HEIGHT,
   cells: [
     headerCell("Accounting Head", "justify-center rounded-tl",1,false,true),
-    headerCell("Budget (Pre-Kickoff)", "justify-center",1,false,true),
+    headerCell("Budget", "justify-center",1,false,true),
   ],
 };
 const headerRow2 = {

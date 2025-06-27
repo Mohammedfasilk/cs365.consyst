@@ -60,7 +60,7 @@ const headerRow2 = {
   rowId: "header2",
   height: HEADING_ROW_HEIGHT,
   cells: [
-    headerCell("", "justify-center",1,false,true),
+    // headerCell("", "justify-center",2,false,true),
   ],
 };
 
@@ -110,7 +110,7 @@ const getRows = (
     height: HEADING_ROW_HEIGHT,
     cells: [
       nonEditable(
-        bottomLine(textCell(title, "align-items-end text-lg text-center font-bold", { color }))
+        bottomLine(textCell(title, "align-items-end text-lg text-center font-bold bg-blue-50", { color }))
       ),
     ],
   });
@@ -128,9 +128,9 @@ const getRows = (
     height: ROW_HEIGHT,
     cells: [
       isEditable
-        ? numberCell(currentValue, isLastRow ? " rounded-br" : "")
-        : nonEditable(isPercent ? percentCell(currentValue, "disabled" + (isBold ? " font-bold" : "") + (isLastRow ? " rounded-br" : ""), color ? { color } : {})
-        :numberCell(currentValue, "disabled" + (isBold ? " font-bold" : "") + (isLastRow ? " rounded-br" : ""), color ? { color } : {})),
+        ? numberCell(currentValue, isLastRow ? " rounded-br" : "" + " bg-blue-50")
+        : nonEditable(isPercent ? percentCell(currentValue, "disabled bg-blue-50" + (isBold ? " font-bold" : "") + (isLastRow ? " rounded-br " : "" ), color ? { color } : {})
+        :numberCell(currentValue, "disabled bg-blue-50" + (isBold ? " font-bold" : "") + (isLastRow ? " rounded-br" : ""), color ? { color } : {})),
     ],
   });
 

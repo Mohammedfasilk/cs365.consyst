@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { LineChart } from '@mui/x-charts/LineChart';
 import { FormControlLabel, Checkbox, Box } from '@mui/material';
-import { lineElementClasses } from '@mui/x-charts';
 
 const margin = { right: 24 };
 
