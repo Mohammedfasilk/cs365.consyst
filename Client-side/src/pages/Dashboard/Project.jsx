@@ -22,7 +22,8 @@ function Project() {
       dispatch(setChoosenProject(""));
     };
   }, [dispatch]);
-  const [checked, setChecked] = useState(true);
+  const [showCurrent, setShowCurrent] = useState(true);
+  const [ShowProjected, setShowProjected] = useState(true);
   const [budget, setBudget] = useState({});
   const [monthWiseData, setMonthWiseData] = useState([]);
   const [latestProjection, setLatestProjection] = useState({});
@@ -153,16 +154,26 @@ function Project() {
           </div>
         ) : (
           <div className="flex-col">
+            <div className="flex space-x-5">
+              <div className="flex items-center space-x-2 py-5">
+            <Checkbox
+              checked={showCurrent}
+              onCheckedChange={(value) => {
+                setShowCurrent(value);
+              }}
+            />
+            <span>Current</span>
+          </div>
             <div className="flex items-center space-x-2 py-5">
             <Checkbox
-              checked={checked}
+              checked={ShowProjected}
               onCheckedChange={(value) => {
-                setChecked(value);
-                console.log(checked);
+                setShowProjected(value);
               }}
-            />{" "}
-            <span>Show Projected</span>
+            />
+            <span>Projection</span>
           </div>
+            </div>
           <div className="flex budget-sheet mb-12 w-full">
             <div className="pointer-events-none">
               <CostControlBudgetTable project={budget} />
@@ -171,17 +182,22 @@ function Project() {
               className="flex overflow-x-scroll"
               style={{ scrollbarWidth: "thin" }}
             >
-              {monthWiseData.map((months, index) => {
+              
+              {
+              showCurrent || ShowProjected ?
+              monthWiseData.map((months, index) => {
                 return (
                   <div key={index} className="mx-px pointer-events-none">
                     <MonthwiseTable
                       project={months}
                       title={months?.month}
-                      showProjected={checked}
+                      showProjected={ShowProjected}
+                      showCurrent={showCurrent}
+                      budget={budget}
                     />
                   </div>
                 );
-              })}
+              }) : null}
               <div className="pointer-events-none">
                 <LatestProjectionTable project={latestProjection} />
               </div>

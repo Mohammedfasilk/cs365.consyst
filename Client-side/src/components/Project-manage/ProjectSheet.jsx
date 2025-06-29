@@ -271,7 +271,7 @@ const ProjectSheet = ({ fetchData }) => {
                     description:
                       "Please save the project before accessing this tab.",
                     variant: "destructive",
-                    icon: <CircleXIcon className="mr-4" color="red" />,
+                    icon: <CircleXIcon className="mr-4" color="orange" />,
                   });
                   return;
                 }
