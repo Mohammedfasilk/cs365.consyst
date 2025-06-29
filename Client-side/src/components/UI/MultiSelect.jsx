@@ -151,16 +151,16 @@ export const MultiSelect = React.forwardRef((props, ref) => {
                 })}
                 {selectedValues.length > maxCount && (
                   <Badge
-                    className={cn(
-                      "bg-[var(--transparent)] text-[var(--foreground)] border-[var(--foreground)]/1 hover:bg-[var(--transparent)]",
-                      isAnimating ? "animate-bounce" : "",
-                      multiSelectVariants({ variant })
-                    )}
+                     className={cn(
+                        isAnimating ? "animate-bounce" : "",
+                        multiSelectVariants({ variant }),
+                        "bg-gray-300 text-gray-800"
+                      )}
                     style={{ animationDuration: `${animation}s` }}
                   >
                     {`+ ${selectedValues.length - maxCount} more`}
                     <XCircle
-                      className="ml-2 h-4 w-4 cursor-pointer bg-amber-400"
+                      className="ml-2 h-4 w-4 cursor-pointer text-[var(--foreground)]"
                       onClick={(event) => {
                         event.stopPropagation();
                         clearExtraOptions();
