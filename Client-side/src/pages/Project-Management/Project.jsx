@@ -4,8 +4,11 @@ import { DataTable } from "../../components/Project-manage/DataTable";
 import { columns } from "../../components/Project-manage/Columns";
 import ProjectSheet from "../../components/Project-manage/ProjectSheet";
 import axios from 'axios'
+import { useAuthRedirect } from "../../Hooks/useAuthRoute";
 
 function Project() {
+
+  useAuthRedirect();
   const [loading,setLoading] = useState()
   const [data,setData] = useState({})
 

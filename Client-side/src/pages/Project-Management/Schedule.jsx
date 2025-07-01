@@ -1,14 +1,17 @@
 import React from 'react'
-// import { useRequireAuth } from '../../hooks/Authenticate';
+import { useAuthRedirect } from '../../Hooks/useAuthRoute'
+import GanttChart from '../../components/Project-manage/GanttChart';
 
 function Schedule() {
 
-  // const redirect = useRequireAuth();
-  // if (redirect) return redirect;
-
+  useAuthRedirect();
 
   return (
-    <div className='flex justify-center items-center h-screen w-full'>Schedule</div>
+    <div className='flex justify-center items-center h-screen w-screen'>
+      <div className='w-[95%]'>
+        <GanttChart/>
+      </div>
+    </div>
   )
 }
 

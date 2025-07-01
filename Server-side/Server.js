@@ -19,6 +19,7 @@ const Signature= require('./Routes/SignatureRoute')
 const Project= require('./Routes/ProjectRoutes')
 const costControl = require('./Routes/costControlRoute')
 const projectReport = require('./Routes/projectReportRoute')
+const timeLine = require('./Routes/timelineRoute')
 
 //middlewares
 app.use(express.json())
@@ -39,6 +40,7 @@ app.use('/api/signature', Signature);
 app.use('/api/projects',Project);
 app.use('/api/cost-control',costControl);
 app.use('/api/project-report',projectReport);
+app.use('/api/timeline',timeLine);
 
 
 const PORT = process.env.PORT || 3000;

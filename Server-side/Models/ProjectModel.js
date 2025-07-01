@@ -31,6 +31,32 @@ const budgetSchema = new mongoose.Schema(
   }
 );
 
+const timelineSchema = new mongoose.Schema(
+  {
+    id:{
+        type:Number,
+        default:0,
+    },
+    task: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    start_date: {
+      type: Date,
+      required: true,
+    },
+    end_date: {
+      type: Date,
+      required: true,
+    },
+    duration: {
+      type: Number,
+      required: true,
+    },
+  },
+);
+
 
 const monthlyDataSchema = new mongoose.Schema({
   month: { type: String, required: true },
@@ -74,7 +100,9 @@ const projectSchema = new mongoose.Schema(
 
     budget: budgetSchema,
 
-    monthly_cost_control: [monthlyDataSchema]
+    monthly_cost_control: [monthlyDataSchema],
+
+    timeline:[timelineSchema],
   }
 );
 

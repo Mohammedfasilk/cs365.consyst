@@ -120,7 +120,7 @@ export const columns = (fetchData)=> [
   },
   {
     accessorKey: "status",
-    header: "Status",
+    header: "Doc Status",
     cell: ({ row }) => (
       <Badge
         variant="secondary"
@@ -132,7 +132,7 @@ export const columns = (fetchData)=> [
   },
   {
     accessorKey: "stage",
-    header: "Stage",
+    header: "Project Stage",
     cell: ({ row }) => {
       const stage = row.getValue("stage");
       const bgColor =

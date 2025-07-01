@@ -37,9 +37,9 @@ const Actions = ({ row , onDelete}) => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          {/* <DropdownMenuItem>Release</DropdownMenuItem>
+          <DropdownMenuItem>Release</DropdownMenuItem>
           <DropdownMenuItem>Approve</DropdownMenuItem>
-          <DropdownMenuItem>Close Project</DropdownMenuItem> */}
+          {/* <DropdownMenuItem>Close Project</DropdownMenuItem>/ */}
           <DropdownMenuItem onClick={() => setAlertOpen(true)}>Delete</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -123,7 +123,7 @@ export const columns = (fetchData)=> [
   },
   {
     accessorKey: "status",
-    header: "Status",
+    header: "Doc Status",
     cell: ({ row }) => (
       <Badge
         variant="secondary"
@@ -135,7 +135,7 @@ export const columns = (fetchData)=> [
   },
   {
     accessorKey: "stage",
-    header: "Stage",
+    header: "Project Stage",
     cell: ({ row }) => (
       <Badge
         variant="default"

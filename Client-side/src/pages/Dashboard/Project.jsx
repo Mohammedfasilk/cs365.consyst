@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "../../components/UI/Tabs";
-import { SquareChartGantt } from "lucide-react";
+import { ArrowDown, ArrowDown01, ArrowUp, SquareChartGantt } from "lucide-react";
 import ChooseProject from "../../components/Project/ChooseProject";
 import MonthwiseTable from "../../components/Project/MonthwiseTable";
 import axios from "axios";
@@ -12,8 +12,11 @@ import ScaleLoading from "../../components/UI/ScaleLoader";
 import { Checkbox } from "../../components/UI/Checkbox";
 import MonthlyLineChart from "../../components/Project/MonthlyLineChart";
 import { Card, CardHeader } from "../../components/UI/Card";
+import { useAuthRedirect } from "../../Hooks/useAuthRoute";
+import SquareIcon from "@mui/icons-material/Square";
 
 function Project() {
+  useAuthRedirect();
   const { choosenProject } = useSelector((state) => state.costControlSheet);
   const dispatch = useDispatch();
 
@@ -95,13 +98,13 @@ function Project() {
           (entry) => entry.current.net_profit_loss
         ),
         budget_billing_total: sortedMonthlyCostControl.map(
-          ()=> project.budget.billing_total
+          () => project.budget.billing_total
         ),
         budget_net_profit_loss: sortedMonthlyCostControl.map(
-          ()=> project.budget.net_profit_loss
-        )
+          () => project.budget.net_profit_loss
+        ),
       };
-      
+
       setChartData(chartValues);
     } catch (error) {
       console.error("Error fetching  projects:", error);
@@ -135,7 +138,6 @@ function Project() {
           <div className="border w-lg p-1 rounded hover:bg-gray-100">
             <ChooseProject />
           </div>
-          
         </div>
 
         <Card className="px-5 mb-10">
@@ -144,9 +146,7 @@ function Project() {
           </CardHeader>
           <MonthlyLineChart data={chartData} />
         </Card>
-        {choosenProject ==
-        "" ? null : // <div className="w-full h-[30vh] flex justify-center items-center border border-[var(--secondary)] italic rounded text-[var(--secondary)]">
-        //   No Data Found
+        {choosenProject == "" ? null : //   No Data Found // <div className="w-full h-[30vh] flex justify-center items-center border border-[var(--secondary)] italic rounded text-[var(--secondary)]">
         // </div>
         loader ? (
           <div className="w-full h-[30vh] flex justify-center items-center">
@@ -154,55 +154,69 @@ function Project() {
           </div>
         ) : (
           <div className="flex-col">
-            <div className="flex space-x-5">
-              <div className="flex items-center space-x-2 py-5">
-            <Checkbox
-              checked={showCurrent}
-              onCheckedChange={(value) => {
-                setShowCurrent(value);
-              }}
-            />
-            <span>Current</span>
-          </div>
-            <div className="flex items-center space-x-2 py-5">
-            <Checkbox
-              checked={ShowProjected}
-              onCheckedChange={(value) => {
-                setShowProjected(value);
-              }}
-            />
-            <span>Projection</span>
-          </div>
-            </div>
-          <div className="flex budget-sheet mb-12 w-full">
-            <div className="pointer-events-none">
-              <CostControlBudgetTable project={budget} />
-            </div>
-            <div
-              className="flex overflow-x-scroll"
-              style={{ scrollbarWidth: "thin" }}
-            >
+            <div className="flex justify-between items-center">
+              <div className="flex space-x-5">
+                <div className="flex items-center space-x-2 py-5">
+                  <Checkbox
+                    checked={showCurrent}
+                    onCheckedChange={(value) => {
+                      setShowCurrent(value);
+                    }}
+                  />
+                  <span>Current</span>
+                </div>
+                <div className="flex items-center space-x-2 py-5">
+                  <Checkbox
+                    checked={ShowProjected}
+                    onCheckedChange={(value) => {
+                      setShowProjected(value);
+                    }}
+                  />
+                  <span>Projection</span>
+                </div>
+              </div>
+              <div className="flex space-x-5">
+                <div className="flex items-center">
+                <SquareIcon className="text-yellow-200/80" /><ArrowDown className="w-4"/> 10%
+              </div>
               
-              {
-              showCurrent || ShowProjected ?
-              monthWiseData.map((months, index) => {
-                return (
-                  <div key={index} className="mx-px pointer-events-none">
-                    <MonthwiseTable
-                      project={months}
-                      title={months?.month}
-                      showProjected={ShowProjected}
-                      showCurrent={showCurrent}
-                      budget={budget}
-                    />
-                  </div>
-                );
-              }) : null}
-              <div className="pointer-events-none">
-                <LatestProjectionTable project={latestProjection} />
+              <div className="flex items-center">
+                <SquareIcon className="text-amber-500/60" /> 10%-20%
+              </div>
+
+              <div className="flex items-center">
+                <SquareIcon className="text-red-500/50" /><ArrowUp className="w-4"/> 20%
+              </div>
               </div>
             </div>
-          </div>
+            <div className="flex budget-sheet mb-12 w-full">
+              <div className="pointer-events-none">
+                <CostControlBudgetTable project={budget} />
+              </div>
+              <div
+                className="flex overflow-x-scroll"
+                style={{ scrollbarWidth: "thin" }}
+              >
+                {showCurrent || ShowProjected
+                  ? monthWiseData.map((months, index) => {
+                      return (
+                        <div key={index} className="mx-px pointer-events-none">
+                          <MonthwiseTable
+                            project={months}
+                            title={months?.month}
+                            showProjected={ShowProjected}
+                            showCurrent={showCurrent}
+                            budget={budget}
+                          />
+                        </div>
+                      );
+                    })
+                  : null}
+                <div className="pointer-events-none">
+                  <LatestProjectionTable project={latestProjection} />
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>

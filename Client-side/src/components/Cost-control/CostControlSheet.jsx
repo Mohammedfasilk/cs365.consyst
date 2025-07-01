@@ -40,7 +40,7 @@ export function CostControlSheet() {
   const { selectedMonth } = useSelector((state) => state.costControlSheet);
   const [project, setProject] = useState({});
   const [monthlydata, setMonthlyData] = useState({});
-  const [alertMonthpick, setAlerMonthpick] = useState(false);
+  const [isSaveDisabled,setIsSaveDisabled] = useState(false)
   const { toast } = useToast();
   useEffect(() => {
     async function fetchSelectedProject(project_name) {
@@ -61,9 +61,16 @@ export function CostControlSheet() {
   }, [selectedProjectName, selectedMonth]);
 
   const handleSubmit = async () => {
-    
+    if(isSaveDisabled){
+       toast({
+          title: "Projected must be greater",
+          description: "There was an error saving the monthly budget.",
+          variant: "destructive",
+          icon: <CircleXIcon className="mr-4" color="red" />,
+        });
+      return;
+    }
     try {
-      setAlerMonthpick(false);
       const res = await axios.post(
         `${import.meta.env.VITE_CS365_URI}/api/cost-control/monthly-data`,
         { monthlyData: monthlydata, project_name: selectedProjectName }
@@ -91,7 +98,7 @@ export function CostControlSheet() {
       console.error("Error saving monthly costcontrol:", error);
     }
   };
-
+  
   return (
     <Sheet
       open={isOpen}
@@ -100,7 +107,6 @@ export function CostControlSheet() {
           dispatch(setSelectedProjectName(""));
           dispatch(setSelectedMonth(""));
           setProject({});
-          setAlerMonthpick(false);
         }
         dispatch(setIsOpen(value));
       }}
@@ -156,11 +162,6 @@ export function CostControlSheet() {
                       }
                     }}
                   />
-                  {alertMonthpick ? (
-                    <p className="ml-2 mt-2text-sm text-red-600">
-                      Please select a month
-                    </p>
-                  ) : null}
                 </div>
 
                 <div className="budget-sheet mt-4">
@@ -171,6 +172,7 @@ export function CostControlSheet() {
                         setMonthlyData(data);
                       }}
                       selectedMonth={selectedMonth}
+                      setIsSaveDisabled={setIsSaveDisabled}
                     />
                   ) : (
                      <div className="text-[var(--destructive)] text-xl w-full flex justify-center items-center h-[200px]">Please select a month</div>

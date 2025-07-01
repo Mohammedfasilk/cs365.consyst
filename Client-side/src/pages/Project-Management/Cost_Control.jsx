@@ -6,8 +6,10 @@ import { columns } from "../../components/Cost-control/Columns";
 import ChooseProject from "../../components/Project/ChooseProject";
 import { useSelector } from "react-redux";
 import axios from "axios";
+import { useAuthRedirect } from "../../Hooks/useAuthRoute";
 
 function Cost_Control() {
+  useAuthRedirect();
   const { choosenProject } = useSelector((state) => state.costControlSheet);
   const { saved } = useSelector((state) => state.costControlSheet);
   const [project, setProject] = useState([]);

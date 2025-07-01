@@ -16,8 +16,10 @@ import { SalesOrderByPeriodGraph } from "../../components/Sales-Pipeline/SalesOr
 import { useSelector, useDispatch } from "react-redux";
 import { fetchSettings } from "../../Redux/Slices/settingsSlice";
 import ScaleLoading from "../../components/UI/ScaleLoader";
+import { useAuthRedirect } from "../../Hooks/useAuthRoute";
 
 function SalesPipeline() {
+  useAuthRedirect();
   const dispatch = useDispatch();
   const { settings } = useSelector((state) => state.settings);
 

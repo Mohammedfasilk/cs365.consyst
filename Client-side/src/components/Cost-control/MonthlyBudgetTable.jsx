@@ -132,6 +132,8 @@ const getRows = (purchaseOrderData,
     ],
   });
 
+
+
   const createDataRow = (
     label,
     currentValue,
@@ -142,6 +144,7 @@ const getRows = (purchaseOrderData,
     isPercent = false,
     isLastRow = false,
   ) => ({
+    
     rowId: label.toLowerCase().replace(/[^\w\s]/g, "").replace(/\s+/g, "-") ,
     height: ROW_HEIGHT,
     cells: [
@@ -157,11 +160,12 @@ const getRows = (purchaseOrderData,
         : nonEditable(isPercent ? percentCell(currentValue, "disabled" + (isBold ? " font-bold" : "") + (isLastRow ? " rounded-br" : ""), color ? { color } : {})
         :numberCell(currentValue, "disabled" + (isBold ? " font-bold" : "") + (isLastRow ? " rounded-br" : ""), color ? { color } : {})),
       isEditable
-        ? numberCell(projectedValue, isLastRow ? " rounded-br" : "" + projectedValue < currentValue ? " bg-red-500/70": "")
+        ? numberCell(projectedValue, isLastRow ? " rounded-br" : "" + (projectedValue < currentValue ? " bg-red-500/70": ""))
         : nonEditable(isPercent ? percentCell(projectedValue, "disabled" + (isBold ? " font-bold" : "") + (isLastRow ? " rounded-br" : ""), color ? { color } : {})
         :numberCell(projectedValue, "disabled" + (isBold ? " font-bold" : "") + (isLastRow ? " rounded-br" : ""), color ? { color } : {})),
     ],
-  });
+  }
+);
 
   const purchaseOrderRows = [
     createSectionHeader("Purchase Order", "#336699"),
@@ -207,7 +211,7 @@ const getRows = (purchaseOrderData,
   return [headerRow, ...purchaseOrderRows, ...billingRows, ...directExpensesRows, ...grossProfitRows];    //...netProfitRows
 };
 
-function MonthlyBudgetTable({ project, getData, selectedMonth }) {
+function MonthlyBudgetTable({ project, getData, selectedMonth,setIsSaveDisabled }) {
 
   const [investorProfitSharePercent, setInvestorProfitSharePercent] = useState(getInvestorProfitSharePercent(project));
   const [miscellaneousIndirectExpense, setMiscellaneousIndirectExpense] = useState(getMiscellaneousIndirectExpense(project));
@@ -234,6 +238,39 @@ const [projectedBillingData, setProjectedBillingData] = useState(() =>
 const [projectedDirectExpensesData, setProjectedDirectExpensesData] = useState(() =>
   getDirectExpenses(project, selectedMonth,"projected")
 );
+
+  const checkIfAnyCurrentGreaterThanProjected = () => {
+    const allPairs = [
+      [purchaseOrderData, projectedPurchaseOrderData],
+      [billingData, projectedBillingData],
+      [directExpensesData, projectedDirectExpensesData]
+    ];
+
+    for (const [current, projected] of allPairs) {
+      for (const key in current) {
+        if (typeof current[key] === 'number' && typeof projected[key] === 'number') {
+          if (current[key] > projected[key]) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  };
+
+  useEffect(() => {
+    if (typeof setIsSaveDisabled === "function") {
+      const shouldDisable = checkIfAnyCurrentGreaterThanProjected();
+      setIsSaveDisabled(shouldDisable);
+    }
+  }, [
+    purchaseOrderData,
+    billingData,
+    directExpensesData,
+    projectedPurchaseOrderData,
+    projectedBillingData,
+    projectedDirectExpensesData
+  ]);
 
   // Re-fetch when project or month changes
   useEffect(() => {

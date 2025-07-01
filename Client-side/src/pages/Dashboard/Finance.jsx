@@ -1,9 +1,7 @@
-// import { useRequireAuth } from "../../hooks/Authenticate";
+import { useAuthRedirect } from "../../Hooks/useAuthRoute";
 
 function Finance() {
-
-  // const redirect = useRequireAuth();
-  // if (redirect) return redirect;
+  useAuthRedirect();
 
   return (
     <div className="flex justify-center items-center h-screen w-full">

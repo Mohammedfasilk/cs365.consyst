@@ -49,6 +49,8 @@ import {
 } from "../../Redux/Slices/SelectedProject";
 import GanttChart from "./GanttChart";
 import { useToast } from "../../Hooks/use-toast";
+import GanttTaskTable from "./GanttTaskTable";
+import TaskDrawer from "./TaskDrawer";
 
 const ProjectSheet = ({ fetchData }) => {
   const [project, setProject] = useState(null);
@@ -651,7 +653,9 @@ const ProjectSheet = ({ fetchData }) => {
               </TabsContent>
 
               <TabsContent value="timeline">
-                <GanttChart />
+                <div className="h-[500px]">
+                    <TaskDrawer/>
+                </div>
               </TabsContent>
             </Tabs>
           </div>

@@ -4,12 +4,11 @@ import axios from "axios";
 import { DataTable } from "../../components/Signatures/Data-Table";
 import { SignatureSheet } from "../../components/Signatures/SignatureSheet";
 import { Separator } from "../../components/UI/Separator";
+import { useAuthRedirect } from "../../Hooks/useAuthRoute";
 
 function signatures() {
 
-  // const redirect = useRequireAuth();
-  // if (redirect) return redirect;
-
+  useAuthRedirect();
 
   const [data, setData] = useState([]);
 
