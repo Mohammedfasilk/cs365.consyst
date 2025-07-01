@@ -1,13 +1,15 @@
 import React from 'react'
 import { Route, Routes } from 'react-router-dom'
 import Signatures from '../pages/Signature-management/Signatures'
+import MeetingMinutes from '../pages/Signature-management/MeetingMinutes'
 
-function Signature_management() {
+function Business_Tools() {
   return (
     <Routes>
-        <Route path='/signatures' element={<Signatures/>}/>
+      <Route path='/email-signatures' element={<Signatures />} />
+      <Route path='/meeting-minutes' element={<MeetingMinutes/>} />
     </Routes>
   )
 }
 
-export default Signature_management
+export default Business_Tools

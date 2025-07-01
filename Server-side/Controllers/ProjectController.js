@@ -125,3 +125,26 @@ exports.deleteProject = async (req,res) =>{
         res.status(500).json({error:'Failed to delete Project'})
     }
 }
+
+// Update project status and stage
+
+exports.updateProjectField = async (req, res) => {
+  try {
+    const { project_name, field, value, month } = req.body;
+    console.log(month);
+
+    const updated = await Project.findOneAndUpdate(
+      { project_name,month },
+      { [field]: value },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ error: "Project not found" });
+    }
+
+    res.status(200).json(updated);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update project field" });
+  }
+};

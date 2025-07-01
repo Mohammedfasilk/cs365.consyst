@@ -25,7 +25,8 @@ function Cost_Control() {
         project.monthly_cost_control.map((entry) => ({
           ...entry,
           project_name: project.project_name,
-          project_description:project.project_description
+          project_description:project.project_description,
+          stage:project.stage
         }))
       );
       

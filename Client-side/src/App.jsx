@@ -5,8 +5,8 @@ import Dashboard from './routes/home/Dashboard'
 import MainLayout from '../src/components/UI/Mainlayout'
 import Banking from './routes/home/Banking/Banking'
 import Project_management from './routes/home/Project_management'
-import Signature_management from './routes/Signature_management'
 import { Toaster } from './components/UI/Toaster'
+import Business_Tools from './routes/Signature_management'
 function App() {
 
   return (
@@ -18,7 +18,7 @@ function App() {
         <Route path='/dashboards/*' element={<Dashboard/>}/>
         <Route path='/banking/*' element={<Banking/>}/>
         <Route path='/project-management/*' element={<Project_management/>}/>
-        <Route path='/signature-management/*' element={<Signature_management/>}/>
+        <Route path='/business-tools/*' element={<Business_Tools/>}/>
         </Route>
       </Routes>
       <Toaster/>

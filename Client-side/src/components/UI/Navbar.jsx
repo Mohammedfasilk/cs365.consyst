@@ -1,13 +1,14 @@
 import { Grip } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import logo from "../../assets/logo.png"
-import { useMicrosoftUser } from '../../Hooks/useMicrosoftUser';
 import UserDropdownMenu from './UserDropdownMenu';
+import { useMsal } from '@azure/msal-react';
 
 const Navbar = () => {
 
-  const user = useMicrosoftUser();
-   
+  const { accounts } = useMsal();
+  const user = accounts[0]?.name;
+
   return (
     <nav className="min-h-12 flex justify-between items-center bg-[var(--csblue)] fixed w-screen top-0 z-50">
       <div className="flex justify-center items-center">
@@ -21,10 +22,10 @@ const Navbar = () => {
         </div>
       </div>
 
-      { user ? (
+      {user ? (
         <div className="flex items-center gap-4 mr-6">
 
-          <UserDropdownMenu/>
+          <UserDropdownMenu />
         </div>
       ) : null}
     </nav>

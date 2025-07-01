@@ -63,8 +63,6 @@ const monthlyDataSchema = new mongoose.Schema({
   current: budgetSchema,
   projected: budgetSchema,
   status:{type:String,default:'draft'},
-  stage:{type:String,default:'open'},
-
 },{ _id: false })
 
 

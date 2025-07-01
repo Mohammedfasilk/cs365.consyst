@@ -23,9 +23,33 @@ import {
 } from "../UI/Alert_Dialog";
 import axios from 'axios'
 // Actions Cell Component
-const Actions = ({ row , onDelete}) => {
+const Actions = ({ row, onDelete }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState({
+    open: false,
+    field: null,
+    value: null,
+  });
+
+  const month = row.getValue("month");
+  const status = row.getValue("status");
+  const stage = row.getValue("stage");
+  const projectName = row.getValue("project_name");
+
+  const handleFieldUpdate = async (field, value) => {
+    try {
+      await axios.post(`${import.meta.env.VITE_CS365_URI}/api/projects/update-field`, {
+        project_name: projectName,
+        field,
+        value,
+
+      });
+      onDelete(); // Refresh the list
+    } catch (error) {
+      console.error("Failed to update status:", error);
+    }
+  };
 
   return (
     <>
@@ -37,12 +61,84 @@ const Actions = ({ row , onDelete}) => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem>Release</DropdownMenuItem>
-          <DropdownMenuItem>Approve</DropdownMenuItem>
-          <DropdownMenuItem>Close Project</DropdownMenuItem>
+          {status === "draft" && (
+            <DropdownMenuItem
+              onClick={() =>
+                setConfirmDialog({
+                  open: true,
+                  field: "status",
+                  value: "approved",
+                })
+              }
+            >
+              Approve
+            </DropdownMenuItem>
+          )}
+          {status === "approved" && (
+            <DropdownMenuItem
+              onClick={() =>
+                setConfirmDialog({
+                  open: true,
+                  field: "status",
+                  value: "draft",
+                })
+              }
+            >
+              Release
+            </DropdownMenuItem>
+          )}
+          {stage === "open" && (
+            <DropdownMenuItem
+              onClick={() =>
+                setConfirmDialog({
+                  open: true,
+                  field: "stage",
+                  value: "closed",
+                })
+              }
+            >
+              Close Project
+            </DropdownMenuItem>
+          )}
+          {stage === "closed" && (
+            <DropdownMenuItem
+              onClick={() =>
+                setConfirmDialog({
+                  open: true,
+                  field: "stage",
+                  value: "open",
+                })
+              }
+            >
+              Open Project
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem onClick={() => setAlertOpen(true)}>Delete</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      {/* Confirm Dialog for Approve/Close/Open */}
+      <AlertDialog open={confirmDialog.open} onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will update <b>{projectName}</b> budget to <b>{confirmDialog.value}</b>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                handleFieldUpdate(confirmDialog.field, confirmDialog.value, confirmDialog.label);
+                setConfirmDialog({ ...confirmDialog, open: false });
+              }}
+            >
+              Confirm
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
         <AlertDialogContent>
@@ -56,26 +152,25 @@ const Actions = ({ row , onDelete}) => {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               className="bg-[var(--csred)] hover:bg-[var(--csred)]/90"
-                onClick={async () => {
+              onClick={async () => {
                 const projectname = row.getValue("project_name");
 
                 try {
                   await axios.post(
                     `${import.meta.env.VITE_CS365_URI}/api/projects/delete`,
-                    {project_name:projectname}
+                    { project_name: projectname }
                   );
                   onDelete();
-                  // toast({
-                  //   title: "Signature Removed",
-                  //   description: "The signature has been successfully removed.",
-                  //   icon: <CircleCheckIcon className="mr-4" color="green" />,
-                  // });
+                  toast({
+                    title: "Signature Removed",
+                    description: "The signature has been successfully removed.",
+                    icon: <CircleCheckIcon className="mr-4" color="green" />,
+                  });
                 } catch (error) {
                   console.error("Error deleting project:", error);
-                  // Optional: show error toast
                 }
               }}
-              
+
             >
               Delete
             </AlertDialogAction>
@@ -87,7 +182,7 @@ const Actions = ({ row , onDelete}) => {
 };
 
 // Column Definitions (no TypeScript)
-export const columns = (fetchData)=> [
+export const columns = (fetchData) => [
   {
     id: "select",
     header: ({ table }) => (
@@ -124,7 +219,7 @@ export const columns = (fetchData)=> [
     cell: ({ row }) => (
       <Badge
         variant="secondary"
-        className={`bg-gray-200 ${row.getValue("status") === "submitted" ? "bg-blue-200" : ""}`}
+        className={`bg-gray-200 ${row.getValue("status") === "approved" ? "bg-blue-200" : ""}`}
       >
         {row.getValue("status")}
       </Badge>
@@ -136,11 +231,11 @@ export const columns = (fetchData)=> [
     cell: ({ row }) => {
       const stage = row.getValue("stage");
       const bgColor =
-        stage === "running"
-          ? "bg-orange-400"
-          : stage === "completed"
-          ? "bg-green-600"
-          : "bg-gray-500";
+        stage === "closed"
+          ? "bg-red-400 text-white"
+          : stage === "open"
+            ? "bg-green-600 text-white"
+            : "bg-gray-500";
       return (
         <Badge variant="default" className={bgColor}>
           {stage}

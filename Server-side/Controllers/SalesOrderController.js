@@ -8,7 +8,6 @@ const companies = [
 
 exports.SalesOrderBooking = async (req, res) => {
   const {fyDate} = req.body
-  console.log(fyDate);
   
   const currentFyStartDate = fyDate
   const results = [];

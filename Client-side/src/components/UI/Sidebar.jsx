@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
+  BriefcaseBusiness,
   ChartNoAxesCombined,
   DollarSign,
   FolderGit2Icon,
@@ -51,20 +52,21 @@ export default function Sidebar() {
       ],
     },
     {
-      icon: <SignatureIcon className="h-5 w-5" />,
-      label: "Signature Management",
+      icon: <BriefcaseBusiness className="h-5 w-5" />,
+      label: "Business Tools",
       href: "#",
       subItems: [
-        { label: "Signatures", href: "/signature-management/signatures" },
+        { label: "Email Signatures", href: "/business-tools/email-signatures" },
+        { label: "Meeting Minutes", href: "/business-tools/meeting-minutes" },
+
       ],
     },
   ];
 
   return (
     <div
-      className={`z-50 fixed top-12 h-[calc(100vh-48px)] flex max-h-screen ${
-        isHovered ? "w-64" : "w-14"
-      } flex-col border-r bg-[var(--background)] transition-all duration-300`}
+      className={`z-50 fixed top-12 h-[calc(100vh-48px)] flex max-h-screen ${isHovered ? "w-64" : "w-14"
+        } flex-col border-r bg-[var(--background)] transition-all duration-300`}
     >
       <nav
         className="flex-1 overflow-x-hidden py-4 overflow-y-auto"
@@ -77,24 +79,21 @@ export default function Sidebar() {
               <div className={`${isHovered ? "h-auto" : "h-10"} max-h`}>
                 <Link
                   to={item.href}
-                  className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground ${
-                    isHovered ? "justify-start" : ""
-                  }`}
+                  className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground ${isHovered ? "justify-start" : ""
+                    }`}
                 >
                   {item.icon}
                   <span
-                    className={`whitespace-nowrap ${
-                      isHovered ? "opacity-100 visible" : "opacity-0 invisible"
-                    }`}
+                    className={`whitespace-nowrap ${isHovered ? "opacity-100 visible" : "opacity-0 invisible"
+                      }`}
                   >
                     {item.label}
                   </span>
                 </Link>
                 {item.subItems && (
                   <ul
-                    className={`ml-8 mt-1 space-y-1 transition-opacity duration-500 ${
-                      isHovered ? "opacity-100 visible" : "opacity-0 invisible"
-                    }`}
+                    className={`ml-8 mt-1 space-y-1 transition-opacity duration-500 ${isHovered ? "opacity-100 visible" : "opacity-0 invisible"
+                      }`}
                   >
                     {item.subItems.map((subItem, subIndex) => (
                       <li key={subIndex}>
@@ -114,11 +113,10 @@ export default function Sidebar() {
         </ul>
       </nav>
       <div
-        className={`flex ${
-          !isHovered
+        className={`flex ${!isHovered
             ? "flex-col justify-center"
             : "flex-row justify-start ml-4 "
-        }  items-center py-4 gap-2  mt-auto border-t`}
+          }  items-center py-4 gap-2  mt-auto border-t`}
       >
         {/* <div>
               <ModeToggle/>

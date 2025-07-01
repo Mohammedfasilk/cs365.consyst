@@ -154,6 +154,7 @@ exports.getAllMonthlyBudget = async (req, res) => {
           _id: 0,
           project_name: 1,
           project_description:1,
+          stage:1,
           monthly_cost_control: {
             $map: {
               input: "$monthly_cost_control",
@@ -172,6 +173,7 @@ exports.getAllMonthlyBudget = async (req, res) => {
     res.status(500).json({ error: 'Failed to get monthly budget data' });
   }
 };
+
 
 exports.deleteMonthlyBudget = async (req,res) =>{
   const { month , project_name } = req.body
