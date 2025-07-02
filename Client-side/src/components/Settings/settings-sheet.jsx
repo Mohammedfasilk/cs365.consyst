@@ -51,6 +51,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMsal } from "@azure/msal-react";
 import { fetchSettings } from "../../Redux/Slices/settingsSlice";
+import { useSessionUser } from "../../Hooks/useSessionUser";
 
 const userRoles = [
   { value: "admin", label: "Admin" },
@@ -68,6 +69,7 @@ const userRoles = [
 export function SettingsSheet() {
   const [loading, setLoading] = useState(false);
   const [resetKey, setResetKey] = useState(0);
+  const sessionUser = useSessionUser();
 
   const userList = useSelector((state) => state.users.userList);
   const dispatch = useDispatch();
@@ -110,6 +112,21 @@ export function SettingsSheet() {
         description: "The user has been successfully created.",
         icon: <CircleCheckIcon className="mr-4" color="green" />,
       });
+
+      const actData = {
+                    field: "settings",
+                    data: {
+                      username: sessionUser,
+                      date: new Date().toLocaleString("en-IN", {
+                        timeZone: "Asia/Kolkata",
+                      }),
+                      activity: `Added ${user.email} to users in ${user.roles} role`,
+                    },
+                  };
+                  const act = await axios.post(
+                    `${import.meta.env.VITE_CS365_URI}/api/activity`,
+                    actData
+                  );
     } catch (err) {
       if (err.response?.data?.code === 11000) {
         toast({

@@ -17,6 +17,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { fetchSettings } from "../../Redux/Slices/settingsSlice";
 import ScaleLoading from "../../components/UI/ScaleLoader";
 import { useAuthRedirect } from "../../Hooks/useAuthRoute";
+import { Checkbox } from "../../components/UI/Checkbox";
 
 function SalesPipeline() {
   useAuthRedirect();
@@ -24,7 +25,8 @@ function SalesPipeline() {
   const { settings } = useSelector((state) => state.settings);
 
   const [loading, setLoading] = useState(true);
-  const [topOpportunities, setTopOpportunities] = useState([]);
+  const [usd, setUsd] = useState();
+  const [rawTopOpportunities, setRawTopOpportunities] = useState([]);
   const [sumFunnelData, setSumFunnelData] = useState([]);
   const [countFunnelData, setCountFunnelData] = useState([]);
   const [orderBookingData, setOrderBookingData] = useState([]);
@@ -49,25 +51,35 @@ function SalesPipeline() {
       const base = import.meta.env.VITE_CS365_URI;
 
       try {
-        const [
-          topRes,
-          sumRes,
-          countRes,
-          orderRes,
-          monthlyRes,
-        ] = await Promise.all([
-          axios.get(`${import.meta.env.VITE_CS365_URI}/api/sales-pipeline/top-opportunities`),
-          axios.get(`${import.meta.env.VITE_CS365_URI}/api/sales-pipeline/sum`),
-          axios.get(`${import.meta.env.VITE_CS365_URI}/api/sales-pipeline/count`),
-          axios.post(`${import.meta.env.VITE_CS365_URI}/api/sales-analysis`,{fyDate: settings.currentFyStartDate}),
-          axios.post(`${import.meta.env.VITE_CS365_URI}/api/sales-analysis/order-booking-monthly`, {
-            fyDate: settings.currentFyStartDate,
-            usd: settings.usdToinr || 0,
-            aed: settings.usdToaed || 0,
-          }),
-        ]);
-
-        setTopOpportunities(topRes.data);
+        const [topRes, sumRes, countRes, orderRes, monthlyRes] =
+          await Promise.all([
+            axios.get(
+              `${
+                import.meta.env.VITE_CS365_URI
+              }/api/sales-pipeline/top-opportunities`
+            ),
+            axios.get(
+              `${import.meta.env.VITE_CS365_URI}/api/sales-pipeline/sum`
+            ),
+            axios.get(
+              `${import.meta.env.VITE_CS365_URI}/api/sales-pipeline/count`
+            ),
+            axios.post(`${import.meta.env.VITE_CS365_URI}/api/sales-analysis`, {
+              fyDate: settings.currentFyStartDate,
+            }),
+            axios.post(
+              `${
+                import.meta.env.VITE_CS365_URI
+              }/api/sales-analysis/order-booking-monthly`,
+              {
+                fyDate: settings.currentFyStartDate,
+                usd: settings.usdToinr || 0,
+                aed: settings.usdToaed || 0,
+              }
+            ),
+          ]);
+        
+        setRawTopOpportunities(topRes.data);
         setSumFunnelData(sumRes.data);
         setCountFunnelData(countRes.data);
         setOrderBookingData(orderRes.data);
@@ -81,7 +93,26 @@ function SalesPipeline() {
 
     fetchData();
   }, [settings]);
+const displayedTopOpportunities = useMemo(() => {
+  if (!usd) return rawTopOpportunities;
 
+  return rawTopOpportunities.map((item) => {
+    const isINR = item.currency === "INR"
+
+    if (isINR) {
+      const rate = settings?.usdToinr || 1;
+
+      
+      return {
+        ...item,
+        opportunity_amount: item.opportunity_amount / rate,
+        currency: "USD",
+      };
+    }
+
+    return item;
+  });
+}, [rawTopOpportunities, usd, settings]);
   // Calculate USD group value
   const orderBookingGroupedValueUSD = useMemo(() => {
     const usdRates = {
@@ -103,7 +134,11 @@ function SalesPipeline() {
   }, [orderBookingData, settings]);
 
   if (loading) {
-    return <div className="flex items-center justify-center h-screen text-lg font-semibold"><ScaleLoading size={60}/></div>;
+    return (
+      <div className="flex items-center justify-center h-screen text-lg font-semibold">
+        <ScaleLoading size={60} />
+      </div>
+    );
   }
 
   return (
@@ -123,26 +158,53 @@ function SalesPipeline() {
         </TabsList>
 
         {/* Sales Pipeline View */}
-        <TabsContent value="sales-pipeline" className="bg-[var(--csgray)] w-full">
+        <TabsContent
+          value="sales-pipeline"
+          className="bg-[var(--csgray)] w-full"
+        >
           <div className="flex justify-center gap-2 ml-20 mx-8 mb-2">
             <Card className="flex-1 flex flex-col justify-center items-center">
-              <h1 className="m-4 mb-6 w-[95%]">Current Opportunity Pipeline (Value)</h1>
+              <h1 className="m-4 mb-6 w-[95%]">
+                Current Opportunity Pipeline (Value)
+              </h1>
               <div className="h-80 w-[80%]">
-                <CurrentOpportunityPipeline funnelType="sum" funnelData={sumFunnelData} />
+                <CurrentOpportunityPipeline
+                  funnelType="sum"
+                  funnelData={sumFunnelData}
+                />
               </div>
             </Card>
             <Card className="flex-1 flex flex-col justify-center items-center">
-              <h1 className="m-4 mb-6 w-[95%]">Current Opportunity Pipeline (Count)</h1>
+              <h1 className="m-4 mb-6 w-[95%]">
+                Current Opportunity Pipeline (Count)
+              </h1>
               <div className="h-80 w-[80%]">
-                <CurrentOpportunityPipeline funnelType="count" funnelData={countFunnelData} />
+                <CurrentOpportunityPipeline
+                  funnelType="count"
+                  funnelData={countFunnelData}
+                />
               </div>
             </Card>
           </div>
 
           <div className="flex justify-center mb-12 mx-8 ml-20">
             <Card className="flex-1 w-[768px] p-4">
-              <h1 className="m-2 mb-6">Top Opportunities</h1>
-              <OpportunityDataTable data={topOpportunities} columns={opportunityDataColumns} />
+              <div className="flex justify-between items-center">
+                <h1 className="m-2 mb-6">Top Opportunities</h1>
+                <div className="flex items-center space-x-1">
+                  <Checkbox
+                    checked={!!usd}
+                    onCheckedChange={(value) => {
+                      setUsd(value);
+                    }}
+                  />
+                  <span>USD</span>
+                </div>
+              </div>
+              <OpportunityDataTable
+                data={displayedTopOpportunities}
+                columns={opportunityDataColumns}
+              />
             </Card>
           </div>
         </TabsContent>

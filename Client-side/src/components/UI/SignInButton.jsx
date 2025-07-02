@@ -24,7 +24,6 @@ function SignInButton() {
     });
 
     const account = loginResponse.account;
-    console.log(account.username);
     
     if (!account) {
       console.error("No account returned after login.");
@@ -45,16 +44,27 @@ function SignInButton() {
     const userExist = res.data;
 
     if (userExist.success) {
+      const date = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
       sessionStorage.setItem("user", JSON.stringify(userExist.user));
       setLoading(false);
       navigate("/home");
+
+      const data = {
+        username:account.name,
+        date:date
+      }
+      const res = await axios.post(
+      `${import.meta.env.VITE_CS365_URI}/api/activity`,
+      { field:'login',data:data }
+    );
+      
     } else {
        
       alert("Access denied");
+      setLoading(false)
       await instance.logoutPopup({ postLogoutRedirectUri: "/" });
       instance.removeAccount(account);
       sessionStorage.clear();
-      
     }
   } catch (error) {
     console.error("Login failed:", error);  }

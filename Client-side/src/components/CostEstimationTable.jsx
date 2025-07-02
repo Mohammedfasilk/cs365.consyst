@@ -7,6 +7,7 @@ import { useToast } from "../Hooks/use-toast";
 import { CircleCheckIcon, CircleXIcon } from "lucide-react";
 import axios from 'axios'
 import { useSelector } from "react-redux";
+import { useSessionUser } from "../Hooks/useSessionUser";
 
 const ROW_HEIGHT = 25;
 const HEADING_ROW_HEIGHT = 40;
@@ -359,6 +360,7 @@ function CostEstimationTable({ project }) {
   const [directExpensesData, setDirectExpensesData] = useState(getDirectExpenses(project));
   const [investorProfitSharePercent, setInvestorProfitSharePercent] = useState(getInvestorProfitSharePercent(project));
   const [miscellaneousIndirectExpense, setMiscellaneousIndirectExpense] = useState(getMiscellaneousIndirectExpense(project));
+  const sessionUser = useSessionUser();
 
   const selectedProjectName = useSelector((state)=>state.selectedProject.selectedProjectName)
   const { toast } = useToast();
@@ -436,6 +438,20 @@ function CostEstimationTable({ project }) {
       });
       return;
     }
+
+    const dat = {
+              field:'project_management',
+              data:{
+                username:sessionUser,
+                date:new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
+                activity:`The budget of project "${selectedProjectName}" has been updated`,
+              }
+            }
+            const act = await axios.post(
+              `${import.meta.env.VITE_CS365_URI}/api/activity`,
+              dat
+            );
+
     toast({
       title: "Budget Saved",
       description: "The budget has been successfully saved.",

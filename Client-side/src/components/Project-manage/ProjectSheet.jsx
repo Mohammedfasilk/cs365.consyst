@@ -23,6 +23,7 @@ import { z } from "zod";
 import { Input } from "../UI/Input";
 import { Button } from "../UI/Button";
 import {
+  Activity,
   CalendarCheckIcon,
   CalendarIcon,
   CircleCheckIcon,
@@ -51,10 +52,13 @@ import GanttChart from "./GanttChart";
 import { useToast } from "../../Hooks/use-toast";
 import GanttTaskTable from "./GanttTaskTable";
 import TaskDrawer from "./TaskDrawer";
+import { useSessionUser } from "../../Hooks/useSessionUser";
 
 const ProjectSheet = ({ fetchData }) => {
   const [project, setProject] = useState(null);
   const dispatch = useDispatch();
+  const sessionUser = useSessionUser();
+
 
   const selectedProject = useSelector((state) => state.selectedProject.project);
 
@@ -134,6 +138,19 @@ const ProjectSheet = ({ fetchData }) => {
         }
 
         dispatch(setIsSaved(true));
+
+        const data = {
+          field:'project_management',
+          data:{
+            username:sessionUser,
+            date:new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
+            activity:`The project "${selectedProjectName}" has been saved/updated`,
+          }
+        }
+        const act = await axios.post(
+          `${import.meta.env.VITE_CS365_URI}/api/activity`,
+          data
+        );
 
         toast({
           title: "Project Saved",
@@ -228,16 +245,16 @@ const ProjectSheet = ({ fetchData }) => {
     }
   }, [selectedProjectName]);
 
-  const handleNavigation = () => {
-    if (!isSaved) {
-      toast({
-        title: "Project Not Saved !",
-        description: "Please the project",
-        variant: "destructive",
-        icon: <CircleXIcon className="mr-4" color="red" />,
-      });
-    }
-  };
+  // const handleNavigation = () => {
+  //   if (!isSaved) {
+  //     toast({
+  //       title: "Project Not Saved !",
+  //       description: "Please the project",
+  //       variant: "destructive",
+  //       icon: <CircleXIcon className="mr-4" color="red" />,
+  //     });
+  //   }
+  // };
 
   return (
     <Sheet

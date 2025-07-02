@@ -15,10 +15,12 @@ import { useDispatch, useSelector } from "react-redux"
 import {setSaved} from "../../Redux/Slices/costControlsheet";
 import { useToast } from "../../Hooks/use-toast"
 import { CircleCheckIcon } from "lucide-react"
+import { useSessionUser } from "../../Hooks/useSessionUser"
 
 const Actions = ({ row , onDelete}) => {
   const {toast} = useToast();
   const dispatch = useDispatch();
+  const sessionUser = useSessionUser();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
   const {choosenProject} = useSelector((state) => state.costControlSheet);
@@ -44,6 +46,22 @@ const Actions = ({ row , onDelete}) => {
         }
       });
       onDelete(); // refresh table
+
+       const actData = {
+                    field: "cost_control",
+                    data: {
+                      username: sessionUser,
+                      date: new Date().toLocaleString("en-IN", {
+                        timeZone: "Asia/Kolkata",
+                      }),
+                      activity: `The project ${projectName} "${month}" ${field} is updated to ${value}`,
+                      type:`${field} updation`
+                    },
+                  };
+                  const act = await axios.post(
+                    `${import.meta.env.VITE_CS365_URI}/api/activity`,
+                    actData
+                  );
     } catch (error) {
       console.error(`Error updating ${field}:`, error);
     }
@@ -135,6 +153,22 @@ const Actions = ({ row , onDelete}) => {
                   });
                   onDelete();
                   dispatch(setSaved(!saved));
+
+                   const actData = {
+                    field: "cost_control",
+                    data: {
+                      username: sessionUser,
+                      date: new Date().toLocaleString("en-IN", {
+                        timeZone: "Asia/Kolkata",
+                      }),
+                      activity: `The project "${projectName}" ${month} cost is deleted`,
+                      type:'Delete'
+                    },
+                  };
+                  const act = await axios.post(
+                    `${import.meta.env.VITE_CS365_URI}/api/activity`,
+                    actData
+                  );
                   toast({
                     title: `${month} Budget Removed`,
                     description: "The Budget has been successfully removed.",

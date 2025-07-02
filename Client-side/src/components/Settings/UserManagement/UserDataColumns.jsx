@@ -23,9 +23,11 @@ import {
 import { useDispatch } from "react-redux";
 import { setUserList } from "../../../Redux/Slices/usersSlice";
 import axios from "axios";
+import { useSessionUser } from "../../../Hooks/useSessionUser";
 
 const UserActions = ({ row }) => {
   const dispatch = useDispatch();
+  const sessionUser = useSessionUser();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
 
@@ -41,6 +43,21 @@ const UserActions = ({ row }) => {
       email: emailId ,
     });
     fetchUsers();
+     const actData = {
+                    field: "settings",
+                    data: {
+                      username: sessionUser,
+                      date: new Date().toLocaleString("en-IN", {
+                        timeZone: "Asia/Kolkata",
+                      }),
+                      activity: `Deleted ${emailId} from users`,
+                      type:'Delete'
+                    },
+                  };
+                  const act = await axios.post(
+                    `${import.meta.env.VITE_CS365_URI}/api/activity`,
+                    actData
+                  );
   }
 
   return (

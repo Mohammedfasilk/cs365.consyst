@@ -28,6 +28,7 @@ import {
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useToast } from "../../Hooks/use-toast";
+import {useSessionUser} from '../../Hooks/useSessionUser'
 
 export function CostControlSheet() {
   const dispatch = useDispatch();
@@ -36,7 +37,7 @@ export function CostControlSheet() {
   );
   const { saved } = useSelector((state) => state.costControlSheet);
   const { isOpen } = useSelector((state) => state.costControlSheet);
-
+  const sessionUser = useSessionUser();
   const { selectedMonth } = useSelector((state) => state.costControlSheet);
   const [project, setProject] = useState({});
   const [monthlydata, setMonthlyData] = useState({});
@@ -89,6 +90,22 @@ export function CostControlSheet() {
         });
         return;
       }
+
+      const actData = {
+                    field: "cost_control",
+                    data: {
+                      username: sessionUser,
+                      date: new Date().toLocaleString("en-IN", {
+                        timeZone: "Asia/Kolkata",
+                      }),
+                      activity: `The project "${selectedProjectName}" ${selectedMonth} cost is updated`,
+                    },
+                  };
+                  const act = await axios.post(
+                    `${import.meta.env.VITE_CS365_URI}/api/activity`,
+                    actData
+                  );
+
       toast({
         title: "Monthly Budget Saved",
         description: "The monthly budget has been successfully saved.",

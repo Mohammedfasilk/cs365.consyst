@@ -18,9 +18,11 @@ import {
 } from "../UI/Form";
 import { useToast } from "../../Hooks/use-toast";
 import dayjs from "dayjs";
+import { useSessionUser } from "../../Hooks/useSessionUser";
 
 export default function GeneralSettings() {
   const { toast } = useToast();
+  const sessionUser = useSessionUser();
 
   const form = useForm({
     defaultValues: {
@@ -73,6 +75,20 @@ export default function GeneralSettings() {
       description: "Settings have been successfully saved.",
       icon: <CircleCheckIcon className="mr-4" color="green" />,
     });
+    const actData = {
+                    field: "settings",
+                    data: {
+                      username: sessionUser,
+                      date: new Date().toLocaleString("en-IN", {
+                        timeZone: "Asia/Kolkata",
+                      }),
+                      activity: `Updated global settings`,
+                    },
+                  };
+                  const act = await axios.post(
+                    `${import.meta.env.VITE_CS365_URI}/api/activity`,
+                    actData
+                  );
   } catch (error) {
     toast({
       title: "Save Failed",
