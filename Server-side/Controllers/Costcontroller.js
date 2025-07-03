@@ -1,4 +1,3 @@
-const axios = require("axios");
 const Project = require('../Models/ProjectModel')
 
 exports.fetchProjectList = async (req, res) => {

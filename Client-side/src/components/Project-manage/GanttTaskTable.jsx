@@ -33,18 +33,18 @@ import axios from "axios";
 
 // Columns definition
 const headCells = [
-  { id: "task", numeric: false, disablePadding: true, label: "Task Name" },
+  { id: "task", numeric: false, disablePadding: true, label: "Milestone" },
   {
     id: "start_date",
     numeric: false,
     disablePadding: false,
-    label: "Planned Start",
+    label: "Start Date",
   },
   {
     id: "end_date",
     numeric: false,
     disablePadding: false,
-    label: "Planned End",
+    label: "Target Date",
   },
   { id: "duration", numeric: true, disablePadding: false, label: "Duration" },
   { id: "actions", numeric: false, disablePadding: false, label: "Actions" }, // NEW

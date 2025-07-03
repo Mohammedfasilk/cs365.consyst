@@ -43,16 +43,27 @@ const timelineSchema = new mongoose.Schema(
       trim: true,
     },
     start_date: {
-      type: Date,
+      type: String,
       required: true,
     },
     end_date: {
-      type: Date,
+      type: String,
       required: true,
     },
     duration: {
       type: Number,
       required: true,
+    },
+    progress: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
+    key_deliverables: {
+      type: String,
+      required: false,
+      trim: true,
+      default: '',
     },
   },
 );

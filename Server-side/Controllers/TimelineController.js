@@ -3,8 +3,17 @@ const Project = require('../Models/ProjectModel')
 exports.updateTimelineTask = async (req, res) => {
   try {
     const { project_name, timeline } = req.body;
-    const { id , task, start_date, end_date, duration } = timeline
-    
+    // Convert start_date and end_date to string (YYYY-MM-DD)
+    const toDateString = d => {
+      if (!d) return d;
+      const date = new Date(d);
+      if (!isNaN(date)) return date.toISOString().slice(0, 10);
+      return d;
+    };
+    const { id , task, start_date, end_date, duration, key_deliverables, progress } = timeline;
+    const startDateStr = toDateString(start_date);
+    const endDateStr = toDateString(end_date);
+
     const updateTask = await Project.findOneAndUpdate(
       {
         project_name,
@@ -12,9 +21,11 @@ exports.updateTimelineTask = async (req, res) => {
       },
       {
         $set: {
-          "timeline.$.start_date": start_date,
-          "timeline.$.end_date": end_date,
+          "timeline.$.start_date": startDateStr,
+          "timeline.$.end_date": endDateStr,
           "timeline.$.duration": duration,
+          "timeline.$.key_deliverables": key_deliverables,
+          "timeline.$.progress": progress,
         },
       },
       { new: true }
@@ -76,3 +87,26 @@ exports.deleteTimelineTasks = async (req,res) =>{
          res.status(500).json({error:'Failed to Delete Task'})
      }
 }
+
+exports.getTimelineProjects = async (req, res) => {
+  try {
+    const { search = "" } = req.body || {};
+    // Build search filter for project_name (case-insensitive)
+    const filter = {
+      timeline: { $exists: true, $not: { $size: 0 } },
+    };
+    if (search && search.trim() !== "") {
+      filter.project_name = { $regex: search, $options: "i" };
+    }
+    const projects = await Project.find(
+      filter,
+      {
+        project_name: 1,
+        timeline: 1
+      }
+    );
+    res.status(200).json(projects);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to get projects with timeline' });
+  }
+};

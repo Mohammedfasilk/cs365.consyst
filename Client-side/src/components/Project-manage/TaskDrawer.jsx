@@ -36,7 +36,7 @@ function EnhancedTableToolbar({ onNewTaskClick }) {
       >
         <h1>Project Plan</h1>
         <Button onClick={onNewTaskClick} className="px-8">
-          New
+          New Milestone
         </Button>
       </Box>
     </Box>
@@ -57,6 +57,8 @@ export default function TaskDrawer() {
       start_date: "",
       end_date: "",
       duration: 1,
+      progress: 0,
+      key_deliverables: "",
     },
   });
 
@@ -118,7 +120,7 @@ export default function TaskDrawer() {
     }, 300); // wait 300ms before syncing duration
 
     return () => clearTimeout(dateTimeoutRef.current);
-  }, [startDate, endDate, duration, setValue]);
+  }, [startDate, endDate, setValue]); // Remove duration from dependency array
 
   // When duration changes -> update endDate (debounced)
   useEffect(() => {
@@ -159,6 +161,8 @@ export default function TaskDrawer() {
       start_date: task.start_date?.split("T")[0] || "",
       end_date: task.end_date?.split("T")[0] || "",
       duration: task.duration || 1,
+      progress: typeof task.progress === 'number' ? task.progress : 0,
+      key_deliverables: task.key_deliverables || "",
     });
   };
 
@@ -175,6 +179,7 @@ export default function TaskDrawer() {
       setEditTask(null);
       setDrawerOpen(false);
       getTasks();
+      
     } catch (err) {
       console.log("Error saving task", err);
     }
@@ -198,6 +203,8 @@ export default function TaskDrawer() {
               start_date: "",
               end_date: "",
               duration: 1,
+              progress: 0,
+              key_deliverables: "",
             });
             setDrawerOpen(true);
           }}
@@ -218,7 +225,7 @@ export default function TaskDrawer() {
             top: 10,
             right: 0,
             width: 320,
-            height: "90%",
+            height: "98%" ,// Increased from 90% to 98% for more vertical space
             borderLeft: "1px solid #ddd",
             boxShadow: "-4px 0 10px rgba(0,0,0,0.1)",
             zIndex: 10,
@@ -233,7 +240,7 @@ export default function TaskDrawer() {
               alignItems="center"
             >
               <Typography variant="h6">
-                {editTask ? "Edit Task" : "New Task"}
+                {editTask ? "Edit Task" : "New Milestone"}
               </Typography>
               <IconButton onClick={() => setDrawerOpen(false)} size="small">
                 <CloseIcon />
@@ -243,7 +250,7 @@ export default function TaskDrawer() {
             <Form {...form}>
               <form onSubmit={handleSubmit(onSubmit)}>
                 <TextField
-                  label="Task Name"
+                  label="Milestone"
                   fullWidth
                   {...register("task", { required: true })}
                   sx={{ mb: 2 }}
@@ -270,6 +277,22 @@ export default function TaskDrawer() {
                   inputProps={{ min: 1 }}
                   fullWidth
                   {...register("duration", { required: true, min: 1 })}
+                  sx={{ mb: 2 }}
+                />
+                <TextField
+                  label="Milestone Weight (%)"
+                  type="number"
+                  inputProps={{ min: 0, max: 100 }}
+                  fullWidth
+                  {...register("progress", { required: true, min: 0, max: 100 })}
+                  sx={{ mb: 2 }}
+                />
+                <TextField
+                  label="Key Deliverables"
+                  multiline
+                  minRows={3}
+                  fullWidth
+                  {...register("key_deliverables")}
                   sx={{ mb: 2 }}
                 />
 

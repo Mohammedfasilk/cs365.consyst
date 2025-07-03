@@ -670,7 +670,7 @@ const ProjectSheet = ({ fetchData }) => {
               </TabsContent>
 
               <TabsContent value="timeline">
-                <div className="h-[500px]">
+                <div className="h-[700px]">{/* Adjusted to match TaskDrawer height */}
                     <TaskDrawer/>
                 </div>
               </TabsContent>

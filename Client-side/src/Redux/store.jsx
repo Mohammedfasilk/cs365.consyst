@@ -5,6 +5,7 @@ import settingsReducer from './Slices/settingsSlice';
 import signatureSheetReducer from './Slices/signatureSheetSlice';
 import selectedProject from './Slices/SelectedProject';
 import costControlSheetReducer from './Slices/costControlsheet';
+import scheduleSheetReducer from './Slices/scheduleSheetslice';
 
 const store = configureStore({
   reducer: {    
@@ -21,8 +22,10 @@ const store = configureStore({
     selectedProject: selectedProject,
 
     //Cost Control
-    costControlSheet: costControlSheetReducer
+    costControlSheet: costControlSheetReducer,
 
+    //Schedule
+    scheduleSheet: scheduleSheetReducer
   },
 });
 

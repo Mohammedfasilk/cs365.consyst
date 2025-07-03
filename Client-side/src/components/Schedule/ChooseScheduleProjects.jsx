@@ -13,45 +13,39 @@ import { Check } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useDispatch, useSelector } from "react-redux";
 import { setIsSaved, setSelectedProject, setSelectedProjectName } from "../../Redux/Slices/SelectedProject";
-// import { useProjectSheetStore } from "@/utils/zustandStore";
+import { setSelectedScheduleProjectName } from "../../Redux/Slices/scheduleSheetslice";
 
-export function ChooseProject({ project_name }) {
+export function ChooseScheduleProjects({ project_name }) {
   const dispatch = useDispatch();
 
   const [projectList, setProjectList] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [search, setSearch] = useState({ search: "" });
 
-  const setSalesOrder = []; //from redux
   const selectedProject = useSelector((state) => state.selectedProject.project);
-  const selectedProjectName = useSelector((state) => state.selectedProject.selectedProjectName);
-  // const setSelectedProject = []; //form redux
+  const selectedScheduleProjectName = useSelector((state) => state.scheduleSheet.selectedScheduleProjectName);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const res = await axios.post(
-          `${import.meta.env.VITE_CS365_URI}/api/projects/list`,
+          `${import.meta.env.VITE_CS365_URI}/api/timeline/projects`,
           search
         );
         const data = await res.data;
-
         setProjectList(data);
-        
       } catch (error) {
-        console.error("Error fetching Project List:", error);
+        console.error("Error fetching Timeline Project List:", error);
       }
     };
-
     fetchData();
   }, [search]);
-
 
   return (
     <Popover open={dropdownOpen} onOpenChange={setDropdownOpen}>
       <PopoverTrigger asChild>
         <div className="text-left text-2xl text-gray-400 cursor-pointer border-b-2 border-transparent hover:border-gray-200">
-          {selectedProjectName || "Choose Project"}
+          {selectedScheduleProjectName || "Choose Project"}
         </div>
       </PopoverTrigger>
       <PopoverContent className="w-[760px] p-0 max-h-[400px] overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}>
@@ -69,18 +63,18 @@ export function ChooseProject({ project_name }) {
                 <CommandItem
                   key={project._id}
                   value={project.project_name}
-                  onSelect={() => { 
-                    dispatch(setSelectedProjectName(project.name));                    
+                  onSelect={() => {
+                    dispatch(setSelectedProjectName(project.name));
                     dispatch(setSelectedProject(project));
-                    dispatch(setIsSaved(false))
+                    dispatch(setSelectedScheduleProjectName(project.project_name));
+                    dispatch(setIsSaved(false));
                     setDropdownOpen(false);
-                    // fetchSalesOrderData(project.sales_order);
                   }}
                 >
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
-                      selectedProject?.name === project.name
+                      selectedScheduleProjectName === project.project_name
                         ? "opacity-100"
                         : "opacity-0"
                     )}

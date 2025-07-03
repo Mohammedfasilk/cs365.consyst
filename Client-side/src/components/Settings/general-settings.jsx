@@ -51,6 +51,7 @@ export default function GeneralSettings() {
     const group_value =
       Number(cmefTarget) +
       Number(ctiplTarget) / Number(usdToinr) +
+      
       Number(cdiplTarget) / Number(usdToinr);
 
     return parseFloat(group_value.toFixed(2));
