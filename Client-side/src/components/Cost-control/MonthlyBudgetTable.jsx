@@ -108,8 +108,8 @@ const getTotalExpenses = (billingData, directExpensesData, investorProfitSharePe
   return getTotalDirectExpenses(directExpensesData) + getTotalIndirectExpenses(billingData, directExpensesData, investorProfitSharePercent, miscellaneousIndirectExpense);
 };
 
-const getNetProfitLoss = (billingData, directExpensesData) =>
-  getBillingTotal(billingData) - getTotalDirectExpenses(directExpensesData);
+const getNetProfitLoss = (billingData, directExpensesData, investorProfitSharePercent, miscellaneousIndirectExpense) =>
+  getBillingTotal(billingData) - getTotalExpenses(billingData, directExpensesData, investorProfitSharePercent, miscellaneousIndirectExpense);
 
 const getNetProfitLossPercent = (billingData, directExpensesData, investorProfitSharePercent, miscellaneousIndirectExpense) => {
   return getNetProfitLoss(billingData, directExpensesData, investorProfitSharePercent, miscellaneousIndirectExpense) / getBillingTotal(billingData)
