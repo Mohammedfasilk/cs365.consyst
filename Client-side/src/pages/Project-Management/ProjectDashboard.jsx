@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Tabs, TabsList, TabsTrigger } from "../../components/UI/Tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/UI/Tabs";
 import { ArrowDown, ArrowDown01, ArrowUp, SquareChartGantt } from "lucide-react";
 import ChooseProject from "../../components/Project/ChooseProject";
 import MonthwiseTable from "../../components/Project/MonthwiseTable";
@@ -14,6 +14,7 @@ import MonthlyLineChart from "../../components/Project/MonthlyLineChart";
 import { Card, CardHeader } from "../../components/UI/Card";
 import { useAuthRedirect } from "../../Hooks/useAuthRoute";
 import SquareIcon from "@mui/icons-material/Square";
+import ProgressChart from "../../components/Schedule/ProgressChart";
 
 function ProjectDashboard() {
   useAuthRedirect();
@@ -131,97 +132,122 @@ function ProjectDashboard() {
               <SquareChartGantt className="mr-2 h-4 w-4" />
               Cost Control Report
             </TabsTrigger>
+            <TabsTrigger value="project-progress">
+              Project Progress
+            </TabsTrigger>
           </TabsList>
-        </Tabs>
-        <h1 className="mb-6">Month-Wise Project Cost Control Report</h1>
-        <div className="flex mb-8 justify-between items-center">
-          <div className="border w-lg p-1 rounded hover:bg-gray-100">
-            <ChooseProject />
-          </div>
-        </div>
-
-        <Card className="px-5 mb-10">
-          <CardHeader className="text-center font-bold text-lg">
-            Monthly Chart
-          </CardHeader>
-          <MonthlyLineChart data={chartData} />
-        </Card>
-        {choosenProject == "" ? null : //   No Data Found // <div className="w-full h-[30vh] flex justify-center items-center border border-[var(--secondary)] italic rounded text-[var(--secondary)]">
-        // </div>
-        loader ? (
-          <div className="w-full h-[30vh] flex justify-center items-center">
-            <ScaleLoading size={60} />
-          </div>
-        ) : (
-          <div className="flex-col">
-            <div className="flex justify-between items-center">
-              <div className="flex space-x-5">
-                <div className="flex items-center space-x-2 py-5">
-                  <Checkbox
-                    checked={showCurrent}
-                    onCheckedChange={(value) => {
-                      setShowCurrent(value);
-                    }}
-                  />
-                  <span>Current</span>
-                </div>
-                <div className="flex items-center space-x-2 py-5">
-                  <Checkbox
-                    checked={ShowProjected}
-                    onCheckedChange={(value) => {
-                      setShowProjected(value);
-                    }}
-                  />
-                  <span>Projection</span>
+          <TabsContent value="project-details">
+            <div>
+              <h1 className="mb-6">Month-Wise Project Cost Control Report</h1>
+              <div className="flex mb-8 justify-between items-center">
+                <div className="border w-lg p-1 rounded hover:bg-gray-100">
+                  <ChooseProject />
                 </div>
               </div>
-              <div className="flex space-x-5">
-                <div className="flex items-center">
-                <SquareIcon className="text-yellow-200/80" /><ArrowDown className="w-4"/> 10%
-              </div>
+              {choosenProject == "" ? null :
+              loader ? (
+                <div className="w-full h-[30vh] flex justify-center items-center">
+                  <ScaleLoading size={60} />
+                </div>
+              ) : (
+                <Card className="px-5 mb-10">
+                <CardHeader className="text-center font-bold text-lg">
+                  Monthly Chart
+                </CardHeader>
+                <MonthlyLineChart data={chartData} />
+              </Card>
+              )}
               
-              <div className="flex items-center">
-                <SquareIcon className="text-amber-500/60" /> 10%-20%
-              </div>
+              {choosenProject == "" ? null : //   No Data Found // <div className="w-full h-[30vh] flex justify-center items-center border border-[var(--secondary)] italic rounded text-[var(--secondary)]">
+              // </div>
+              loader ? (
+                null
+              ) : (
+                <div className="flex-col">
+                  <div className="flex justify-between items-center">
+                    <div className="flex space-x-5">
+                      <div className="flex items-center space-x-2 py-5">
+                        <Checkbox
+                          checked={showCurrent}
+                          onCheckedChange={(value) => {
+                            setShowCurrent(value);
+                          }}
+                        />
+                        <span>Current</span>
+                      </div>
+                      <div className="flex items-center space-x-2 py-5">
+                        <Checkbox
+                          checked={ShowProjected}
+                          onCheckedChange={(value) => {
+                            setShowProjected(value);
+                          }}
+                        />
+                        <span>Projection</span>
+                      </div>
+                    </div>
+                    <div className="flex space-x-5">
+                      <div className="flex items-center">
+                      <SquareIcon className="text-yellow-200/80" /><ArrowDown className="w-4"/> 10%
+                    </div>
+                    
+                    <div className="flex items-center">
+                      <SquareIcon className="text-amber-500/60" /> 10%-20%
+                    </div>
 
-              <div className="flex items-center">
-                <SquareIcon className="text-red-500/50" /><ArrowUp className="w-4"/> 20%
-              </div>
-              </div>
-            </div>
-            <div className="flex budget-sheet mb-12 w-full">
-              <div className="pointer-events-none">
-                <CostControlBudgetTable project={budget} />
-              </div>
-              <div
-                className="flex overflow-x-scroll"
-                style={{ scrollbarWidth: "thin" }}
-              >
-                {showCurrent || ShowProjected
-                  ? monthWiseData.map((months, index) => {
-                      return (
-                        <div key={index} className="mx-px pointer-events-none">
-                          <MonthwiseTable
-                            project={months}
-                            title={months?.month}
-                            showProjected={ShowProjected}
-                            showCurrent={showCurrent}
-                            budget={budget}
-                          />
-                        </div>
-                      );
-                    })
-                  : null}
-                <div className="pointer-events-none">
-                  <LatestProjectionTable project={latestProjection} />
+                    <div className="flex items-center">
+                      <SquareIcon className="text-red-500/50" /><ArrowUp className="w-4"/> 20%
+                    </div>
+                    </div>
+                  </div>
+                  <div className="flex budget-sheet mb-12 w-full">
+                    <div className="pointer-events-none">
+                      <CostControlBudgetTable project={budget} />
+                    </div>
+                    <div
+                      className="flex overflow-x-scroll"
+                      style={{ scrollbarWidth: "thin" }}
+                    >
+                      {showCurrent || ShowProjected
+                        ? monthWiseData.map((months, index) => {
+                            return (
+                              <div key={index} className="mx-px pointer-events-none">
+                                <MonthwiseTable
+                                  project={months}
+                                  title={months?.month}
+                                  showProjected={ShowProjected}
+                                  showCurrent={showCurrent}
+                                  budget={budget}
+                                />
+                              </div>
+                            );
+                          })
+                        : null}
+                      <div className="pointer-events-none">
+                        <LatestProjectionTable project={latestProjection} />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
-          </div>
-        )}
+          </TabsContent>
+          <TabsContent value="project-progress">
+            <div className="flex justify-center items-center w-full min-h-[60vh]">
+              <Card className="w-full">
+                <CardHeader>
+                  <div className="text-center font-bold text-lg">Progress</div>
+                </CardHeader>
+                <div className="p-6 pt-0">
+                  <ProgressChart />
+                </div>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </section>
   );
 }
+
 
 export default ProjectDashboard;
