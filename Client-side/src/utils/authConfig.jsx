@@ -1,7 +1,7 @@
 let msalConfig = null;
 
 export const loginRequest = {
-  scopes: ['User.Read'],
+  scopes: ['User.Read', "Tasks.ReadWrite"],
 };
 
 export const getMsalConfig = async () => {

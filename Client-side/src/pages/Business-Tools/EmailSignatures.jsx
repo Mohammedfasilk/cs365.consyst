@@ -6,7 +6,7 @@ import { SignatureSheet } from "../../components/Signatures/SignatureSheet";
 import { Separator } from "../../components/UI/Separator";
 import { useAuthRedirect } from "../../Hooks/useAuthRoute";
 
-function signatures() {
+function Emailsignatures() {
 
   useAuthRedirect();
 
@@ -44,4 +44,4 @@ function signatures() {
     </div>
   );
 }
-export default signatures;
+export default Emailsignatures;

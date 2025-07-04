@@ -8,53 +8,77 @@ import {
 } from "./Dropdown-menu";
 
 import { SquareUserRound } from "lucide-react";
+import { useEffect, useState, useMemo } from "react";
 import { useMsal } from "@azure/msal-react";
+import { loginRequest } from "../../utils/authConfig";
 
 function UserDropdownMenu() {
   const { instance, accounts } = useMsal();
-  const user = accounts[0]?.name;
+  const user = useMemo(() => accounts[0], [accounts]);
+  const [avatarUrl, setAvatarUrl] = useState(null);
+
+  useEffect(() => {
+    const fetchProfilePhoto = async () => {
+      if (!user) return;
+
+      try {
+        const { accessToken } = await instance.acquireTokenSilent({
+          ...loginRequest,
+          account: user,
+        });
+
+        const res = await fetch("https://graph.microsoft.com/v1.0/me/photo/$value", {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+
+        if (!res.ok) throw new Error("Photo not found");
+
+        const blob = await res.blob();
+        setAvatarUrl(URL.createObjectURL(blob));
+      } catch (err) {
+        console.warn("Unable to fetch profile photo:", err.message);
+      }
+    };
+
+    fetchProfilePhoto();
+  }, [instance, user]);
 
   const handleLogout = () => {
-    const accounts = instance.getAllAccounts();
-
-    if (accounts.length > 0) {
-      instance.logoutRedirect({
-        account: accounts[0],
-        postLogoutRedirectUri: '/',
-      });
-    } else {
-      instance.logoutRedirect({
-        postLogoutRedirectUri: '/',
-      });
-    }
+    instance.logoutRedirect({
+      account: user,
+      postLogoutRedirectUri: '/',
+    });
     sessionStorage.clear();
   };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <div className="flex items-center mr-4 gap-4 cursor-pointer">
-          {user ? (
-            <>
-              <p className="text-white truncate w-40">{user}</p>
-              {user.photo ? (
-                <img src='' width={32} height={32} alt="profile-pic" />
-              ) : <SquareUserRound className="text-white" />}
-            </>
+        <div className="flex items-center gap-4 mr-4 cursor-pointer">
+          <p className="text-white truncate w-40">{user?.name || "Guest"}</p>
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt="profile-pic"
+              className="w-8 h-8 rounded-full object-cover"
+            />
           ) : (
-            <p className="text-white truncate w-40">Guest</p>
+            <SquareUserRound className="text-white w-8 h-8" />
           )}
         </div>
       </DropdownMenuTrigger>
+
       <DropdownMenuContent className="w-56">
         <DropdownMenuLabel>Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout}>
-          Log out
-        </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }
 
 export default UserDropdownMenu;
+
+

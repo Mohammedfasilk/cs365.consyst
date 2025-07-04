@@ -22,23 +22,20 @@ export default function Sidebar() {
   const menuItems = [
     {
       icon: <ChartNoAxesCombined className="h-5 w-5" />,
-      label: "Dashboards",
+      label: "Sales",
       href: "#",
       subItems: [
-        { label: "Sales", href: "/dashboards/sales" },
-        { label: "Finance", href: "/dashboards/finance" },
-        { label: "Project", href: "/dashboards/project-report" },
+        { label: "Sales Dashboard", href: "/Sales/sales-dashboard" },
+        { label: "Order Booking", href: "/Sales/order-booking" },
       ],
     },
     {
       icon: <DollarSign className="h-5 w-5" />,
-      label: "Banking",
+      label: "Finance",
       href: "#",
       subItems: [
-        { label: "Axis Bank", href: "/banking/axis-bank" },
-        { label: "HDFC Bank", href: "/banking/hdfc-bank" },
-        { label: "ICICI Bank", href: "/banking/icici-bank" },
-        { label: "RAK Bank", href: "/banking/rak-bank" },
+        { label: "Finance Dashboard", href: "/Finance/finance-dashboard" },
+        { label: "Banking", href: "/Finance/Banking" },
       ],
     },
     {
@@ -46,9 +43,10 @@ export default function Sidebar() {
       label: "Project Management",
       href: "#",
       subItems: [
+        { label: "Project Dashboard", href: "/project-management/project-dashboard" },
         { label: "Project", href: "/project-management/project" },
         { label: "Cost Control", href: "/project-management/cost-control" },
-        { label: "Schedule", href: "/project-management/schedule" },
+        { label: "Schedule Update", href: "/project-management/schedule" },
       ],
     },
     {
@@ -79,7 +77,7 @@ export default function Sidebar() {
               <div className={`${isHovered ? "h-auto" : "h-10"} max-h`}>
                 <Link
                   to={item.href}
-                  className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground ${isHovered ? "justify-start" : ""
+                  className={`flex items-center gap-3 rounded-md px-3 py-2 text-base font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground ${isHovered ? "justify-start" : ""
                     }`}
                 >
                   {item.icon}
@@ -114,8 +112,8 @@ export default function Sidebar() {
       </nav>
       <div
         className={`flex ${!isHovered
-            ? "flex-col justify-center"
-            : "flex-row justify-start ml-4 "
+          ? "flex-col justify-center"
+          : "flex-row justify-start ml-4 "
           }  items-center py-4 gap-2  mt-auto border-t`}
       >
         {/* <div>

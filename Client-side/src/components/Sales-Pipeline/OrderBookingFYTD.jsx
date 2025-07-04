@@ -47,24 +47,21 @@ const options = {
 };
 
 const OrderBookingFYTD = ({ company, value: initialValue, isGroup }) => {
-
-  const dispatch = useDispatch()
-  const { settings } = useSelector((state) => state.settings)
-
-  useEffect(() => {
-    if (!settings || Object.keys(settings).length == 0) {
-      dispatch(fetchSettings())
-    }
-  }, [dispatch, settings])
-
+  const dispatch = useDispatch();
+  const { settings } = useSelector((state) => state.settings);
 
   const [value, setValue] = useState(initialValue);
   const [series, setSeries] = useState([0]);
   const [isUsd, setIsUsd] = useState(false);
 
+  useEffect(() => {
+    if (!settings || Object.keys(settings).length === 0) {
+      dispatch(fetchSettings());
+    }
+  }, [dispatch, settings]);
+
   const getPercent = (companyName) => {
     let percent = 0;
-
     switch (companyName) {
       case "CONSYST Digital Industries Pvt. Ltd":
         percent = (initialValue / settings?.cdiplTarget || 0) * 100;
@@ -81,7 +78,6 @@ const OrderBookingFYTD = ({ company, value: initialValue, isGroup }) => {
       default:
         percent = 0;
     }
-
     setSeries([Number(percent.toFixed(2))]);
   };
 
@@ -101,71 +97,78 @@ const OrderBookingFYTD = ({ company, value: initialValue, isGroup }) => {
     const currency = isUsd
       ? "USD"
       : company === "CONSYST Middle East FZ-LLC"
-        ? "AED"
-        : "INR";
+      ? "AED"
+      : "INR";
 
     return val >= 1e6
-      ? `${currency} ${(val / 1e6).toFixed(3)}M`
-      : `${currency} ${(val / 1e3).toFixed(3)}K`;
+      ? `${currency} ${(val / 1e6).toFixed(2)}M`
+      : `${currency} ${(val / 1e3).toFixed(2)}K`;
   };
 
   const handleUSDConvertion = (checked) => {
     setIsUsd(checked);
-
-    if (checked) {
-      const rate =
-        company === "CONSYST Middle East FZ-LLC"
-          ? settings?.usdToaed || 1
-          : settings?.usdToinr || 1;
-      setValue(initialValue / rate);
-    } else {
-      setValue(initialValue);
-    }
+    const rate =
+      company === "CONSYST Middle East FZ-LLC"
+        ? settings?.usdToaed || 1
+        : settings?.usdToinr || 1;
+    setValue(checked ? initialValue / rate : initialValue);
   };
 
-  return !isGroup ? (
-    <Card className="flex-1 p-4 flex flex-col justify-between">
-      <div className="flex justify-between items-start">
-        <div>
+  const hideChartCompanies = [
+    "CONSYST Digital Industries Pvt. Ltd",
+    "CONSYST Technologies (India) Pvt. Ltd.",
+    "CONSYST Middle East FZ-LLC",
+  ];
 
-          <p className="mb-2 font-medium">Order Booking - This FY</p>
-          <p className="mb-6 text-sm">{company}</p>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Switch
-            onCheckedChange={handleUSDConvertion}
-            id="is-usd"
-            defaultChecked={company === "CONSYST Middle East FZ-LLC"}
-          />
-          <Label htmlFor="is-usd">USD</Label>
-        </div>
-      </div>
-      <div id="chart">
-        <ReactApexChart options={options} series={series} type="radialBar" />
-      </div>
-      <p className="text-center font-medium text-2xl mt-4 text-csblue">
-        {formatValue(value)}
-      </p>
-    </Card>
-  ) : (
-    <Card className="flex-1 p-4 flex flex-col justify-between">
-      <div className="flex justify-between items-start">
+  const isSimpleCard = !isGroup && hideChartCompanies.includes(company);
+
+  return (
+    <Card className="bg-white rounded-lg shadow p-4 flex flex-col items-center justify-center h-full w-full">
+      <div className="flex justify-between items-start w-full">
         <div>
-          <p className="mb-2 font-medium">Consolidated Order Booking - This FY</p>
-          <p className="mb-6 text-sm">{company}</p>
+          <p className="mb-1 text-sm font-semibold text-gray-700">
+            {isGroup
+              ? "Consolidated Order Booking - This FY"
+              : "Order Booking - This FY"}
+          </p>
+          <p className="mb-4 text-xs text-gray-500">{company}</p>
         </div>
+        {!isGroup && (
+          <div className="flex items-center space-x-2">
+            <Switch
+              onCheckedChange={handleUSDConvertion}
+              id="is-usd"
+              defaultChecked={company === "CONSYST Middle East FZ-LLC"}
+            />
+            <Label htmlFor="is-usd">USD</Label>
+          </div>
+        )}
       </div>
-      <div id="chart">
-        <ReactApexChart options={options} series={series} type="radialBar" />
-      </div>
-      <p className="text-center font-medium text-2xl mt-4 text-csblue">
-        {`USD ${initialValue >= 1e6
-            ? (initialValue / 1e6).toFixed(3) + "M"
-            : (initialValue / 1e3).toFixed(3) + "K"
-          }`}
+
+      {!isSimpleCard && (
+        <div className="flex-1 w-full h-full flex items-center justify-center">
+          <ReactApexChart
+            options={options}
+            series={series}
+            type="radialBar"
+            height={"100%"}
+            width={"100%"}
+          />
+        </div>
+      )}
+
+      <p className="text-center font-medium text-xl text-[var(--csblue)]">
+        {isGroup
+          ? `USD ${
+              initialValue >= 1e6
+                ? (initialValue / 1e6).toFixed(2) + "M"
+                : (initialValue / 1e3).toFixed(2) + "K"
+            }`
+          : formatValue(value)}
       </p>
     </Card>
   );
 };
 
 export default OrderBookingFYTD;
+

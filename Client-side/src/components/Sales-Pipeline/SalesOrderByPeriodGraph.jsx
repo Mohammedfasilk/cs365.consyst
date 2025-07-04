@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import axios from "axios";
 import ReactApexChart from "react-apexcharts";
@@ -8,24 +9,77 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchSettings } from "../../Redux/Slices/settingsSlice";
 
 export function SalesOrderByPeriodGraph(props) {
-  const [values, setValues] = useState(props.values);
-  const [dates, setDates] = useState(props.dates);
-  const { settings } = useSelector((state) => state.settings)
+  const { settings } = useSelector((state) => state.settings);
   const dispatch = useDispatch();
-
-  useEffect(() => {
-    if (!settings || Object.keys(settings).length == 0) {
-      dispatch(fetchSettings())
+  // Get FY start date from settings or default to 2024-04-01
+  // Always use settings?.currentFyStartDate for consistency
+  const fyStartDate = settings?.currentFyStartDate || "2024-04-01";
+  // Generate months for the FY, returning array of {iso, label}
+  const generateFYMonthLabels = (fyStartDate) => {
+    const months = [];
+    const start = new Date(fyStartDate);
+    let year = start.getFullYear();
+    let month = start.getMonth();
+    for (let i = 0; i < 12; i++) {
+      const date = new Date(year, month, 1);
+      months.push({
+        iso: date.toISOString().split("T")[0],
+        label: date.toLocaleString("en-US", { month: "short", year: "numeric" })
+      });
+      month++;
+      if (month > 11) {
+        month = 0;
+        year++;
+      }
     }
-  }, [dispatch, settings])
+    return months;
+  };
+  const [dates, setDates] = useState(() => generateFYMonthLabels(fyStartDate));
+  const [values, setValues] = useState(Array(12).fill(0));
+  const [isQuarterly, setIsQuarterly] = useState(false);
+
+  // Fetch settings if not loaded, and update months/data when settings change
+  // Only fetch settings if not loaded
+  // Fetch settings if not loaded, then fetch data when settings or isQuarterly changes
+  useEffect(() => {
+    if (!settings || Object.keys(settings).length === 0) {
+      dispatch(fetchSettings());
+    } else if (settings.currentFyStartDate) {
+      fetchData(settings.currentFyStartDate);
+    }
+  }, [dispatch, settings]);
 
 
+  // Helper to group values into quarters
+  const groupToQuarters = (values) => [
+    values.slice(0, 3).reduce((a, b) => a + b, 0),
+    values.slice(3, 6).reduce((a, b) => a + b, 0),
+    values.slice(6, 9).reduce((a, b) => a + b, 0),
+    values.slice(9, 12).reduce((a, b) => a + b, 0),
+  ];
+
+  // Helper to get quarter labels for the FY
+  const getQuarterLabels = (fyStartDate) => {
+    const start = new Date(fyStartDate);
+    const fyStartYear = start.getFullYear();
+    const fyEndYear = start.getMonth() === 0 ? fyStartYear : fyStartYear + 1;
+    const fyLabel = `${fyStartYear.toString().slice(-2)}-${fyEndYear.toString().slice(-2)}`;
+    return [
+      `Q1 ${fyLabel}`,
+      `Q2 ${fyLabel}`,
+      `Q3 ${fyLabel}`,
+      `Q4 ${fyLabel}`,
+    ];
+  };
+
+  const chartLabels = isQuarterly ? getQuarterLabels(fyStartDate) : dates.map(m => m.label);
+  const chartValues = isQuarterly ? groupToQuarters(values) : values;
 
   const series = [
     {
       name: "Order Value",
       type: "column",
-      data: values,
+      data: chartValues,
     },
   ];
 
@@ -79,12 +133,17 @@ export function SalesOrderByPeriodGraph(props) {
         stops: [0, 100, 100, 100],
       },
     },
-    labels: dates,
+    labels: chartLabels,
     markers: {
       size: 0,
     },
     xaxis: {
-      type: "datetime",
+      categories: chartLabels,
+      labels: {
+        formatter: function (value) {
+          return value;
+        },
+      },
     },
     yaxis: {
       title: {
@@ -118,46 +177,43 @@ export function SalesOrderByPeriodGraph(props) {
     },
   };
 
-  const handleSwitch = async (isSwitchedOn) => {
-    if (isSwitchedOn) {
-      const fyDate = settings?.currentFyStartDate;
-      const usd = settings?.usdToinr;
-      const aed = settings?.usdToaed;
-      const response = await axios.post(
-        `${import.meta.env.VITE_CS365_URI}/api/sales-analysis/order-booking`,
-        { fyDate, usd, aed }
-      );
-      const data = response.data;
-
-      setValues(data.valueList);
-      setDates(data.dateList);
-    } else {
-      const fyDate = settings?.currentFyStartDate;
-      const usd = settings?.usdToinr;
-      const aed = settings?.usdToaed;
-      const response = await axios.post(`${import.meta.env.VITE_CS365_URI}/api/sales-analysis/order-booking-monthly`, {
-        fyDate,
-        usd,
-        aed,
-      });
-      const data = response.data;
-
-      setValues(data.valueList);
-      setDates(data.dateList);
+  // Align API data to months array
+  const alignValuesToMonths = (months, apiData) => {
+    if (typeof apiData === 'object' && apiData !== null && !Array.isArray(apiData)) {
+      return months.map(m => apiData[m.iso] ?? 0);
     }
+    // If array, assume order matches months
+    return months.map((m, i) => apiData[i] ?? 0);
   };
-  useEffect(()=>{
-    handleSwitch();
-  },[])
 
+  // Fetch data from API and align to months
+  async function fetchData(fyDate) {
+    const usd = settings?.usdToinr;
+    const aed = settings?.usdToaed;
+    const endpoint = "/api/sales-analysis/order-booking-monthly";
+    const response = await axios.post(`${import.meta.env.VITE_CS365_URI}${endpoint}`, {
+      fyDate,
+      usd,
+      aed,
+    });
+    const data = response.data;
+    const monthsArr = generateFYMonthLabels(fyDate);
+    const aligned = alignValuesToMonths(monthsArr, data.valueList);
+    setDates(monthsArr);
+    setValues(aligned);
+  }
+
+  // Switch handler only sets state
+  const handleSwitch = setIsQuarterly;
+// (Removed duplicate useEffect)
   return (
-    <Card className="w-full">
+    <Card className="w-full bg-white">
       <div className="flex items-center m-4 mb-6 gap-4">
         <div>
           <p className="font-medium">Order Booking - This FY</p>
         </div>
         <div className="flex items-center space-x-2">
-          <Switch onCheckedChange={handleSwitch} id="is-quarterly" />
+          <Switch onCheckedChange={handleSwitch} checked={isQuarterly} id="is-quarterly" />
           <Label htmlFor="is-quarterly">Quarterly</Label>
         </div>
       </div>

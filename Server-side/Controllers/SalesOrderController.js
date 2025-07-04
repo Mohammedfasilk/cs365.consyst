@@ -62,7 +62,7 @@ exports.monthlySalesOrderBooking = async (req, res) => {
 
     let currentDate = new Date(
       currentFyStartDate.getFullYear(),
-      currentFyStartDate.getMonth() - 1,
+      currentFyStartDate.getMonth(),
       1
     );
 

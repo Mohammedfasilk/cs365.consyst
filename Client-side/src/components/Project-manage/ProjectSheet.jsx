@@ -40,7 +40,7 @@ import { format } from "date-fns";
 import { Textarea } from "../UI/TextArea";
 import { Calendar } from "../UI/Calender";
 import CostEstimationTable from "../CostEstimationTable";
-import { ChooseProject } from "../Project-manage/ChooseProject";
+import { ChooseProject } from "./ChooseProject";
 import { useDispatch, useSelector } from "react-redux";
 import {
   clearSelectedProject,

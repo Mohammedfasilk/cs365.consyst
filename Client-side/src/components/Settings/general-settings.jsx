@@ -129,7 +129,7 @@ export default function GeneralSettings() {
         <div className="flex justify-between">
           <h1>Global Settings</h1>
           <Button
-            className="bg-[var(--csblue)] hover:bg-[var(--csblue/90)] px-8"
+            className="bg-[var(--csblue)] hover:bg-[var(--csblue)]/90 px-8"
             type="submit"
           >
             Save
