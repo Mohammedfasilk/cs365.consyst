@@ -28,29 +28,38 @@ import { Input } from "../UI/Input";
 import { ChevronDownIcon } from "lucide-react";
 import ScaleLoading from "../UI/ScaleLoader";
 import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { setSelectedScheduleProjectName, setIsOpen, setSelectedMonth } from "../../Redux/Slices/scheduleSheetslice";
 
 export default function DataTable({ columns, data, loading, filterKey = "task" }) {
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
   const [columnVisibility, setColumnVisibility] = useState({});
   const [rowSelection, setRowSelection] = useState({});
+  const [globalFilter, setGlobalFilter] = useState("");
+  const dispatch = useDispatch();
 
-  const table = useReactTable({
+   const table = useReactTable({
     data,
     columns,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
     state: {
       sorting,
       columnFilters,
       columnVisibility,
       rowSelection,
+      globalFilter, // ← Add this
+    },
+    onGlobalFilterChange: setGlobalFilter,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getGlobalRowModel: getCoreRowModel(),
+    globalFilterFn: (row, columnId, filterValue) => {
+      const name = row.getValue("project_name")?.toLowerCase() ?? "";
+      const desc = row.getValue("project_description")?.toLowerCase() ?? "";
+      const search = filterValue.toLowerCase();
+      return name.includes(search) || desc.includes(search);
     },
   });
 
@@ -58,15 +67,13 @@ export default function DataTable({ columns, data, loading, filterKey = "task" }
     <div>
       <div className="flex items-center py-4">
         <Input
-          placeholder={`Filter Project...`}
-          value={table.getColumn(filterKey)?.getFilterValue() ?? ""}
-          onChange={(event) =>
-            table.getColumn(filterKey)?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm outline p-2 rounded"
+          placeholder="Search projects..."
+          value={globalFilter}
+          onChange={(e) => setGlobalFilter(e.target.value)}
+          className="max-w-sm p-2 outline rounded"
         />
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+          <DropdownMenuTrigger asChild >
             <Button variant="outline" className="ml-auto">
               Columns <ChevronDownIcon className="ml-2 h-4 w-4" />
             </Button>
@@ -109,7 +116,7 @@ export default function DataTable({ columns, data, loading, filterKey = "task" }
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
+           <TableBody>
             {table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
@@ -117,7 +124,20 @@ export default function DataTable({ columns, data, loading, filterKey = "task" }
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell
+                      key={cell.id}
+                      onClick={() => {
+                        if (cell.column.id !== "actions") {
+                          const projectName = row.getValue("project_name")
+                          
+                          if (projectName) {
+                            dispatch(setSelectedScheduleProjectName(row.getValue('project_name')))
+                            dispatch(setSelectedMonth(row.getValue('month')))
+                            dispatch(setIsOpen(true))
+                          }
+                        }
+                      }}
+                    >
                       {cell.column.columnDef.cell
                         ? cell.column.columnDef.cell(cell.getContext())
                         : cell.getValue()}
@@ -128,7 +148,7 @@ export default function DataTable({ columns, data, loading, filterKey = "task" }
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  {loading ? <ScaleLoading size={30} /> : "No results."}
+                  {loading ? <ScaleLoading size={30}/> :'No results.'}
                 </TableCell>
               </TableRow>
             )}

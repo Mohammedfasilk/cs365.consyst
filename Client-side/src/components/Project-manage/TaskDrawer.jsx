@@ -53,11 +53,11 @@ export default function TaskDrawer() {
 
   const form = useForm({
     defaultValues: {
-      task: "",
+      milestone: "",
       start_date: "",
       end_date: "",
       duration: 1,
-      progress: 0,
+      weight: 0,
       key_deliverables: "",
     },
   });
@@ -67,6 +67,7 @@ export default function TaskDrawer() {
   const startDate = watch("start_date");
   const endDate = watch("end_date");
   const duration = watch("duration");
+  const weight = watch("weight");
   const [editTask, setEditTask] = useState(null);
 
   // This ref tracks what triggered the update to avoid loops.
@@ -85,6 +86,7 @@ export default function TaskDrawer() {
         `${import.meta.env.VITE_CS365_URI}/api/timeline/tasks`,
         { project_name: selectedProject }
       );
+      // Use API fields directly (milestone, weight, etc)
       setTasks(res.data?.timeline || []);
     } catch (err) {
       console.error("Failed to fetch tasks:", err.message);
@@ -157,11 +159,11 @@ export default function TaskDrawer() {
     setEditTask(task);
     setDrawerOpen(true);
     reset({
-      task: task.task,
+      milestone: task.milestone || "",
       start_date: task.start_date?.split("T")[0] || "",
       end_date: task.end_date?.split("T")[0] || "",
       duration: task.duration || 1,
-      progress: typeof task.progress === 'number' ? task.progress : 0,
+      weight: typeof task.weight === 'number' ? task.weight : 0,
       key_deliverables: task.key_deliverables || "",
     });
   };
@@ -172,7 +174,14 @@ export default function TaskDrawer() {
         `${import.meta.env.VITE_CS365_URI}/api/timeline/task-update`,
         {
           project_name: selectedProject,
-          timeline: data,
+          timeline: {
+            milestone: data.milestone,
+            start_date: data.start_date,
+            end_date: data.end_date,
+            duration: data.duration,
+            weight: data.weight,
+            key_deliverables: data.key_deliverables,
+          },
         }
       );
       reset();
@@ -199,11 +208,11 @@ export default function TaskDrawer() {
           onNewTaskClick={() => {
             setEditTask(null);
             reset({
-              task: "",
+              milestone: "",
               start_date: "",
               end_date: "",
               duration: 1,
-              progress: 0,
+              weight: 0,
               key_deliverables: "",
             });
             setDrawerOpen(true);
@@ -240,7 +249,7 @@ export default function TaskDrawer() {
               alignItems="center"
             >
               <Typography variant="h6">
-                {editTask ? "Edit Task" : "New Milestone"}
+                {editTask ? "Edit Milestone" : "New Milestone"}
               </Typography>
               <IconButton onClick={() => setDrawerOpen(false)} size="small">
                 <CloseIcon />
@@ -252,7 +261,7 @@ export default function TaskDrawer() {
                 <TextField
                   label="Milestone"
                   fullWidth
-                  {...register("task", { required: true })}
+                  {...register("milestone", { required: true })}
                   sx={{ mb: 2 }}
                 />
                 <TextField
@@ -284,7 +293,7 @@ export default function TaskDrawer() {
                   type="number"
                   inputProps={{ min: 0, max: 100 }}
                   fullWidth
-                  {...register("progress", { required: true, min: 0, max: 100 })}
+                  {...register("weight", { required: true, min: 0, max: 100 })}
                   sx={{ mb: 2 }}
                 />
                 <TextField
@@ -298,7 +307,7 @@ export default function TaskDrawer() {
 
                 <Box mt="auto" className="flex justify-center">
                   <Button className="px-8" type="submit">
-                    Save Task
+                    Save Milestone
                   </Button>
                 </Box>
               </form>

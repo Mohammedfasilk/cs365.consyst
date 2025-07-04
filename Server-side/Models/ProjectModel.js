@@ -37,7 +37,7 @@ const timelineSchema = new mongoose.Schema(
         type:Number,
         default:0,
     },
-    task: {
+    milestone: {
       type: String,
       required: true,
       trim: true,
@@ -54,7 +54,7 @@ const timelineSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    progress: {
+    weight: {
       type: Number,
       required: false,
       default: 0,
@@ -68,6 +68,20 @@ const timelineSchema = new mongoose.Schema(
   },
 );
 
+const milestoneSchema = new mongoose.Schema({
+  id: { type: Number, default: 0 },
+  milestone: { type: String, required: true, trim: true },
+  start_date: { type: String, required: true },
+  end_date: { type: String, required: true },
+  duration: { type: Number, required: true },
+  weight: { type: Number, required: false, default: 0 },
+  key_deliverables: { type: String, required: false, trim: true, default: '' },
+  progress: { type: Number, required: false, trim: true, default: 0 },
+  prev_progress: { type: Number, required: false, trim: true, default: 0 },
+  progressNotes: { type: String, required: false, trim: true, default: '' },
+  risksIssues: { type: String, required: false, trim: true, default: '' },
+  nextSteps: { type: String, required: false, trim: true, default: '' },
+}, { _id: false });
 
 const monthlyDataSchema = new mongoose.Schema({
   month: { type: String, required: true },
@@ -112,6 +126,12 @@ const projectSchema = new mongoose.Schema(
     monthly_cost_control: [monthlyDataSchema],
 
     timeline:[timelineSchema],
+
+    schedules:[{
+      month:{type:String,required:true},
+      milestones:[milestoneSchema],
+      status:{type:String,default:'draft'},
+    }],
   }
 );
 

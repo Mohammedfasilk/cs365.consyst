@@ -33,7 +33,7 @@ import axios from "axios";
 
 // Columns definition
 const headCells = [
-  { id: "task", numeric: false, disablePadding: true, label: "Milestone" },
+  { id: "milestone", numeric: false, disablePadding: true, label: "Milestone" },
   {
     id: "start_date",
     numeric: false,
@@ -47,7 +47,8 @@ const headCells = [
     label: "Target Date",
   },
   { id: "duration", numeric: true, disablePadding: false, label: "Duration" },
-  { id: "actions", numeric: false, disablePadding: false, label: "Actions" }, // NEW
+  { id: "weight", numeric: true, disablePadding: false, label: "Weight (%)" },
+  { id: "actions", numeric: false, disablePadding: false, label: "Actions" },
 ];
 
 function descendingComparator(a, b, orderBy) {
@@ -168,8 +169,8 @@ export default function GanttTaskTable({ task, onRowClick, refetch }) {
                 </TableRow>
               ) : (
                 visibleRows.map((row, index) => {
-                  if (!row.task) return null;
-                  const isItemSelected = selected.includes(row.task);
+                  if (!row.milestone) return null;
+                  const isItemSelected = selected.includes(row.milestone);
                   const labelId = `enhanced-table-checkbox-${index}`;
 
                   return (
@@ -179,7 +180,7 @@ export default function GanttTaskTable({ task, onRowClick, refetch }) {
                       role="checkbox"
                       aria-checked={isItemSelected}
                       tabIndex={-1}
-                      key={row.task}
+                      key={row._id || row.milestone}
                       selected={isItemSelected}
                       sx={{ cursor: "pointer" }}
                     >
@@ -190,7 +191,7 @@ export default function GanttTaskTable({ task, onRowClick, refetch }) {
                         scope="row"
                         padding="none"
                       >
-                        {row.task}
+                        {row.milestone}
                       </TableCell>
                       <TableCell align="center">
                         {row.start_date
@@ -203,13 +204,14 @@ export default function GanttTaskTable({ task, onRowClick, refetch }) {
                           : ""}
                       </TableCell>
                       <TableCell align="center">{row.duration}</TableCell>
+                      <TableCell align="center">{row.weight}</TableCell>
                       <TableCell align="center">
                         <IconButton
                           size="small"
                           color="error"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setDeleteTask(row.task);
+                            setDeleteTask(row.milestone);
                             setAlertOpen(true);
                           }}
                         >

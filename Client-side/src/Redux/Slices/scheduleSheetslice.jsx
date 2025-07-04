@@ -2,8 +2,8 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   isOpen: false,
-  selectedScheduleProjectName: "",
-  selectedScheduleProject: {},
+  selectedScheduleProjectName: '',
+  selectedMonth: null,
 };
 
 const scheduleSheetSlice = createSlice({
@@ -16,8 +16,8 @@ const scheduleSheetSlice = createSlice({
     setSelectedScheduleProjectName(state, action) {
       state.selectedScheduleProjectName = action.payload;
     },
-    setSelectedScheduleProject(state, action) {
-      state.selectedScheduleProject = action.payload;
+    setSelectedMonth(state, action) {
+      state.selectedMonth = action.payload;
     },
   },
 });
@@ -25,7 +25,7 @@ const scheduleSheetSlice = createSlice({
 export const {
   setIsOpen,
   setSelectedScheduleProjectName,
-  setSelectedScheduleProject,
+  setSelectedMonth,
 } = scheduleSheetSlice.actions;
 
 export default scheduleSheetSlice.reducer;
