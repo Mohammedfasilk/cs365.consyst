@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import {
   Command,
   CommandEmpty,
@@ -12,25 +11,24 @@ import { Popover, PopoverContent, PopoverTrigger } from "../UI/Popover";
 import { Check } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useDispatch, useSelector } from "react-redux";
-import { setIsSaved, setSelectedProject, setSelectedProjectName } from "../../Redux/Slices/SelectedProject";
-// import { useProjectSheetStore } from "@/utils/zustandStore";
+import axios from "axios"
+import { setSelectedSchedule } from "../../Redux/Slices/scheduleSheetslice";
 
-export function ChooseProject({ project_name }) {
+function ChooseSchedule() {
   const dispatch = useDispatch();
 
   const [projectList, setProjectList] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [search, setSearch] = useState({ search: "" });
 
-  const setSalesOrder = []; //from redux
-  const selectedProject = useSelector((state) => state.selectedProject.project);
-  const selectedProjectName = useSelector((state) => state.selectedProject.selectedProjectName);
+  const selectedProject = useSelector((state) => state.scheduleSheet.selectedSchedule);
+
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const res = await axios.post(
-          `${import.meta.env.VITE_CS365_URI}/api/projects/list`,
+          `${import.meta.env.VITE_CS365_URI}/api/timeline/list`,
           search
         );
         const data = await res.data;
@@ -45,15 +43,14 @@ export function ChooseProject({ project_name }) {
     fetchData();
   }, [search]);
 
-
   return (
     <Popover open={dropdownOpen} onOpenChange={setDropdownOpen}>
       <PopoverTrigger asChild>
-        <div className="text-left text-2xl text-gray-400 cursor-pointer border-b-2 border-transparent hover:border-gray-200">
-          {selectedProjectName || "Choose Project"}
+        <div className="text-left text-md p-1 text-gray-800 cursor-pointer  border-transparent hover:text-gray-600">
+          {selectedProject || "Choose a Project"}
         </div>
       </PopoverTrigger>
-      <PopoverContent className="w-[760px] p-0 max-h-[400px] overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}>
+      <PopoverContent className={`p-0 w-lg`}>
         <Command>
           <CommandInput
             placeholder="Search with project name"
@@ -64,27 +61,24 @@ export function ChooseProject({ project_name }) {
           <CommandList>
             <CommandEmpty>No project found.</CommandEmpty>
             <CommandGroup>
-              {projectList.map((project) => (
+              {projectList.map((project,index) => (
                 <CommandItem
-                  key={project._id}
-                  value={project.project_name}
-                  onSelect={() => { 
-                    dispatch(setSelectedProjectName(project.name));                    
-                    dispatch(setSelectedProject(project));
-                    dispatch(setIsSaved(false))
+                  key={index}
+                  value={project.project_title}
+                  onSelect={(currentValue) => {
+                    dispatch(setSelectedSchedule(project.project_name));                                        
                     setDropdownOpen(false);
-                    // fetchSalesOrderData(project.sales_order);
                   }}
                 >
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
-                      selectedProject?.name === project.name
+                      selectedProject === project.project_name
                         ? "opacity-100"
                         : "opacity-0"
                     )}
                   />
-                  {project.project_name}
+                  {project.project_title}
                 </CommandItem>
               ))}
             </CommandGroup>
@@ -94,3 +88,5 @@ export function ChooseProject({ project_name }) {
     </Popover>
   );
 }
+
+export default ChooseSchedule;

@@ -4,6 +4,7 @@ const initialState = {
   isOpen: false,
   selectedScheduleProjectName: '',
   selectedMonth: null,
+  selectedSchedule: ''
 };
 
 const scheduleSheetSlice = createSlice({
@@ -19,6 +20,9 @@ const scheduleSheetSlice = createSlice({
     setSelectedMonth(state, action) {
       state.selectedMonth = action.payload;
     },
+    setSelectedSchedule(state, action) {
+      state.selectedSchedule = action.payload;
+    },
   },
 });
 
@@ -26,6 +30,7 @@ export const {
   setIsOpen,
   setSelectedScheduleProjectName,
   setSelectedMonth,
+  setSelectedSchedule,
 } = scheduleSheetSlice.actions;
 
 export default scheduleSheetSlice.reducer;

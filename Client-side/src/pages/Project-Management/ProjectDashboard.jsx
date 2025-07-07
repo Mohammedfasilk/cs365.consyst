@@ -15,6 +15,8 @@ import { Card, CardHeader } from "../../components/UI/Card";
 import { useAuthRedirect } from "../../Hooks/useAuthRoute";
 import SquareIcon from "@mui/icons-material/Square";
 import ProgressChart from "../../components/Schedule/ProgressChart";
+import ChooseSchedule from "../../components/Project-manage/ChooseSchedule";
+import { setSelectedSchedule } from "../../Redux/Slices/scheduleSheetslice";
 
 function ProjectDashboard() {
   useAuthRedirect();
@@ -24,8 +26,10 @@ function ProjectDashboard() {
   useEffect(() => {
     return () => {
       dispatch(setChoosenProject(""));
+      dispatch(setSelectedSchedule(""));
     };
   }, [dispatch]);
+  const selectedSchedule = useSelector((state => state.scheduleSheet.selectedSchedule));
   const [showCurrent, setShowCurrent] = useState(true);
   const [ShowProjected, setShowProjected] = useState(true);
   const [budget, setBudget] = useState({});
@@ -33,6 +37,7 @@ function ProjectDashboard() {
   const [latestProjection, setLatestProjection] = useState({});
   const [loader, setLoader] = useState();
   const [chartData, setChartData] = useState({});
+  const [progress, setProgress] = useState([]);
   const selectedProject = {
     project: choosenProject,
   };
@@ -118,6 +123,25 @@ function ProjectDashboard() {
   useEffect(() => {
     fetchCostcontrolReport();
   }, [choosenProject]);
+
+useEffect(() => {
+  console.log(selectedSchedule);
+    const fetchprogress = async () => {
+      try {
+        const res = await axios.post(
+          `${import.meta.env.VITE_CS365_URI}/api/timeline/progress`,
+          {project_name:selectedSchedule}
+        );
+        const data = await res.data;
+        setProgress(data);
+      } catch (error) {
+        console.error("Error fetching progress List:", error);
+      }
+    };
+
+    fetchprogress();
+  }, [selectedSchedule]);
+
 
   return (
     <section className="w-screen">
@@ -232,13 +256,18 @@ function ProjectDashboard() {
             </div>
           </TabsContent>
           <TabsContent value="project-progress">
+            <div className="flex mb-8 justify-between items-center">
+                <div className="border w-lg p-1 rounded hover:bg-gray-100">
+                  <ChooseSchedule />
+                </div>
+              </div>
             <div className="flex justify-center items-center w-full min-h-[60vh]">
               <Card className="w-full">
                 <CardHeader>
                   <div className="text-center font-bold text-lg">Progress</div>
                 </CardHeader>
                 <div className="p-6 pt-0">
-                  <ProgressChart />
+                  {progress && <ProgressChart data={progress} />}
                 </div>
               </Card>
             </div>

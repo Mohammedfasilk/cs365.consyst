@@ -292,3 +292,80 @@ exports.updateStatus = async (req,res)=>{
       res.status(500).json({ error: "Failed to update status" });
     }
 }
+
+exports.fetchScheduleProjects = async (req, res) => {
+  try {
+    const { search } = req.body;
+
+    const query = {
+      schedules : { $exists: true, $not: { $size: 0 }  } // Only projects with this field
+    };
+
+    if (search?.trim()) {
+      query.project_title = {
+        $regex: search.trim(),
+        $options: "i"
+      };
+    }
+
+    const projects = await Project.find(query)
+      .select("project_title project_name -_id")
+      .limit(10);
+    console.log(projects);
+    
+    res.status(200).json(projects);
+  } catch (error) {
+    console.error("Error fetching Project:", error.message);
+    res.status(500).json({
+      success: false,
+      message: "Failed to retrieve Projects.",
+      error: error.message,
+    });
+  }
+};
+
+exports.fetchProgressReport = async (req, res) => {
+  try {
+    const { project_name } = req.body || {};
+    if(project_name === ''){
+      return;
+    }
+    const filter = project_name ? { project_name } : {};
+
+    const projects = await Project.find(filter, {
+      project_name: 1,
+      schedules: 1,
+      _id: 0,
+    });
+
+    // Temporary object to hold aggregation
+    const monthMap = {};
+
+    projects.forEach(project => {
+      (project.schedules || []).forEach(schedule => {
+        const month = schedule.month || 'Unknown';
+
+        (schedule.milestones || []).forEach(milestone => {
+          const weight = parseFloat(milestone.weight) || 0;
+          const progress = parseFloat(milestone.progress) || 0;
+          const actual = (progress / 100) * weight;
+
+          if (!monthMap[month]) {
+            monthMap[month] = { month, actual: 0, planned: 0 };
+          }
+
+          monthMap[month].actual += actual;
+          monthMap[month].planned += weight;
+        });
+      });
+    });
+
+    // Convert to array
+    const result = Object.values(monthMap);
+
+    res.status(200).json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch project progress report' });
+  }
+};
