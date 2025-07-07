@@ -324,48 +324,86 @@ exports.fetchScheduleProjects = async (req, res) => {
   }
 };
 
+function getMonthKey(dateStr) {
+  const date = new Date(dateStr);
+  return date.toLocaleString("en-US", { month: "short", year: "numeric" });
+}
+
+function getMonthsRange(startDate, endDate) {
+  const months = [];
+  const current = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+  const last = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
+
+  while (current <= last) {
+    months.push(current.toLocaleString("en-US", { month: "short", year: "numeric" }));
+    current.setMonth(current.getMonth() + 1);
+  }
+
+  return months;
+}
+
 exports.fetchProgressReport = async (req, res) => {
   try {
     const { project_name } = req.body || {};
-    if(project_name === ''){
-      return;
-    }
-    const filter = project_name ? { project_name } : {};
+    if (!project_name) return res.status(400).json({ error: "Project name is required" });
 
-    const projects = await Project.find(filter, {
-      project_name: 1,
-      schedules: 1,
-      _id: 0,
+    const project = await Project.findOne({ project_name });
+
+    if (!project) return res.status(404).json({ error: "Project not found" });
+
+    const schedules = project.schedules || [];
+    const timeline = project.timeline || [];
+
+    // 1. Determine earliest start and latest end from timeline
+    let earliest = null;
+    let latest = null;
+
+    timeline.forEach(m => {
+      const start = new Date(m.start_date);
+      const end = new Date(m.end_date);
+
+      if (!earliest || start < earliest) earliest = start;
+      if (!latest || end > latest) latest = end;
     });
 
-    // Temporary object to hold aggregation
+    if (!earliest || !latest) {
+      return res.status(200).json([]); // No timeline data
+    }
+
+    // 2. Generate all months in range
+    const allMonths = getMonthsRange(earliest, latest);
+
+    // 3. Aggregate actual and planned from schedules
     const monthMap = {};
 
-    projects.forEach(project => {
-      (project.schedules || []).forEach(schedule => {
-        const month = schedule.month || 'Unknown';
+    schedules.forEach(schedule => {
+      const month = schedule.month;
+      const milestones = schedule.milestones || [];
 
-        (schedule.milestones || []).forEach(milestone => {
-          const weight = parseFloat(milestone.weight) || 0;
-          const progress = parseFloat(milestone.progress) || 0;
-          const actual = (progress / 100) * weight;
+      milestones.forEach(milestone => {
+        const weight = parseFloat(milestone.weight) || 0;
+        const progress = parseFloat(milestone.progress) || 0;
+        const actual = (progress / 100) * weight;
 
-          if (!monthMap[month]) {
-            monthMap[month] = { month, actual: 0, planned: 0 };
-          }
+        if (!monthMap[month]) {
+          monthMap[month] = { actual: 0, planned: 0 };
+        }
 
-          monthMap[month].actual += actual;
-          monthMap[month].planned += weight;
-        });
+        monthMap[month].actual += actual;
+        monthMap[month].planned += weight;
       });
     });
 
-    // Convert to array
-    const result = Object.values(monthMap);
+    // 4. Prepare final result with all months
+    const result = allMonths.map(month => ({
+      month,
+      actual: parseFloat((monthMap[month]?.actual || 0).toFixed(2)),
+      planned: parseFloat((monthMap[month]?.planned || 0).toFixed(2)),
+    }));
 
-    res.status(200).json(result);
+    return res.status(200).json(result);
   } catch (err) {
-    console.error(err);
+    console.error("Error in fetchProgressReport:", err);
     res.status(500).json({ error: 'Failed to fetch project progress report' });
   }
 };
