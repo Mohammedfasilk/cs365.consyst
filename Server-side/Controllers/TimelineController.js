@@ -348,34 +348,38 @@ exports.fetchProgressReport = async (req, res) => {
     if (!project_name) return res.status(400).json({ error: "Project name is required" });
 
     const project = await Project.findOne({ project_name });
-
     if (!project) return res.status(404).json({ error: "Project not found" });
 
     const schedules = project.schedules || [];
     const timeline = project.timeline || [];
 
-    // 1. Determine earliest start and latest end from timeline
     let earliest = null;
     let latest = null;
 
+    // Check timeline dates
     timeline.forEach(m => {
       const start = new Date(m.start_date);
       const end = new Date(m.end_date);
-
       if (!earliest || start < earliest) earliest = start;
       if (!latest || end > latest) latest = end;
     });
 
-    if (!earliest || !latest) {
-      return res.status(200).json([]); // No timeline data
-    }
+    // Check schedules months
+    schedules.forEach(s => {
+      const [monStr, yearStr] = (s.month || "").split(" ");
+      const monIdx = new Date(`${monStr} 1, ${yearStr}`).getMonth();
+      const schedDate = new Date(parseInt(yearStr), monIdx, 1);
 
-    // 2. Generate all months in range
+      if (!earliest || schedDate < earliest) earliest = schedDate;
+      if (!latest || schedDate > latest) latest = schedDate;
+    });
+
+    if (!earliest || !latest) return res.status(200).json([]); // No valid range
+
     const allMonths = getMonthsRange(earliest, latest);
 
-    // 3. Aggregate actual and planned from schedules
+    // Aggregate schedule data
     const monthMap = {};
-
     schedules.forEach(schedule => {
       const month = schedule.month;
       const milestones = schedule.milestones || [];
@@ -394,7 +398,7 @@ exports.fetchProgressReport = async (req, res) => {
       });
     });
 
-    // 4. Prepare final result with all months
+    // Final result
     const result = allMonths.map(month => ({
       month,
       actual: parseFloat((monthMap[month]?.actual || 0).toFixed(2)),
