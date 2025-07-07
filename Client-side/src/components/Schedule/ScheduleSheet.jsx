@@ -14,7 +14,7 @@ import {
 import { useToast } from "../../Hooks/use-toast";
 import { useSessionUser } from "../../Hooks/useSessionUser";
 import { Button } from "../UI/Button";
-import { Plus } from "lucide-react";
+import { CircleCheckIcon, CircleXIcon, Plus } from "lucide-react";
 import { MonthPickerComponent } from "../UI/MonthPickerComponent";
 import {
   Form,
@@ -134,11 +134,13 @@ const ScheduleSheet = ({ fetchData }) => {
 
   async function onSubmit() {
     if (!selectedScheduleProjectName) {
+ 
       toast({
-        title: "No project selected",
-        description: "Please select a project before saving the schedule.",
-        variant: "destructive",
-      });
+            title: "Project Not Saved",
+            description: "There was an error saving the project.",
+            variant: "destructive",
+            icon: <CircleXIcon className="mr-4" color="red" />,
+          });
       return;
     }
     if (!selectedMonth) {
@@ -146,7 +148,9 @@ const ScheduleSheet = ({ fetchData }) => {
         title: "No month selected",
         description: "Please select a month before saving the schedule.",
         variant: "destructive",
+        icon: <CircleXIcon className="mr-4" color="red" />,
       });
+
       return;
     }
     try {
@@ -160,10 +164,10 @@ const ScheduleSheet = ({ fetchData }) => {
         payload
       );
       toast({
-        title: "Schedule saved!",
-        description: `Milestones for ${payload.project_name} (${payload.month}) have been saved successfully.`,
-        variant: "success",
-      });
+                title: "Schedule saved!",
+                description: `Milestones for ${payload.project_name} (${payload.month}) have been saved successfully.`,
+                icon: <CircleCheckIcon className="mr-4" color="green" />,
+              });
       if (fetchData) fetchData();
       // Optionally, refetch milestones to update UI
       // fetchMilestones();

@@ -262,14 +262,15 @@ useEffect(() => {
                 </div>
               </div>
             <div className="flex justify-center items-center w-full min-h-[60vh]">
-              <Card className="w-full">
-                <CardHeader>
+              {progress.length == 0 ? null :
+              (<Card className="w-full overflow-x-auto py-10" style={{ scrollbarWidth: "none" }}>
+                {/* <CardHeader>
                   <div className="text-center font-bold text-lg">Progress</div>
-                </CardHeader>
-                <div className="p-6 pt-0">
-                  {progress && <ProgressChart data={progress} />}
+                </CardHeader> */}
+                <div className="p-6 pt-0 w-fit">
+                   <ProgressChart data={progress} />
                 </div>
-              </Card>
+              </Card>)}
             </div>
           </TabsContent>
         </Tabs>
