@@ -256,6 +256,7 @@ useEffect(() => {
             </div>
           </TabsContent>
           <TabsContent value="project-progress">
+            <h1 className="mb-6">Month-Wise Project Progress Report</h1>
             <div className="flex mb-8 justify-between items-center">
                 <div className="border w-lg p-1 rounded hover:bg-gray-100">
                   <ChooseSchedule />
@@ -267,7 +268,7 @@ useEffect(() => {
                 {/* <CardHeader>
                   <div className="text-center font-bold text-lg">Progress</div>
                 </CardHeader> */}
-                <div className="p-6 pt-0 w-fit">
+                <div className=" w-fit">
                    <ProgressChart data={progress} />
                 </div>
               </Card>)}

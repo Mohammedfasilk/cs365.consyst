@@ -29,7 +29,8 @@ import { ChevronDownIcon } from "lucide-react";
 import ScaleLoading from "../UI/ScaleLoader";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { setSelectedScheduleProjectName, setIsOpen, setSelectedMonth } from "../../Redux/Slices/scheduleSheetslice";
+import { setSelectedScheduleProjectName, setIsOpen, setSelectedMonth,setSelectedScheduleStatus } from "../../Redux/Slices/scheduleSheetslice";
+import { selectClasses } from "@mui/material";
 
 export default function DataTable({ columns, data, loading, filterKey = "task" }) {
   const [sorting, setSorting] = useState([]);
@@ -133,6 +134,7 @@ export default function DataTable({ columns, data, loading, filterKey = "task" }
                           if (projectName) {
                             dispatch(setSelectedScheduleProjectName(row.getValue('project_name')))
                             dispatch(setSelectedMonth(row.getValue('month')))
+                            dispatch(setSelectedScheduleStatus(row.getValue('status')))    
                             dispatch(setIsOpen(true))
                           }
                         }

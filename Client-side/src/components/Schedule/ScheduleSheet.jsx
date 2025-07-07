@@ -52,6 +52,7 @@ const ScheduleSheet = ({ fetchData }) => {
   const selectedScheduleProjectName = useSelector(
     (state) => state.scheduleSheet?.selectedScheduleProjectName
   );
+  const scheduleStatus = useSelector((state) => state.scheduleSheet?.selectedScheduleStatus);
   const selectedMonth = useSelector(
     (state) => state.scheduleSheet?.selectedMonth
   );
@@ -133,11 +134,20 @@ const ScheduleSheet = ({ fetchData }) => {
   };
 
   async function onSubmit() {
+    if(scheduleStatus === "approved") {
+       toast({
+            title: "Error: Approved Schedules Cannot Be Edited",
+            description: "There was an error saving the schedule.",
+            variant: "destructive",
+            icon: <CircleXIcon className="mr-4" color="red" />,
+          });
+      return;
+    }
     if (!selectedScheduleProjectName) {
  
       toast({
-            title: "Project Not Saved",
-            description: "There was an error saving the project.",
+            title: "Schedule Not Saved",
+            description: "There was an error saving the schedule.",
             variant: "destructive",
             icon: <CircleXIcon className="mr-4" color="red" />,
           });

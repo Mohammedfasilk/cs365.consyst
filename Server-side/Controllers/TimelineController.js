@@ -96,11 +96,12 @@ exports.getTimelineProjects = async (req, res) => {
       timeline: { $exists: true, $not: { $size: 0 } },
     };
     if (search && search.trim() !== "") {
-      filter.project_name = { $regex: search, $options: "i" };
+      filter.project_title = { $regex: search, $options: "i" };
     }
     const projects = await Project.find(
       filter,
       {
+        project_title: 1,
         project_name: 1,
       }
     );
@@ -324,25 +325,22 @@ exports.fetchScheduleProjects = async (req, res) => {
   }
 };
 
-function getMonthKey(dateStr) {
-  const date = new Date(dateStr);
-  return date.toLocaleString("en-US", { month: "short", year: "numeric" });
+function getMonthKey(date) {
+  return new Date(date).toLocaleString("en-US", { month: "short", year: "numeric" });
 }
 
 function getMonthsRange(startDate, endDate) {
   const months = [];
-  const current = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+  let current = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
   const last = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
-
   while (current <= last) {
-    months.push(current.toLocaleString("en-US", { month: "short", year: "numeric" }));
+    months.push(getMonthKey(current));
     current.setMonth(current.getMonth() + 1);
   }
-
   return months;
 }
 
-exports.fetchProgressReport = async (req, res) => {
+exports.fetchProgressReport = async(req, res)=>{
   try {
     const { project_name } = req.body || {};
     if (!project_name) return res.status(400).json({ error: "Project name is required" });
@@ -351,54 +349,68 @@ exports.fetchProgressReport = async (req, res) => {
     if (!project) return res.status(404).json({ error: "Project not found" });
 
     const schedules = project.schedules || [];
-    const timeline = project.timeline || [];
 
+    // Deduplicate milestones by unique key (e.g. milestone + start_date + end_date)
+    const milestoneMap = new Map();
+    schedules.forEach(({ milestones }) => {
+      (milestones || []).forEach(milestone => {
+        const key = `${milestone.milestone}-${milestone.start_date}-${milestone.end_date}`;
+        if (!milestoneMap.has(key)) {
+          milestoneMap.set(key, milestone);
+        }
+      });
+    });
+
+    // Find overall date range from all milestones
     let earliest = null;
     let latest = null;
-
-    // Check timeline dates
-    timeline.forEach(m => {
+    milestoneMap.forEach(m => {
       const start = new Date(m.start_date);
       const end = new Date(m.end_date);
       if (!earliest || start < earliest) earliest = start;
       if (!latest || end > latest) latest = end;
     });
 
-    // Check schedules months
-    schedules.forEach(s => {
-      const [monStr, yearStr] = (s.month || "").split(" ");
-      const monIdx = new Date(`${monStr} 1, ${yearStr}`).getMonth();
-      const schedDate = new Date(parseInt(yearStr), monIdx, 1);
-
-      if (!earliest || schedDate < earliest) earliest = schedDate;
-      if (!latest || schedDate > latest) latest = schedDate;
-    });
-
-    if (!earliest || !latest) return res.status(200).json([]); // No valid range
+    if (!earliest || !latest) return res.status(200).json([]);
 
     const allMonths = getMonthsRange(earliest, latest);
-
-    // Aggregate schedule data
     const monthMap = {};
-    schedules.forEach(schedule => {
-      const month = schedule.month;
-      const milestones = schedule.milestones || [];
 
-      milestones.forEach(milestone => {
-        const weight = parseFloat(milestone.weight) || 0;
-        const progress = parseFloat(milestone.progress) || 0;
-        const actual = (progress / 100) * weight;
+    milestoneMap.forEach(milestone => {
+      const start = new Date(milestone.start_date);
+      const end = new Date(milestone.end_date);
+      const durationDays = Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1;
 
-        if (!monthMap[month]) {
-          monthMap[month] = { actual: 0, planned: 0 };
+      const weight = parseFloat(milestone.weight) || 0;
+      const progress = parseFloat(milestone.progress) || 0;
+
+      // Distribute planned weight proportionally across months
+      const monthsCovered = getMonthsRange(start, end);
+
+      monthsCovered.forEach(monthKey => {
+        const [monStr, yearStr] = monthKey.split(" ");
+        const monthStart = new Date(`${monStr} 1, ${yearStr}`);
+        const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0);
+
+        const overlapStart = start > monthStart ? start : monthStart;
+        const overlapEnd = end < monthEnd ? end : monthEnd;
+
+        if (overlapStart <= overlapEnd) {
+          const overlapDays = Math.round((overlapEnd - overlapStart) / (1000 * 60 * 60 * 24)) + 1;
+          const plannedForMonth = (overlapDays / durationDays) * weight;
+
+          if (!monthMap[monthKey]) monthMap[monthKey] = { actual: 0, planned: 0 };
+          monthMap[monthKey].planned += plannedForMonth;
         }
-
-        monthMap[month].actual += actual;
-        monthMap[month].planned += weight;
       });
+
+      // Add actual only in the milestone end month
+      const endMonthKey = getMonthKey(end);
+      if (!monthMap[endMonthKey]) monthMap[endMonthKey] = { actual: 0, planned: 0 };
+      monthMap[endMonthKey].actual += (progress / 100) * weight;
     });
 
-    // Final result
+    // Format output with two decimals
     const result = allMonths.map(month => ({
       month,
       actual: parseFloat((monthMap[month]?.actual || 0).toFixed(2)),
@@ -406,8 +418,9 @@ exports.fetchProgressReport = async (req, res) => {
     }));
 
     return res.status(200).json(result);
-  } catch (err) {
-    console.error("Error in fetchProgressReport:", err);
-    res.status(500).json({ error: 'Failed to fetch project progress report' });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Failed to fetch project progress report" });
   }
-};
+}

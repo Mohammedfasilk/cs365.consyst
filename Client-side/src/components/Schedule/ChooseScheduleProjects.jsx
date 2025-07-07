@@ -62,7 +62,7 @@ export function ChooseScheduleProjects({ project_name }) {
               {projectList.map((project) => (
                 <CommandItem
                   key={project._id}
-                  value={project.project_name}
+                  value={project.project_title}
                   onSelect={() => {
                     dispatch(setSelectedProjectName(project.name));
                     dispatch(setSelectedProject(project));
@@ -79,7 +79,7 @@ export function ChooseScheduleProjects({ project_name }) {
                         : "opacity-0"
                     )}
                   />
-                  {project.project_name}
+                  {project.project_title}
                 </CommandItem>
               ))}
             </CommandGroup>
