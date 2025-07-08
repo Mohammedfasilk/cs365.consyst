@@ -441,14 +441,20 @@ exports.fetchProgressReport = async (req, res) => {
       });
     });
 
-    // Final result
-    const result = allMonths.map(month => ({
-      month,
-      actual: parseFloat((monthMap[month]?.actual || 0).toFixed(2)),
-      planned: parseFloat((monthMap[month]?.planned || 0).toFixed(2)),
-    }));
+    // Calculate cumulative planned values
+    let cumulativePlanned = 0;
+    const result = allMonths.map(month => {
+      const actualVal = monthMap[month]?.actual || 0;
+      const plannedVal = monthMap[month]?.planned || 0;
 
+      cumulativePlanned += plannedVal;
 
+      return {
+        month,
+        actual: parseFloat(actualVal.toFixed(2)),
+        planned: parseFloat(cumulativePlanned.toFixed(2)), // cumulative planned sum
+      };
+    });
 
     return res.status(200).json(result);
   } catch (err) {
