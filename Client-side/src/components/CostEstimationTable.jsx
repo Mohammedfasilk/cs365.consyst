@@ -30,6 +30,7 @@ const getDirectExpenses = (project) => ({
   travel_allowances: project?.budget?.travel_allowances || 0,
   commissioning: project?.budget?.commissioning || 0,
   programming_outsourced: project?.budget?.programming_outsourced || 0,
+  engineering: project?.budget?.engineering || 0,
   installation_subcontract: project?.budget?.installation_subcontract || 0,
   extended_warranty_cost: project?.budget?.extended_warranty_cost || 0,
   miscellaneous_direct_expense: project?.budget?.miscellaneous_direct_expense || 0,
@@ -208,8 +209,16 @@ const getRows = (
     rowId: "programming-outsourced",
     height: ROW_HEIGHT,
     cells: [
-      nonEditable(textCell("Programming (Outsourced)", "padding-left-lg")),
+      nonEditable(textCell("Programming", "padding-left-lg")),
       numberCell(directExpensesData.programming_outsourced)
+    ]
+  },
+  {
+    rowId: "engineering",
+    height: ROW_HEIGHT,
+    cells: [
+      nonEditable(textCell("Engineering", "padding-left-lg")),
+      numberCell(directExpensesData.engineering)
     ]
   },
   {
@@ -224,7 +233,7 @@ const getRows = (
     rowId: "extended-warranty-cost",
     height: ROW_HEIGHT,
     cells: [
-      nonEditable(textCell("Extended Warranty (Cost)", "padding-left-lg")),
+      nonEditable(textCell("Warranty", "padding-left-lg")),
       numberCell(directExpensesData.extended_warranty_cost)
     ]
   },
@@ -393,6 +402,7 @@ function CostEstimationTable({ project }) {
           case "travel-allowances": update(setDirectExpensesData, "travel_allowances"); break;
           case "commissioning": update(setDirectExpensesData, "commissioning"); break;
           case "programming-outsourced": update(setDirectExpensesData, "programming_outsourced"); break;
+          case "engineering": update(setDirectExpensesData, "engineering"); break;
           case "installation-subcontract": update(setDirectExpensesData, "installation_subcontract"); break;
           case "extended-warranty-cost": update(setDirectExpensesData, "extended_warranty_cost"); break;
           case "miscellaneous-direct-expense": update(setDirectExpensesData, "miscellaneous_direct_expense"); break;

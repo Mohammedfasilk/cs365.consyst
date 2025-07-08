@@ -50,6 +50,7 @@ const getDirectExpenses = (project, type = "current") => {
     travel_allowances: data?.travel_allowances || 0,
     commissioning: data?.commissioning || 0,
     programming_outsourced: data?.programming_outsourced || 0,
+    engineering: data?.engineering || 0,
     installation_subcontract: data?.installation_subcontract || 0,
     extended_warranty_cost: data?.extended_warranty_cost || 0,
     miscellaneous_direct_expense: data?.miscellaneous_direct_expense || 0,
@@ -440,7 +441,7 @@ const getRows = (
       budget.commissioning
     ),
     createDataRow(
-      "Programming (Outsourced)",
+      "Programming",
       directExpensesData.programming_outsourced,
       projectedDirectExpensesData.programming_outsourced,
       true,
@@ -453,6 +454,21 @@ const getRows = (
       showCurrent,
       true,
       budget.programming_outsourced
+    ),
+    createDataRow(
+      "Engineering",
+      directExpensesData.engineering,
+      projectedDirectExpensesData.engineering,
+      true,
+      false,
+      undefined,
+      false,
+      false,
+      "",
+      showProjected,
+      showCurrent,
+      true,
+      budget.engineering
     ),
     createDataRow(
       "Installation (Sub-Contract)",
@@ -470,7 +486,7 @@ const getRows = (
       budget.installation_subcontract
     ),
     createDataRow(
-      "Extended Warranty (Cost)",
+      "Warranty",
       directExpensesData.extended_warranty_cost,
       projectedDirectExpensesData.extended_warranty_cost,
       true,

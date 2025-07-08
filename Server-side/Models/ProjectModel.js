@@ -15,6 +15,7 @@ const budgetSchema = new mongoose.Schema(
     travel_allowances: Number,
     commissioning: Number,
     programming_outsourced: Number,
+    engineering: Number,
     installation_subcontract: Number,
     extended_warranty_cost: Number,
     miscellaneous_direct_expense: Number,
