@@ -145,7 +145,7 @@ exports.fetchTasks = async (req, res) => {
       if (project && project.schedules && project.schedules.length > 0) {
         const currentSchedule = project.schedules.find(s => s.month === month);
         const prevSchedule = project.schedules.find(s => s.month === prevMonth);
-
+        
         return res.status(200).json({
           month,
           schedule: currentSchedule || null,
@@ -158,14 +158,22 @@ exports.fetchTasks = async (req, res) => {
     // If no month or no schedules found, return the timeline
     const project = await Project.findOne(
       { project_name },
-      { timeline: 1, _id: 0 }
+      { timeline: 1,schedules:1, _id: 0 }
     );
 
-    if (!project) {
-      return res.status(404).json({ error: 'Project not found' });
-    }
-
-    return res.status(200).json({ timeline: project.timeline });
+    // if (!project) {
+    //   return res.status(404).json({ error: 'Project not found' });
+    // }
+    const prevMonth = getPreviousMonth(month);    
+    const currentTimeline = project.timeline
+    const prevSchedule = project.schedules.find(s => s.month === prevMonth);
+    
+    return res.status(200).json({
+          month,
+          timeline: currentTimeline || null,
+          previous_month: prevMonth,
+          previous_schedule: prevSchedule || null,
+        });
 
   } catch (err) {
     console.error("Fetch Tasks Error:", err);
@@ -462,3 +470,8 @@ exports.fetchProgressReport = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch project progress report' });
   }
 };
+
+
+
+
+

@@ -14,7 +14,7 @@ import {
 import { useToast } from "../../Hooks/use-toast";
 import { useSessionUser } from "../../Hooks/useSessionUser";
 import { Button } from "../UI/Button";
-import { CircleCheckIcon, CircleXIcon, Plus } from "lucide-react";
+import { ChevronDown, ChevronUp, CircleCheckIcon, CircleXIcon, Plus } from "lucide-react";
 import { MonthPickerComponent } from "../UI/MonthPickerComponent";
 import {
   Form,
@@ -52,12 +52,13 @@ const ScheduleSheet = ({ fetchData }) => {
   const selectedScheduleProjectName = useSelector(
     (state) => state.scheduleSheet?.selectedScheduleProjectName
   );
-  const scheduleStatus = useSelector((state) => state.scheduleSheet?.selectedScheduleStatus);
+  const scheduleStatus = useSelector(
+    (state) => state.scheduleSheet?.selectedScheduleStatus
+  );
   const selectedMonth = useSelector(
     (state) => state.scheduleSheet?.selectedMonth
   );
   const isOpen = useSelector((state) => state.scheduleSheet?.isOpen);
-  console.log(selectedMonth);
 
   const [milestones, setMilestones] = useState([]);
   const [tabValue, setTabValue] = useState("details");
@@ -134,23 +135,22 @@ const ScheduleSheet = ({ fetchData }) => {
   };
 
   async function onSubmit() {
-    if(scheduleStatus === "approved") {
-       toast({
-            title: "Error: Approved Schedules Cannot Be Edited",
-            description: "There was an error saving the schedule.",
-            variant: "destructive",
-            icon: <CircleXIcon className="mr-4" color="red" />,
-          });
+    if (scheduleStatus === "approved") {
+      toast({
+        title: "Error: Approved Schedules Cannot Be Edited",
+        description: "There was an error saving the schedule.",
+        variant: "destructive",
+        icon: <CircleXIcon className="mr-4" color="red" />,
+      });
       return;
     }
     if (!selectedScheduleProjectName) {
- 
       toast({
-            title: "Schedule Not Saved",
-            description: "There was an error saving the schedule.",
-            variant: "destructive",
-            icon: <CircleXIcon className="mr-4" color="red" />,
-          });
+        title: "Schedule Not Saved",
+        description: "There was an error saving the schedule.",
+        variant: "destructive",
+        icon: <CircleXIcon className="mr-4" color="red" />,
+      });
       return;
     }
     if (!selectedMonth) {
@@ -165,22 +165,23 @@ const ScheduleSheet = ({ fetchData }) => {
     }
     try {
       const payload = {
-  project_name: selectedScheduleProjectName,
-  month: selectedMonth,
-  milestones: milestoneStates.map((m) => ({
-    ...m,
-    progress: m.progress !=0 ? m.progress : m.prevProgress ?? 0,
-  })),
-};
+        project_name: selectedScheduleProjectName,
+        month: selectedMonth,
+        milestones: milestoneStates.map((m) => ({
+          ...m,
+          progress: m.progress ? m.progress : m.prevProgress,
+        })),
+      };
+      
       const res = await axios.post(
         `${import.meta.env.VITE_CS365_URI}/api/timeline/saveSchedules`,
         payload
       );
       toast({
-                title: "Schedule saved!",
-                description: `Milestones for ${payload.project_name} (${payload.month}) have been saved successfully.`,
-                icon: <CircleCheckIcon className="mr-4" color="green" />,
-              });
+        title: "Schedule saved!",
+        description: `Milestones for ${payload.project_name} (${payload.month}) have been saved successfully.`,
+        icon: <CircleCheckIcon className="mr-4" color="green" />,
+      });
       if (fetchData) fetchData();
       // Optionally, refetch milestones to update UI
       // fetchMilestones();
@@ -193,39 +194,6 @@ const ScheduleSheet = ({ fetchData }) => {
     }
   }
 
-  // useEffect(() => {
-  //   if (selectedSchedule) {
-  //     form.reset({
-  //       milestone: selectedSchedule.milestone || "",
-  //       progressNotes: selectedSchedule.progressNotes || "",
-  //       risksIssues: selectedSchedule.risksIssues || "",
-  //       nextSteps: selectedSchedule.nextSteps || "",
-  //     });
-  //   }
-  // }, [selectedSchedule]);
-
-  // Remove the useEffect that listens to isOpen for reset/clear logic
-  // Instead, handle open/close logic in onOpenChange
-  // const handleSheetOpenChange = (open) => {
-  //   dispatch(setIsOpen(open));
-  //   if (open) {
-
-  //   } else {
-  //     form.reset({
-  //       milestone: "",
-  //       progressNotes: "",
-  //       risksIssues: "",
-  //       nextSteps: "",
-  //     });
-  //     setProgress(0);
-  //     setPrevProgress(0);
-  //     setTabValue("details");
-  //     dispatch(setSelectedScheduleProjectName(""));
-  //    // Do NOT clear selectedMonth here
-  //   }
-  // };
-
-  // Ensure progress and dropdown are cleared when form is reset
   useEffect(() => {
     const subscription = form.watch((values, { name, type }) => {
       if (name === undefined && type === undefined) {
@@ -235,60 +203,85 @@ const ScheduleSheet = ({ fetchData }) => {
     return () => subscription.unsubscribe();
   }, [form]);
 
- useEffect(() => {
-  const fetchMilestones = async () => {
-    try {
-      const params = { project_name: selectedScheduleProjectName };
-      if (selectedMonth) {
-        params.month = selectedMonth;
-      }
+  useEffect(() => {
+    const fetchMilestones = async () => {
+      try {
+        const params = { project_name: selectedScheduleProjectName };
+        if (selectedMonth) {
+          params.month = selectedMonth;
+        }
 
-      const res = await axios.post(
-        `${import.meta.env.VITE_CS365_URI}/api/timeline`,
-        params
-      );
+        const res = await axios.post(
+          `${import.meta.env.VITE_CS365_URI}/api/timeline`,
+          params
+        );
 
-      const data = res.data;
-
-      if (selectedMonth && data?.schedule?.milestones) {
-        const currentMilestones = data.schedule.milestones;
-        const previousMilestones = data.previous_schedule?.milestones || [];
-
-       const milestonesWithPrevProgress = currentMilestones.map((m) => {
-  if (!data.previous_schedule) {
-    return {
-      ...m,
-      prevProgress: 0, // or null, or undefined
-    };
-  }
-
-  const previousMilestones = data.previous_schedule.milestones || [];
-  const match = previousMilestones.find(
-    (p) => (p.milestone && p.milestone === m.milestone) || (p.task && p.task === m.task)
-  );
-
-  return {
-    ...m,
-    prevProgress: match?.progress || 0,
-  };
-});
+        const data = res.data;
 
 
-        setMilestones(milestonesWithPrevProgress);
-      } else if (data.timeline) {
-        setMilestones(data.timeline);
-      } else {
+        if (selectedMonth && data?.schedule?.milestones) {
+          const currentMilestones = data.schedule.milestones;
+          const previousMilestones = data.previous_schedule?.milestones || [];
+
+          const milestonesWithPrevProgress = currentMilestones.map((m) => {
+            if (!data.previous_schedule) {
+              return {
+                ...m,
+                prevProgress: 0, // or null, or undefined
+              };
+            }
+
+            const previousMilestones = data.previous_schedule.milestones || [];
+            const match = previousMilestones.find(
+              (p) =>
+                (p.milestone && p.milestone === m.milestone) ||
+                (p.task && p.task === m.task)
+            );
+
+            return {
+              ...m,
+              prevProgress: match?.progress || 0,
+            };
+          });
+
+          setMilestones(milestonesWithPrevProgress);
+        } else if (data.timeline) {
+          const currentTimeline = data.timeline;
+          const previousMilestones = data.previous_schedule?.milestones || [];
+
+          const milestonesWithPrevProgress = currentTimeline.map((m) => {
+            if (!data.previous_schedule) {
+              return {
+                ...m,
+                prevProgress: 0, // or null, or undefined
+              };
+            }
+
+            const previousMilestones = data.previous_schedule.milestones || [];
+            const match = previousMilestones.find(
+              (p) =>
+                (p.milestone && p.milestone === m.milestone) ||
+                (p.task && p.task === m.task)
+            );
+
+
+            return {
+              ...m,
+              prevProgress: match?.progress || 0,
+            };
+          });
+          setMilestones(milestonesWithPrevProgress);
+        } else {
+          setMilestones([]);
+        }
+      } catch (error) {
+        console.error("Error fetching milestones:", error);
         setMilestones([]);
       }
-    } catch (error) {
-      console.error("Error fetching milestones:", error);
-      setMilestones([]);
-    }
-  };
+    };
 
-  fetchMilestones();
-}, [selectedScheduleProjectName, selectedMonth]);
-
+    fetchMilestones();
+  }, [selectedScheduleProjectName, selectedMonth]);
 
   // Clear form and milestone states when month changes
   useEffect(() => {
@@ -341,48 +334,6 @@ const ScheduleSheet = ({ fetchData }) => {
     return d.toISOString().slice(0, 10);
   };
 
-  // Helper to get YYYY-MM from a Date object or string
-  function getYearMonth(val) {
-    if (!val) return null;
-    if (typeof val === "string" && val.includes("-")) return val.slice(0, 7); // already YYYY-MM
-    const d = new Date(val);
-    if (!isNaN(d)) {
-      return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0");
-    }
-    return null;
-  }
-
-  // Helper to get only the duration within the selected month
-  function getMonthOnlyDuration(milestone, selectedMonth) {
-    const monthStr = getYearMonth(selectedMonth);
-    if (!monthStr) return { start: null, end: null, days: null };
-    const [year, month] = monthStr.split("-").map(Number);
-    // Parse dates
-    const msStart = new Date(milestone.startDate);
-    const msEnd = new Date(milestone.endDate);
-    // Use UTC to avoid timezone issues
-    const monthStart = new Date(Date.UTC(year, month - 1, 1));
-    const monthEnd = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999)); // last ms of last day
-    if (msEnd < monthStart || msStart > monthEnd)
-      return { start: null, end: null, days: null };
-    const start =
-      msStart > monthEnd ? null : msStart > monthStart ? msStart : monthStart;
-    const end = msEnd < monthStart ? null : msEnd < monthEnd ? msEnd : monthEnd;
-    if (!start || !end) return { start: null, end: null, days: null };
-    // Calculate total days (inclusive)
-    const days = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
-    return { start: fmt(start), end: fmt(end), days };
-  }
-
-  // Utility to get current month in YYYY-MM format
-  function getCurrentMonth() {
-    const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
-      2,
-      "0"
-    )}`;
-  }
-
   return (
     <Sheet
       open={isOpen}
@@ -426,39 +377,45 @@ const ScheduleSheet = ({ fetchData }) => {
                 <MonthPickerComponent
                   selectedMonth={selectedMonth}
                   onSelect={(date) => {
-                                        const options = { month: "short", year: "numeric" };
-                                        if (date) {
-                                          const formatted = date.toLocaleDateString(
-                                            "en-US",
-                                            options
-                                          );
-                                          dispatch(setSelectedMonth(formatted));
-                                        }
-                                      }}
+                    const options = { month: "short", year: "numeric" };
+                    if (date) {
+                      const formatted = date.toLocaleDateString(
+                        "en-US",
+                        options
+                      );
+                      dispatch(setSelectedMonth(formatted));
+                    }
+                  }}
                 />
               </div>
               {milestoneStates.map((m, idx) => {
+
                 const open = openCards[idx];
                 const handleCardToggle = () => {
                   setOpenCards((prev) => {
                     const updated = [...prev];
-                    updated[idx] = !updated[idx];
+                    updated[idx] = !updated[idx];                    
                     return updated;
                   });
                 };
                 return (
-                  <Card key={idx} className="mb-6 p-2">
+                  <Card key={idx} className="mb-6 p-2 w-4/5 rounded">
                     <CardHeader
-                      className="cursor-pointer select-none p-2"
+                      className="cursor-pointer select-none p-2 flex-row items-center justify-between"
                       onClick={handleCardToggle}
                     >
-                      <h2 className="text-base font-semibold mb-2">
+                      <div>
+                        <h2 className="text-base font-semibold mb-2">
                         {m.task || m.milestone}
                       </h2>
                       <p className="text-xs text-gray-500 mt-1">
                         Duration: {m.start_date || "-"} &mdash;{" "}
                         {m.end_date || "-"}
                       </p>
+                      </div>
+                      <div>
+                        {openCards[idx] ? <ChevronUp/> : <ChevronDown/>}
+                      </div>
                     </CardHeader>
                     {open && (
                       <CardContent className="p-2">
@@ -468,7 +425,7 @@ const ScheduleSheet = ({ fetchData }) => {
                               Previous Progress
                             </label>
                             <Slider.Root
-                              className="relative flex items-center select-none touch-none w-[600px] h-5 opacity-60 cursor-not-allowed"
+                              className="relative flex items-center select-none touch-none h-5 opacity-60 cursor-not-allowed"
                               min={0}
                               max={100}
                               step={1}
@@ -490,13 +447,15 @@ const ScheduleSheet = ({ fetchData }) => {
                               Progress
                             </label>
                             <Slider.Root
-                              className="relative flex items-center select-none touch-none w-[600px] h-5"
+                              className="relative flex items-center select-none touch-none h-5"
                               min={0}
                               max={100}
                               step={1}
-                              value={[m.progress != 0 ? m.progress : m.prevProgress || 0]}
-                              onValueChange={([v]) =>
-                                handleProgressChange(idx, v)
+                              value={[
+                                (m.progress ? m.progress : m.prevProgress) || 0,
+                              ]}
+                              onValueChange={([v]) =>{
+                                handleProgressChange(idx, v)}
                               }
                             >
                               <Slider.Track className="bg-gray-200 relative grow rounded-full h-2">
@@ -505,7 +464,7 @@ const ScheduleSheet = ({ fetchData }) => {
                               <Slider.Thumb className="block w-5 h-5 bg-white border border-blue-500 rounded-full shadow focus:outline-none" />
                             </Slider.Root>
                             <span className="ml-2 text-sm font-semibold">
-                              {(m.progress !=0 ? m.progress : m.prevProgress) || 0}%
+                              {(m.progress ? m.progress : m.prevProgress) || 0}%
                             </span>
                           </div>
                           <div>

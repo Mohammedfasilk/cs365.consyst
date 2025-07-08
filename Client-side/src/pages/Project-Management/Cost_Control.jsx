@@ -21,6 +21,7 @@ function Cost_Control() {
       );
 
       const data = res.data;
+      
       const flattened = data.flatMap((project) =>
         project.monthly_cost_control.map((entry) => ({
           ...entry,
