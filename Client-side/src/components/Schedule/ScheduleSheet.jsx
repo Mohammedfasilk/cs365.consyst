@@ -165,10 +165,13 @@ const ScheduleSheet = ({ fetchData }) => {
     }
     try {
       const payload = {
-        project_name: selectedScheduleProjectName,
-        month:selectedMonth,
-        milestones: milestoneStates,
-      };
+  project_name: selectedScheduleProjectName,
+  month: selectedMonth,
+  milestones: milestoneStates.map((m) => ({
+    ...m,
+    progress: m.progress !=0 ? m.progress : m.prevProgress ?? 0,
+  })),
+};
       const res = await axios.post(
         `${import.meta.env.VITE_CS365_URI}/api/timeline/saveSchedules`,
         payload
@@ -479,7 +482,7 @@ const ScheduleSheet = ({ fetchData }) => {
                               <Slider.Thumb className="block w-5 h-5 bg-white border border-green-500 rounded-full shadow focus:outline-none" />
                             </Slider.Root>
                             <span className="ml-2 text-sm font-semibold">
-                              {m.prevProgress}%
+                              {m.prevProgress || 0}%
                             </span>
                           </div>
                           <div>
@@ -502,7 +505,7 @@ const ScheduleSheet = ({ fetchData }) => {
                               <Slider.Thumb className="block w-5 h-5 bg-white border border-blue-500 rounded-full shadow focus:outline-none" />
                             </Slider.Root>
                             <span className="ml-2 text-sm font-semibold">
-                              {m.progress !=0 ? m.progress : m.prevProgress || 0}%
+                              {(m.progress !=0 ? m.progress : m.prevProgress) || 0}%
                             </span>
                           </div>
                           <div>
