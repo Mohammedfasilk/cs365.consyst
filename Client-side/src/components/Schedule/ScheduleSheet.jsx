@@ -491,7 +491,7 @@ const ScheduleSheet = ({ fetchData }) => {
                               min={0}
                               max={100}
                               step={1}
-                              value={[m.progress || 0]}
+                              value={[m.progress != 0 ? m.progress : m.prevProgress || 0]}
                               onValueChange={([v]) =>
                                 handleProgressChange(idx, v)
                               }
@@ -502,7 +502,7 @@ const ScheduleSheet = ({ fetchData }) => {
                               <Slider.Thumb className="block w-5 h-5 bg-white border border-blue-500 rounded-full shadow focus:outline-none" />
                             </Slider.Root>
                             <span className="ml-2 text-sm font-semibold">
-                              {m.progress || 0}%
+                              {m.progress !=0 ? m.progress : m.prevProgress || 0}%
                             </span>
                           </div>
                           <div>

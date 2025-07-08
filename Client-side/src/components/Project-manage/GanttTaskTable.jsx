@@ -117,9 +117,47 @@ export default function GanttTaskTable({ task, onRowClick, refetch }) {
   const [alertOpen, setAlertOpen] = useState(false);
   const [deleteTask, setDeleteTask] = useState(false);
 
+  // New state for totals
+  const [totalWeight, setTotalWeight] = useState(0);
+  const [totalDuration, setTotalDuration] = useState(0);
+
   useEffect(() => {
     setRows(task || []);
   }, [task]);
+
+  // Calculate total weight and duration
+  useEffect(() => {
+    if (!rows || rows.length === 0) {
+      setTotalWeight(0);
+      setTotalDuration(0);
+      return;
+    }
+
+    let minStartDate = null;
+    let maxEndDate = null;
+    let weightSum = 0;
+
+    rows.forEach((row) => {
+      if (row.start_date) {
+        const start = new Date(row.start_date);
+        if (!minStartDate || start < minStartDate) minStartDate = start;
+      }
+      if (row.end_date) {
+        const end = new Date(row.end_date);
+        if (!maxEndDate || end > maxEndDate) maxEndDate = end;
+      }
+      weightSum += parseFloat(row.weight) || 0;
+    });
+
+    // Calculate duration in days between earliest start and latest end
+    let duration = 0;
+    if (minStartDate && maxEndDate) {
+      duration = Math.ceil((maxEndDate - minStartDate) / (1000 * 60 * 60 * 24)) + 1;
+    }
+
+    setTotalWeight(weightSum.toFixed(2));
+    setTotalDuration(duration);
+  }, [rows]);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -149,11 +187,7 @@ export default function GanttTaskTable({ task, onRowClick, refetch }) {
     <Box sx={{ width: "100%" }}>
       <Paper sx={{ width: "100%", mb: 2 }}>
         <TableContainer sx={{ maxHeight: 400, overflowY: "auto" }}>
-          <Table
-            sx={{ minWidth: 700 }}
-            aria-labelledby="tableTitle"
-            size="small"
-          >
+          <Table sx={{ minWidth: 700 }} aria-labelledby="tableTitle" size="small">
             <EnhancedTableHead
               numSelected={selected.length}
               order={order}
@@ -163,7 +197,7 @@ export default function GanttTaskTable({ task, onRowClick, refetch }) {
             <TableBody>
               {visibleRows.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} align="center" sx={{ py: 6, px: 2 }}>
+                  <TableCell colSpan={7} align="center" sx={{ py: 6, px: 2 }}>
                     No tasks available
                   </TableCell>
                 </TableRow>
@@ -185,12 +219,7 @@ export default function GanttTaskTable({ task, onRowClick, refetch }) {
                       sx={{ cursor: "pointer" }}
                     >
                       <TableCell padding="checkbox" />
-                      <TableCell
-                        component="th"
-                        id={labelId}
-                        scope="row"
-                        padding="none"
-                      >
+                      <TableCell component="th" id={labelId} scope="row" padding="none">
                         {row.milestone}
                       </TableCell>
                       <TableCell align="center">
@@ -222,16 +251,26 @@ export default function GanttTaskTable({ task, onRowClick, refetch }) {
                   );
                 })
               )}
+
+              {/* Summary row */}
+              <TableRow sx={{ fontWeight: "bold", backgroundColor: "#f5f5f5" }}>
+                <TableCell padding="checkbox" />
+                <TableCell component="th" scope="row" padding="none">
+                </TableCell>
+                <TableCell align="center">Total Duration</TableCell>
+                <TableCell align="center">{totalDuration}</TableCell>
+                <TableCell align="right">Total Weights</TableCell>
+                <TableCell align="left">{totalWeight}</TableCell>
+                <TableCell align="center" />
+              </TableRow>
+
               <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      Are you absolutely sure?
-                    </AlertDialogTitle>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                     <AlertDialogDescription>
                       This action cannot be undone. This will permanently delete{" "}
-                      <span className="font-bold">{deleteTask}</span> from
-                      server.
+                      <span className="font-bold">{deleteTask}</span> from server.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
