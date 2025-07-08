@@ -264,7 +264,7 @@ useEffect(() => {
               </div>
             <div className="flex justify-center items-center w-full min-h-[60vh]">
               {progress.length == 0 ? null :
-              (<Card className="w-full overflow-x-auto py-10" style={{ scrollbarWidth: "none" }}>
+              (<Card className="w-full overflow-x-auto py-10">
                 {/* <CardHeader>
                   <div className="text-center font-bold text-lg">Progress</div>
                 </CardHeader> */}
