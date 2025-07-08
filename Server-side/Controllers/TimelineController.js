@@ -352,7 +352,7 @@ exports.fetchProgressReport = async (req, res) => {
     let earliest = null;
     let latest = null;
 
-    // Determine earliest and latest dates from timeline
+    // Get milestone bounds from timeline
     timeline.forEach(m => {
       const start = new Date(m.start_date);
       const end = new Date(m.end_date);
@@ -360,12 +360,20 @@ exports.fetchProgressReport = async (req, res) => {
       if (!latest || end > latest) latest = end;
     });
 
-    // Also consider schedule months
-    schedules.forEach(s => {
-      const [monStr, yearStr] = (s.month || "").split(" ");
-      const monIdx = new Date(`${monStr} 1, ${yearStr}`).getMonth();
-      const schedDate = new Date(parseInt(yearStr), monIdx, 1);
+    // Get milestone bounds from schedule milestones
+    schedules.forEach(schedule => {
+      schedule.milestones?.forEach(milestone => {
+        const start = new Date(milestone.start_date);
+        const end = new Date(milestone.end_date);
+        if (!earliest || start < earliest) earliest = start;
+        if (!latest || end > latest) latest = end;
+      });
+    });
 
+    // Also include months explicitly listed in schedules
+    schedules.forEach(schedule => {
+      const [monStr, yearStr] = (schedule.month || "").split(" ");
+      const schedDate = new Date(`${monStr} 1, ${yearStr}`);
       if (!earliest || schedDate < earliest) earliest = schedDate;
       if (!latest || schedDate > latest) latest = schedDate;
     });
@@ -375,56 +383,71 @@ exports.fetchProgressReport = async (req, res) => {
     const allMonths = getMonthsRange(earliest, latest);
     const monthMap = {};
 
+    // Initialize all months
+    allMonths.forEach(month => {
+      monthMap[month] = { actual: 0, planned: 0 };
+    });
+
+    // Calculate planned (distribute across months)
     schedules.forEach(schedule => {
       const scheduleMonth = schedule.month;
       const milestones = schedule.milestones || [];
 
       milestones.forEach(milestone => {
-  const weight = parseFloat(milestone.weight) || 0;
-  const progress = parseFloat(milestone.progress) || 0;
-  const actual = (progress / 100) * weight;
+        const weight = parseFloat(milestone.weight) || 0;
+        const progress = parseFloat(milestone.progress) || 0;
+        const actual = (progress / 100) * weight;
 
-  const startDate = new Date(milestone.start_date);
-  const endDate = new Date(milestone.end_date);
+        const startDate = new Date(milestone.start_date);
+        const endDate = new Date(milestone.end_date);
+        const duration = (endDate - startDate) / (1000 * 60 * 60 * 24) + 1;
 
-  const [schedMonStr, schedYearStr] = scheduleMonth.split(" ");
-  const schedMonIdx = new Date(`${schedMonStr} 1, ${schedYearStr}`).getMonth();
-  const schedYear = parseInt(schedYearStr);
+        // 🔵 Distribute PLANNED across all overlapping months
+        let temp = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+        const endMonth = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
 
-  // Add ACTUAL only if milestone fully falls in the schedule month
-  if (
-    startDate.getFullYear() === schedYear &&
-    startDate.getMonth() === schedMonIdx &&
-    endDate.getFullYear() === schedYear &&
-    endDate.getMonth() === schedMonIdx
-  ) {
-    if (!monthMap[scheduleMonth]) {
-      monthMap[scheduleMonth] = { actual: 0, planned: 0 };
-    }
-    monthMap[scheduleMonth].actual += actual;
-  }
+        while (temp <= endMonth) {
+          const monthKey = temp.toLocaleString("en-US", { month: "short", year: "numeric" });
 
-  // Add planned only if milestone fully falls in the schedule month
-  if (
-    startDate.getFullYear() === schedYear &&
-    startDate.getMonth() === schedMonIdx &&
-    endDate.getFullYear() === schedYear &&
-    endDate.getMonth() === schedMonIdx
-  ) {
-    monthMap[scheduleMonth].planned += weight;
-  }
-});
+          const monthStart = new Date(temp.getFullYear(), temp.getMonth(), 1);
+          const monthEnd = new Date(temp.getFullYear(), temp.getMonth() + 1, 0);
+
+          const overlapStart = new Date(Math.max(startDate, monthStart));
+          const overlapEnd = new Date(Math.min(endDate, monthEnd));
+          const overlapDays = Math.max(0, (overlapEnd - overlapStart) / (1000 * 60 * 60 * 24) + 1);
+
+          const proportionalWeight = (overlapDays / duration) * weight;
+
+          monthMap[monthKey].planned += proportionalWeight;
+
+          temp.setMonth(temp.getMonth() + 1);
+        }
+
+        // 🔴 Add ACTUAL only to the schedule's month if milestone is in that exact month
+        const [schedMonStr, schedYearStr] = scheduleMonth.split(" ");
+        const schedMonIdx = new Date(`${schedMonStr} 1, ${schedYearStr}`).getMonth();
+        const schedYear = parseInt(schedYearStr);
+
+        if (
+          startDate.getFullYear() === schedYear &&
+          endDate.getFullYear() === schedYear &&
+          startDate.getMonth() === schedMonIdx &&
+          endDate.getMonth() === schedMonIdx
+        ) {
+          monthMap[scheduleMonth].actual += actual;
+        }
+      });
     });
 
     const result = allMonths.map(month => ({
       month,
-      actual: parseFloat((monthMap[month]?.actual || 0).toFixed(2)),
-      planned: parseFloat((monthMap[month]?.planned || 0).toFixed(2)),
+      actual: parseFloat(monthMap[month].actual.toFixed(2)),
+      planned: parseFloat(monthMap[month].planned.toFixed(2))
     }));
 
     return res.status(200).json(result);
   } catch (err) {
     console.error("Error in fetchProgressReport:", err);
-    res.status(500).json({ error: 'Failed to fetch project progress report' });
+    res.status(500).json({ error: "Failed to fetch project progress report" });
   }
 };
