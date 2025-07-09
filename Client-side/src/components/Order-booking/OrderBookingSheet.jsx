@@ -85,7 +85,7 @@ const OrderBookingSheet = ({ fetchData }) => {
                         salesOrderValue: data.net_total || 0,
                         company: data.company || "",
                         adjustment: 0,
-                        adjustedSalesValue: data.grand_total || 0,
+                        adjustedSalesValue: data.net_total || 0,
                         category: "",
                         subCategory: "",
                     });
