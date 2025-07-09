@@ -14,7 +14,13 @@ import {
 import { useToast } from "../../Hooks/use-toast";
 import { useSessionUser } from "../../Hooks/useSessionUser";
 import { Button } from "../UI/Button";
-import { ChevronDown, ChevronUp, CircleCheckIcon, CircleXIcon, Plus } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  CircleCheckIcon,
+  CircleXIcon,
+  Plus,
+} from "lucide-react";
 import { MonthPickerComponent } from "../UI/MonthPickerComponent";
 import {
   Form,
@@ -169,10 +175,10 @@ const ScheduleSheet = ({ fetchData }) => {
         month: selectedMonth,
         milestones: milestoneStates.map((m) => ({
           ...m,
-          progress: m.progress ? m.progress : m.prevProgress,
+          progress: m.progress || m.progress == 0 ? m.progress : m.prevProgress,
         })),
       };
-      
+
       const res = await axios.post(
         `${import.meta.env.VITE_CS365_URI}/api/timeline/saveSchedules`,
         payload
@@ -218,7 +224,6 @@ const ScheduleSheet = ({ fetchData }) => {
 
         const data = res.data;
 
-
         if (selectedMonth && data?.schedule?.milestones) {
           const currentMilestones = data.schedule.milestones;
           const previousMilestones = data.previous_schedule?.milestones || [];
@@ -263,7 +268,6 @@ const ScheduleSheet = ({ fetchData }) => {
                 (p.milestone && p.milestone === m.milestone) ||
                 (p.task && p.task === m.task)
             );
-
 
             return {
               ...m,
@@ -389,12 +393,11 @@ const ScheduleSheet = ({ fetchData }) => {
                 />
               </div>
               {milestoneStates.map((m, idx) => {
-
                 const open = openCards[idx];
                 const handleCardToggle = () => {
                   setOpenCards((prev) => {
                     const updated = [...prev];
-                    updated[idx] = !updated[idx];                    
+                    updated[idx] = !updated[idx];
                     return updated;
                   });
                 };
@@ -406,15 +409,15 @@ const ScheduleSheet = ({ fetchData }) => {
                     >
                       <div>
                         <h2 className="text-base font-semibold mb-2">
-                        {m.task || m.milestone}
-                      </h2>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Duration: {m.start_date || "-"} &mdash;{" "}
-                        {m.end_date || "-"}
-                      </p>
+                          {m.task || m.milestone}
+                        </h2>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Duration: {m.start_date || "-"} &mdash;{" "}
+                          {m.end_date || "-"}
+                        </p>
                       </div>
                       <div>
-                        {openCards[idx] ? <ChevronUp/> : <ChevronDown/>}
+                        {openCards[idx] ? <ChevronUp /> : <ChevronDown />}
                       </div>
                     </CardHeader>
                     {open && (
@@ -454,9 +457,26 @@ const ScheduleSheet = ({ fetchData }) => {
                               value={[
                                 (m.progress ? m.progress : m.prevProgress) || 0,
                               ]}
-                              onValueChange={([v]) =>{
-                                handleProgressChange(idx, v)}
-                              }
+                              onValueChange={([v]) => {
+                                const prev = m.prevProgress || 0;
+                                if (v < prev) {
+                                  toast({
+                                    title:
+                                      "Error: Progress Must Be Greater Than Previous",
+                                    description:
+                                      "You cannot set progress lower than the previous value.",
+                                    variant: "destructive",
+                                    icon: (
+                                      <CircleXIcon
+                                        className="mr-4"
+                                        color="red"
+                                      />
+                                    ),
+                                  });
+                                  return;
+                                }
+                                handleProgressChange(idx, v);
+                              }}
                             >
                               <Slider.Track className="bg-gray-200 relative grow rounded-full h-2">
                                 <Slider.Range className="absolute bg-blue-500 rounded-full h-2" />
@@ -512,23 +532,6 @@ const ScheduleSheet = ({ fetchData }) => {
                                 handleMilestoneChange(
                                   idx,
                                   "nextSteps",
-                                  e.target.value
-                                )
-                              }
-                              className="min-h-[100px] max-w-[600px] w-full"
-                            />
-                          </div>
-                          <div>
-                            <label className="mb-2 block font-medium">
-                              Key Deliverables
-                            </label>
-                            <Textarea
-                              placeholder="Key Deliverables"
-                              value={m.key_deliverables || ""}
-                              onChange={(e) =>
-                                handleMilestoneChange(
-                                  idx,
-                                  "key_deliverables",
                                   e.target.value
                                 )
                               }

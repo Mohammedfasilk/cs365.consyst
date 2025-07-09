@@ -472,6 +472,97 @@ exports.fetchProgressReport = async (req, res) => {
 };
 
 
+exports.fetchProjectProgress = async (req, res) => {
+  try {
+    const { project_name } = req.body;
 
+    const query = {
+      project_name,
+      schedules: { $exists: true, $not: { $size: 0 } },
+    };
 
+    const project = await Project.findOne(query).lean();
+
+    if (!project) {
+      return res.status(404).json({
+        success: false,
+        message: "Project not found or has no schedules.",
+      });
+    }
+
+    const milestonesMap = new Map(); 
+    const seenMilestones = new Set();
+    const uniqueMilestoneNames = new Set();
+
+    // Process schedules to build milestone history and collect stats
+    for (const schedule of project.schedules) {
+      const month = schedule.month;
+
+      if (Array.isArray(schedule.milestones)) {
+        for (const milestone of schedule.milestones) {
+          const name = milestone.milestone || milestone.task || "Unnamed Milestone";
+
+          // Track for total unique milestones
+          uniqueMilestoneNames.add(name);
+
+          // Add history entry
+          if (!milestonesMap.has(name)) {
+            milestonesMap.set(name, []);
+          }
+
+          milestonesMap.get(name).push({
+            month,
+            nextSteps: milestone.nextSteps || "",
+            risksIssues: milestone.risksIssues || "",
+            progressNotes: milestone.progressNotes || "",
+            progress: milestone.progress || 0,
+          });
+
+          // Track completed milestones (progress == 100)
+          if (Number(milestone.progress) === 100 && !seenMilestones.has(name)) {
+            seenMilestones.add(name);
+          }
+        }
+      }
+    }
+
+    // Convert map to sorted history array
+    const parseMonthString = (monthStr) => new Date(monthStr);
+
+    const milestone_history = Array.from(milestonesMap.entries()).map(
+      ([milestone, history]) => {
+        const sortedHistory = history.sort(
+          (a, b) => parseMonthString(b.month) - parseMonthString(a.month)
+        );
+        return { milestone, history: sortedHistory };
+      }
+    );
+
+    // Latest month & actual
+    const latestSchedule = project.schedules[project.schedules.length - 1];
+    const latestMonth = latestSchedule?.month || "";
+    let latestMonthActual = 0;
+
+    if (latestSchedule && Array.isArray(latestSchedule.milestones)) {
+      latestMonthActual = latestSchedule.milestones.reduce((acc, m) => {
+        return acc + (Number(m.progress || 0) / 100) * (Number(m.weight || 0));
+      }, 0);
+    }
+
+    res.status(200).json({
+      project_name: project.project_name,
+      total_milestones: uniqueMilestoneNames.size,
+      milestone_delivered: seenMilestones.size,
+      project_progress: parseFloat(latestMonthActual.toFixed(2)),
+      milestone_history,
+    });
+  } catch (error) {
+    console.error("Error fetching project progress:", error.message);
+    res.status(500).json({
+      success: false,
+      message: "Failed to retrieve project progress.",
+      error: error.message,
+    });
+  }
+};
 

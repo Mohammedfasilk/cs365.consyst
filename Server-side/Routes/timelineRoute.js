@@ -1,5 +1,5 @@
 const express = require('express');
-const { updateTimelineTask, getTimelineTasks, deleteTimelineTasks, getTimelineProjects, fetchTasks, saveSchedules, fetchSchedules, deleteSchedule, updateStatus, fetchScheduleProjects, fetchProgressReport } = require('../Controllers/TimelineController');
+const { updateTimelineTask, getTimelineTasks, deleteTimelineTasks, getTimelineProjects, fetchTasks, saveSchedules, fetchSchedules, deleteSchedule, updateStatus, fetchScheduleProjects, fetchProgressReport, fetchProjectProgress } = require('../Controllers/TimelineController');
 const  router = express.Router();
 
 router.post('/task-update',updateTimelineTask);
@@ -13,6 +13,7 @@ router.post('/delete',deleteSchedule);
 router.post('/status-update',updateStatus);
 router.post('/progress',fetchProgressReport);
 router.post('/',fetchTasks);
+router.post('/project-progress',fetchProjectProgress);
 
 
 module.exports = router;
