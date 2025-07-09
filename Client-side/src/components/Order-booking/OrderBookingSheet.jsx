@@ -82,7 +82,7 @@ const OrderBookingSheet = ({ fetchData }) => {
                         salesOrderDate: data.transaction_date ? new Date(data.transaction_date) : null,
                         customerName: data.customer || "",
                         currency: data.currency || "",
-                        salesOrderValue: data.grand_total || 0,
+                        salesOrderValue: data.net_total || 0,
                         company: data.company || "",
                         adjustment: 0,
                         adjustedSalesValue: data.grand_total || 0,

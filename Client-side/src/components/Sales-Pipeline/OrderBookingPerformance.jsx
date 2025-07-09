@@ -10,7 +10,7 @@ export default function OrderBookingFYTDGrid({ orderBookingData, orderSummaryDat
         const match = orderSummaryData.find((d) => d.category === label);
         return match?.total || 0;
     };
-    
+
     const IS = {
         label: "Integrated Solution",
         value: getCategoryValue("Integrated Solution"),
@@ -62,12 +62,10 @@ export default function OrderBookingFYTDGrid({ orderBookingData, orderSummaryDat
         },
     ];
 
-
-    // Assign a unique color for each donut
     const donutColors = {
-        CMEF: "#3fa0f9",
-        CTIPL: "#34c759",
-        CDIPL: "#ff9500",
+        PP: "#3fa0f9",
+        IS: "#34c759",
+        SS: "#ff9500",
     };
 
     const chartOptions = (label) => ({
@@ -126,34 +124,57 @@ export default function OrderBookingFYTDGrid({ orderBookingData, orderSummaryDat
                             <div key={item.label} className="bg-white rounded-lg shadow p-4 flex flex-col items-center justify-center h-full flex-1">
                                 <span className="mb-2 text-sm font-semibold text-gray-700">{item.label}</span>
                                 <div className="w-full h-full flex items-center justify-center">
-                                    <ReactApexChart
-                                        options={{
-                                            chart: {
-                                                type: "donut",
-                                                height: '100%',
-                                                width: '100%',
-                                            },
-                                            labels: item.categories,
-                                            colors: subcategoryColors.slice(0, item.categories.length),
-                                            legend: {
-                                                show: false
-                                            },
-                                            dataLabels: {
-                                                enabled: false
-                                            },
-                                            tooltip: {
-                                                y: {
-                                                    formatter: function (val) {
-                                                        return val + '%';
-                                                    }
-                                                }
-                                            },
-                                        }}
-                                        series={subcategoryValues}
-                                        type="donut"
-                                        height={"100%"}
-                                        width={"100%"}
-                                    />
+                                    {
+                                        subcategoryValues.every((val) => val === 0) ? (
+                                            <ReactApexChart
+                                                options={{
+                                                    chart: {
+                                                        type: "donut",
+                                                        height: '100%',
+                                                        width: '100%',
+                                                    },
+                                                    labels: ["No Data"],
+                                                    colors: ["#e0e0e0"],
+                                                    legend: { show: false },
+                                                    dataLabels: { enabled: false },
+                                                    tooltip: { enabled: false },
+                                                }}
+                                                series={[100]}
+                                                type="donut"
+                                                height={"100%"}
+                                                width={"100%"}
+                                            />
+                                        ) : (
+                                            <ReactApexChart
+                                                options={{
+                                                    chart: {
+                                                        type: "donut",
+                                                        height: '100%',
+                                                        width: '100%',
+                                                    },
+                                                    labels: item.categories,
+                                                    colors: subcategoryColors.slice(0, item.categories.length),
+                                                    legend: {
+                                                        show: false
+                                                    },
+                                                    dataLabels: {
+                                                        enabled: false
+                                                    },
+                                                    tooltip: {
+                                                        y: {
+                                                            formatter: function (val) {
+                                                                return val + '%';
+                                                            }
+                                                        }
+                                                    },
+                                                }}
+                                                series={subcategoryValues}
+                                                type="donut"
+                                                height={"100%"}
+                                                width={"100%"}
+                                            />
+                                        )
+                                    }
                                 </div>
                                 <div className="mt-2 text-xs text-gray-500">
                                 </div>

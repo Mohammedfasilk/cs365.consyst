@@ -186,14 +186,15 @@ const ProjectSheet = ({ fetchData }) => {
         );
 
         const salesOrder = res.data[0];
-
+        console.log(salesOrder);
+        
         if (salesOrder) {
           const {
             po_date,
             customer_name,
             company,
             currency,
-            base_rounded_total,
+            net_total,
           } = salesOrder;
           const { project_name } = selectedProject || {};
 
@@ -202,7 +203,7 @@ const ProjectSheet = ({ fetchData }) => {
           form.setValue("projectCurrency", currency || "");
           form.setValue("company", company || "");
           form.setValue("projectDescription", project_name || "");
-          form.setValue("customerPoValue", base_rounded_total || 0);
+          form.setValue("customerPoValue", net_total || 0);
         }
       } catch (error) {
         console.error("Error fetching sales-order list:", error);
@@ -220,18 +221,19 @@ const ProjectSheet = ({ fetchData }) => {
         );
 
         const projects = res.data;
-        console.log("Projects Data:", projects);
         
         const data = projects.filter(
           (project) => project?.project_name == project_name
         )[0];
+        console.log("new",data);
+        
         if (data) {
           dispatch(setIsSaved(true));
           setProject(data);
           form.setValue("customerName", data.customer_name);
           form.setValue("projectCurrency", data.project_currency);
           form.setValue("customerPoDate", new Date(data.customer_po_date));
-          form.setValue("customerPoValue",data.company === "CONSYST Middle East FZ-LLC" ? (data.customer_po_value/settings.usdToaed).toFixed(2) : data.customer_po_value);
+          form.setValue("customerPoValue",);
           form.setValue("projectDescription", data.project_description);
           form.setValue("company", data.company);
           form.setValue("commencementDate", new Date(data.commencement_date));

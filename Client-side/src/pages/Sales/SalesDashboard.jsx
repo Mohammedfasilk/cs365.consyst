@@ -19,6 +19,7 @@ import ScaleLoading from "../../components/UI/ScaleLoader";
 import { useAuthRedirect } from "../../Hooks/useAuthRoute";
 import OrderBookingFYTDGrid from "../../components/Sales-Pipeline/OrderBookingPerformance";
 import { data } from "react-router-dom";
+import { Switch } from "../../components/UI/Switch";
 
 function SalesDashboard() {
   useAuthRedirect();
@@ -26,11 +27,14 @@ function SalesDashboard() {
   const { settings } = useSelector((state) => state.settings);
 
   const [loading, setLoading] = useState(true);
-  const [topOpportunities, setTopOpportunities] = useState([]);
   const [sumFunnelData, setSumFunnelData] = useState([]);
   const [countFunnelData, setCountFunnelData] = useState([]);
   const [orderBookingData, setOrderBookingData] = useState([]);
   const [orderSummaryData, setOrderSummaryData] = useState([]);
+  const [isUsd, setIsUsd] = useState(false);
+  const [usd, setUsd] = useState();
+  const [rawTopOpportunities, setRawTopOpportunities] = useState([]);
+
   const [monthlyOrderBookingData, setMonthlyOrderBookingData] = useState({
     dateList: [],
     valueList: [],
@@ -42,6 +46,28 @@ function SalesDashboard() {
       dispatch(fetchSettings());
     }
   }, [dispatch, settings]);
+
+
+  const displayedTopOpportunities = useMemo(() => {
+  if (!usd) return rawTopOpportunities;
+ 
+  return rawTopOpportunities.map((item) => {
+    const isINR = item.currency === "INR"
+ 
+    if (isINR) {
+      const rate = settings?.usdToinr || 1;
+ 
+      
+      return {
+        ...item,
+        opportunity_amount: item.opportunity_amount / rate,
+        currency: "USD",
+      };
+    }
+ 
+    return item;
+  });
+}, [rawTopOpportunities, usd, settings]);
 
   // Fetch data only after settings are loaded
   useEffect(() => {
@@ -72,7 +98,7 @@ function SalesDashboard() {
           axios.get(`${base}/api/orders/order-summary`),
         ]);
 
-        setTopOpportunities(topRes.data);
+        setRawTopOpportunities(topRes.data);
         setSumFunnelData(sumRes.data);
         setCountFunnelData(countRes.data);
         setOrderBookingData(orderRes.data);
@@ -113,6 +139,12 @@ function SalesDashboard() {
     return <div className="flex items-center justify-center h-screen text-lg font-semibold"><ScaleLoading size={60} /></div>;
   }
 
+  const handleUSDConvertion = (checked) => {
+    setIsUsd(checked);
+  };
+  
+
+
   return (
     <div>
       <div className="mb-16 ml-20 mt-16 mx-8">
@@ -133,9 +165,19 @@ function SalesDashboard() {
         <TabsContent value="sales-pipeline" className="bg-[var(--csgray)] w-full">
           <div className="flex justify-center gap-2 ml-20 mx-8 mb-2">
             <Card className="flex-1 flex flex-col justify-center items-center">
-              <h1 className="m-4 mb-6 w-[95%]">Current Opportunity Pipeline (Value)</h1>
+              <div className="flex justify-between items-center w-[95%] mt-4 mb-6">
+                <h1>Current Opportunity Pipeline (Value)</h1>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    onCheckedChange={handleUSDConvertion}
+                    id="is-usd"
+                    checked={isUsd}
+                  />
+                  <label htmlFor="is-usd" className="text-sm font-medium text-gray-700">USD</label>
+                </div>
+              </div>
               <div className="h-80 w-[80%]">
-                <CurrentOpportunityPipeline funnelType="sum" funnelData={sumFunnelData} />
+                <CurrentOpportunityPipeline funnelType="sum" funnelData={sumFunnelData} isUsd={isUsd} />
               </div>
             </Card>
             <Card className="flex-1 flex flex-col justify-center items-center">
@@ -147,9 +189,20 @@ function SalesDashboard() {
           </div>
 
           <div className="flex justify-center mb-12 mx-8 ml-20">
-            <Card className="flex-1 w-[768px] p-4">
-              <h1 className="m-2 mb-6">Top Opportunities</h1>
-              <OpportunityDataTable data={topOpportunities} columns={opportunityDataColumns} />
+            <Card className="flex-1 w-[768px] p-4">       
+              <div className="flex justify-between items-center space-x-1">
+                <h1 className="m-2 mb-6">Top Opportunities</h1>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                  checked={!!usd}
+                  onCheckedChange={(value) => {
+                    setUsd(value);
+                  }}
+                />
+                <span>USD</span>
+                </div>
+              </div>
+              <OpportunityDataTable data={displayedTopOpportunities} columns={opportunityDataColumns} />
             </Card>
           </div>
         </TabsContent>
