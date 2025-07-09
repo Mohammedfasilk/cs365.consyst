@@ -21,6 +21,12 @@ export default function Sidebar() {
 
   const menuItems = [
     {
+      icon: <BriefcaseBusiness className="h-5 w-5" />,
+      label: "Business Tools",
+      href: "/business-tools/tools",
+      subItems: [],
+    },
+    {
       icon: <ChartNoAxesCombined className="h-5 w-5" />,
       label: "Sales",
       href: "#",
@@ -47,16 +53,6 @@ export default function Sidebar() {
         { label: "Project", href: "/project-management/project" },
         { label: "Cost Control", href: "/project-management/cost-control" },
         { label: "Schedule Update", href: "/project-management/schedule" },
-      ],
-    },
-    {
-      icon: <BriefcaseBusiness className="h-5 w-5" />,
-      label: "Business Tools",
-      href: "#",
-      subItems: [
-        { label: "Email Signatures", href: "/business-tools/email-signatures" },
-        { label: "Meeting Minutes", href: "/business-tools/meeting-minutes" },
-
       ],
     },
   ];

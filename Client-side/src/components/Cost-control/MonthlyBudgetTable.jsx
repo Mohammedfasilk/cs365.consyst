@@ -316,10 +316,10 @@ const [projectedDirectExpensesData, setProjectedDirectExpensesData] = useState((
         "travel-expenses": "travel_expenses",
         "travel-allowances": "travel_allowances",
         commissioning: "commissioning",
-        "programming-outsourced": "programming_outsourced",
+        "programming": "programming_outsourced",
         "engineering": "engineering",
         "installation-subcontract": "installation_subcontract",
-        "extended-warranty-cost": "extended_warranty_cost",
+        "warranty": "extended_warranty_cost",
         "miscellaneous-direct-expense": "miscellaneous_direct_expense",
       };
 
