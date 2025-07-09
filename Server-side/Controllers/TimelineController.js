@@ -490,11 +490,11 @@ exports.fetchProjectProgress = async (req, res) => {
       });
     }
 
-    const milestonesMap = new Map(); 
+    const milestonesMap = new Map();
     const seenMilestones = new Set();
     const uniqueMilestoneNames = new Set();
 
-    // Process schedules to build milestone history and collect stats
+    // Build milestone history from schedules
     for (const schedule of project.schedules) {
       const month = schedule.month;
 
@@ -502,10 +502,8 @@ exports.fetchProjectProgress = async (req, res) => {
         for (const milestone of schedule.milestones) {
           const name = milestone.milestone || milestone.task || "Unnamed Milestone";
 
-          // Track for total unique milestones
           uniqueMilestoneNames.add(name);
 
-          // Add history entry
           if (!milestonesMap.has(name)) {
             milestonesMap.set(name, []);
           }
@@ -518,7 +516,6 @@ exports.fetchProjectProgress = async (req, res) => {
             progress: milestone.progress || 0,
           });
 
-          // Track completed milestones (progress == 100)
           if (Number(milestone.progress) === 100 && !seenMilestones.has(name)) {
             seenMilestones.add(name);
           }
@@ -526,9 +523,8 @@ exports.fetchProjectProgress = async (req, res) => {
       }
     }
 
-    // Convert map to sorted history array
+    // Sort history by month (descending)
     const parseMonthString = (monthStr) => new Date(monthStr);
-
     const milestone_history = Array.from(milestonesMap.entries()).map(
       ([milestone, history]) => {
         const sortedHistory = history.sort(
@@ -538,7 +534,7 @@ exports.fetchProjectProgress = async (req, res) => {
       }
     );
 
-    // Latest month & actual
+    // Calculate latest month progress
     const latestSchedule = project.schedules[project.schedules.length - 1];
     const latestMonth = latestSchedule?.month || "";
     let latestMonthActual = 0;
@@ -549,12 +545,51 @@ exports.fetchProjectProgress = async (req, res) => {
       }, 0);
     }
 
+    // ✅ total_project_days: from timeline earliest start to latest end
+    let totalProjectDays = 0;
+    let earliestStart = null;
+    let latestEnd = null;
+
+    if (Array.isArray(project.timeline) && project.timeline.length > 0) {
+      for (const milestone of project.timeline) {
+        const start = new Date(milestone.start_date);
+        const end = new Date(milestone.end_date);
+
+        if (!earliestStart || start < earliestStart) earliestStart = start;
+        if (!latestEnd || end > latestEnd) latestEnd = end;
+      }
+
+      if (earliestStart && latestEnd) {
+        const diffMs = latestEnd - earliestStart;
+        totalProjectDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+      }
+    }
+
+    // ✅ current_days: from earliest timeline start to latest schedule month last day
+    let currentDays = 0;
+
+if (Array.isArray(project.timeline) && project.timeline.length > 0) {
+  for (const milestone of project.timeline) {
+    const start = new Date(milestone.start_date);
+    if (!earliestStart || start < earliestStart) earliestStart = start;
+  }
+
+  const today = new Date();
+  if (earliestStart && today) {
+    const diffMs = today - earliestStart;
+    currentDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+  }
+}
+
+    // ✅ Response
     res.status(200).json({
       project_name: project.project_name,
       total_milestones: uniqueMilestoneNames.size,
       milestone_delivered: seenMilestones.size,
       project_progress: parseFloat(latestMonthActual.toFixed(2)),
       milestone_history,
+      planned_days: totalProjectDays,
+      current_days: currentDays,
     });
   } catch (error) {
     console.error("Error fetching project progress:", error.message);
@@ -565,4 +600,3 @@ exports.fetchProjectProgress = async (req, res) => {
     });
   }
 };
-

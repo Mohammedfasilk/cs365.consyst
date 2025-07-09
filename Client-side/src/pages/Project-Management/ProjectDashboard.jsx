@@ -10,6 +10,7 @@ import {
   ArrowDown01,
   ArrowUp,
   Calendar,
+  CalendarClock,
   ChevronDown,
   ChevronUp,
   Flag,
@@ -319,6 +320,18 @@ function ProjectDashboard() {
                   </div>
                 </CardContent>
               </Card>
+              <Card className="w-full">
+                <CardHeader className="text-lg font-bold py-5 pb-3 flex-row justify-between items-center">
+                  <div>Project Days</div>
+                  <div>
+                    <CalendarClock className="text-blue-600" />
+                  </div>
+                </CardHeader>
+                <CardContent className="mt-0">
+                  <span className={`font-black text-xl ${(projectProgress?.current_days) > (projectProgress?.planned_days) ? "text-red-500" :"text-blue-500"}`}>{projectProgress?.current_days || 0}</span>
+                  <p>of <b>{projectProgress?.planned_days || 0}</b> days</p>
+                </CardContent>
+              </Card>
 
               <Card className="w-full">
                 <CardHeader className="text-lg font-bold py-5 pb-3 flex-row justify-between items-center">
@@ -330,9 +343,6 @@ function ProjectDashboard() {
                 <CardContent className="mt-0">
                   <span className="font-black text-2xl text-green-500">{projectProgress?.milestone_delivered || 0}</span>
                   <p>of <b>{projectProgress.total_milestones}</b> total milestones</p>
-                  {/* <div className="w-full mt-3">
-                    <ProgressBar />
-                  </div> */}
                 </CardContent>
               </Card>
 
@@ -384,6 +394,7 @@ function ProjectDashboard() {
             </div>
 
   <section className="space-y-6 mt-5">
+    <h1 className="py-5">Milestone History</h1>
   {(projectProgress?.milestone_history || []).map((milestone, index) => (
     <Card key={index} className="w-full p-2 rounded shadow">
       <CardHeader onClick={()=>toggleCard(index)} className="text-lg font-bold py-5 pb-3 pl-8 flex-row justify-between items-center cursor-pointer">
