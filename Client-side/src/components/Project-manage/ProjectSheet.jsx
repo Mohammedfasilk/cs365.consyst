@@ -53,6 +53,7 @@ import { useToast } from "../../Hooks/use-toast";
 import GanttTaskTable from "./GanttTaskTable";
 import TaskDrawer from "./TaskDrawer";
 import { useSessionUser } from "../../Hooks/useSessionUser";
+import {fetchSettings} from "../../Redux/Slices/settingsSlice";
 
 const ProjectSheet = ({ fetchData }) => {
   const [project, setProject] = useState(null);
@@ -61,7 +62,14 @@ const ProjectSheet = ({ fetchData }) => {
 
 
   const selectedProject = useSelector((state) => state.selectedProject.project);
+  const {settings} = useSelector((state) => state.settings);
 
+   useEffect(() => {
+    if (!settings || Object.keys(settings).length === 0) {
+      dispatch(fetchSettings());
+    }
+  }, [dispatch, settings]);
+ console.log(settings);
   const selectedProjectName = useSelector(
     (state) => state.selectedProject.selectedProjectName
   );
@@ -223,7 +231,7 @@ const ProjectSheet = ({ fetchData }) => {
           form.setValue("customerName", data.customer_name);
           form.setValue("projectCurrency", data.project_currency);
           form.setValue("customerPoDate", new Date(data.customer_po_date));
-          form.setValue("customerPoValue", data.customer_po_value);
+          form.setValue("customerPoValue",data.company === "CONSYST Middle East FZ-LLC" ? (data.customer_po_value/settings.usdToaed).toFixed(2) : data.customer_po_value);
           form.setValue("projectDescription", data.project_description);
           form.setValue("company", data.company);
           form.setValue("commencementDate", new Date(data.commencement_date));
@@ -650,7 +658,6 @@ const ProjectSheet = ({ fetchData }) => {
                                     mode="single"
                                     selected={field.value}
                                     onSelect={field.onChange}
-                                    // disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
                                     initialFocus
                                   />
                                 </PopoverContent>

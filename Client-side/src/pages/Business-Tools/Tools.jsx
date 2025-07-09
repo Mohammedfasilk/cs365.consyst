@@ -1,5 +1,6 @@
 import {
     CalendarClockIcon,
+  CalendarCog,
   ChartNoAxesCombined,
   DollarSign,
   FolderGit2,
@@ -8,7 +9,8 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuthRedirect } from "../../Hooks/useAuthRoute";
-import MicrosoftIcon from '@mui/icons-material/Microsoft';
+import { TfiMicrosoftAlt } from "react-icons/tfi";
+import { ImProfile } from "react-icons/im";
 
 const AppIconButton = ({ title, icon, path, className }) => (
   <Link to={path}>
@@ -18,7 +20,7 @@ const AppIconButton = ({ title, icon, path, className }) => (
       >
         {icon}
       </div>
-      <p className="drop-shadow max-w-[105px] overflow-clip text-center text-sm cursor-pointer">
+      <p className="drop-shadow max-w-[105px] overflow-clip text-center text-sm cursor-pointer font-semibold text-gray-800">
         {title}
       </p>
     </div>
@@ -28,8 +30,8 @@ const AppIconButton = ({ title, icon, path, className }) => (
 export default  function Tools() {
   useAuthRedirect();
   return (
-    <div className="w-full h-[100vh] justify-center bg-[var(--csgray)]">
-      <div className="flex justify-center ml-24 pt-24 gap-12">
+    <div className="w-full h-screen flex flex-col justify-center items-center bg-[var(--csgray)]">
+      <div className="flex justify-center ml-24 gap-16">
         <AppIconButton
           title="ERP Next"
         //   path="/dashboards/sales"
@@ -40,7 +42,7 @@ export default  function Tools() {
           title="Odoo HR"
         //   path="/banking/axis-bank"
           className="bg-[#468c8c]"
-          icon={<DollarSign className="text-white w-12 h-12" />}
+          icon={<ImProfile className="text-white w-12 h-12" />}
         />
         <AppIconButton
           title="Meeting Room Booking"
@@ -49,24 +51,24 @@ export default  function Tools() {
           icon={<CalendarClockIcon className="text-white w-12 h-12" />}
         />
       </div>
-      <div className="flex justify-center ml-24 pt-24 gap-12">
+      <div className="flex justify-center ml-24 pt-10 gap-16">
                <AppIconButton
           title="Microsoft 365"
-          path="/coming-soon"
+        //   path="/coming-soon"
           className="bg-[#204cb2]"
-          icon={<MicrosoftIcon className="text-white w-20 h-20" />}
+          icon={<TfiMicrosoftAlt className="text-white w-12 h-12" />}
         />
         <AppIconButton
           title="Email Signatures"
-        //   path="/banking/axis-bank"
+          path="/business-tools/email-signatures"
           className="bg-[#0c7a34]"
           icon={<Signature className="text-white w-12 h-12" />}
         />
         <AppIconButton
           title="Meeting Mangement"
-        //   path="/project-management/project"
-          className="bg-[#3e0034]"
-          icon={<FolderGit2 className="text-white w-12 h-12" />}
+          path="/business-tools/meeting-minutes"
+          className="bg-[#696969]"
+          icon={<CalendarCog className="text-white w-12 h-12" />}
         />
       </div>
     </div>
