@@ -29,7 +29,12 @@ import { setChoosenProject } from "../../Redux/Slices/costControlsheet";
 import ScaleLoading from "../../components/UI/ScaleLoader";
 import { Checkbox } from "../../components/UI/Checkbox";
 import MonthlyLineChart from "../../components/Project/MonthlyLineChart";
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/UI/Card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../components/UI/Card";
 import { useAuthRedirect } from "../../Hooks/useAuthRoute";
 import SquareIcon from "@mui/icons-material/Square";
 import ProgressChart from "../../components/Schedule/ProgressChart";
@@ -61,7 +66,7 @@ function ProjectDashboard() {
   const [progress, setProgress] = useState([]);
   const [projectProgress, setProjectprogress] = useState({});
 
-   const [expandedCardIndex, setExpandedCardIndex] = useState(null);
+  const [expandedCardIndex, setExpandedCardIndex] = useState(null);
 
   const toggleCard = (index) => {
     setExpandedCardIndex(expandedCardIndex === index ? null : index);
@@ -169,7 +174,7 @@ function ProjectDashboard() {
 
     fetchprogress();
   }, [selectedSchedule]);
-  
+
   useEffect(() => {
     const fetchProjectProgress = async () => {
       try {
@@ -223,8 +228,7 @@ function ProjectDashboard() {
                 </Card>
               )}
 
-              {choosenProject == "" ? null : // </div> //   No Data Found // <div className="w-full h-[30vh] flex justify-center items-center border border-[var(--secondary)] italic rounded text-[var(--secondary)]">
-              loader ? null : (
+              {choosenProject == "" ? null : loader ? null : ( // </div> //   No Data Found // <div className="w-full h-[30vh] flex justify-center items-center border border-[var(--secondary)] italic rounded text-[var(--secondary)]">
                 <div className="flex-col">
                   <div className="flex justify-between items-center">
                     <div className="flex space-x-5">
@@ -305,7 +309,9 @@ function ProjectDashboard() {
                 <ChooseSchedule />
               </div>
             </div>
-            <section className="flex w-full justify-evenly space-x-5">
+            {progress.length == 0 ? null : (
+            <section>
+              <section className="flex w-full justify-evenly space-x-5">
               <Card className="w-full">
                 <CardHeader className="text-lg font-bold py-5 pb-3 flex-row justify-between items-center">
                   <div>Project Progress</div>{" "}
@@ -314,9 +320,13 @@ function ProjectDashboard() {
                   </div>
                 </CardHeader>
                 <CardContent className="mt-0">
-                  <span className="font-black text-xl text-blue-500">{projectProgress?.project_progress || 0}%</span>
+                  <span className="font-black text-xl text-blue-500">
+                    {projectProgress?.project_progress || 0}%
+                  </span>
                   <div className="w-full mt-3">
-                    <ProgressBar progress={projectProgress?.project_progress || 0} />
+                    <ProgressBar
+                      progress={projectProgress?.project_progress || 0}
+                    />
                   </div>
                 </CardContent>
               </Card>
@@ -328,8 +338,19 @@ function ProjectDashboard() {
                   </div>
                 </CardHeader>
                 <CardContent className="mt-0">
-                  <span className={`font-black text-xl ${(projectProgress?.current_days) > (projectProgress?.planned_days) ? "text-red-500" :"text-blue-500"}`}>{projectProgress?.current_days || 0}</span>
-                  <p>of <b>{projectProgress?.planned_days || 0}</b> days</p>
+                  <span
+                    className={`font-black text-xl ${
+                      projectProgress?.current_days >
+                      projectProgress?.planned_days
+                        ? "text-red-500"
+                        : "text-blue-500"
+                    }`}
+                  >
+                    {projectProgress?.current_days || 0}
+                  </span>
+                  <p>
+                    of <b>{projectProgress?.planned_days || 0}</b> days
+                  </p>
                 </CardContent>
               </Card>
 
@@ -341,8 +362,13 @@ function ProjectDashboard() {
                   </div>
                 </CardHeader>
                 <CardContent className="mt-0">
-                  <span className="font-black text-2xl text-green-500">{projectProgress?.milestone_delivered || 0}</span>
-                  <p>of <b>{projectProgress.total_milestones}</b> total milestones</p>
+                  <span className="font-black text-2xl text-green-500">
+                    {projectProgress?.milestone_delivered || 0}
+                  </span>
+                  <p>
+                    of <b>{projectProgress.total_milestones}</b> total
+                    milestones
+                  </p>
                 </CardContent>
               </Card>
 
@@ -377,11 +403,9 @@ function ProjectDashboard() {
                   </div> */}
                 </CardContent>
               </Card>
-
-
             </section>
             <div className="flex justify-center items-center w-full min-h-[60vh] mt-5">
-              {progress.length == 0 ? null : (
+              
                 <Card className="w-full overflow-x-auto py-10">
                   {/* <CardHeader>
                   <div className="text-center font-bold text-lg">Progress</div>
@@ -390,48 +414,64 @@ function ProjectDashboard() {
                     <ProgressChart data={progress} />
                   </div>
                 </Card>
-              )}
             </div>
 
-  <section className="space-y-6 mt-5">
-    <h1 className="py-5">Milestone History</h1>
-  {(projectProgress?.milestone_history || []).map((milestone, index) => (
-    <Card key={index} className="w-full p-2 rounded shadow">
-      <CardHeader onClick={()=>toggleCard(index)} className="text-lg font-bold py-5 pb-3 pl-8 flex-row justify-between items-center cursor-pointer">
-        <div>{milestone.milestone}</div>
-        <div>{expandedCardIndex === index ?<ChevronUp/>:<ChevronDown/>}</div>
-      </CardHeader>
-      {expandedCardIndex === index && (
-      <CardContent className="mt-0 space-y-4">
-        {milestone.history.map((entry, idx) => (
-          <div className="py-10 pt-5 px-5 shadow border border-gray-300 rounded-md ">
-            <div className="font-bold">{entry.month}</div>
-            <div className="flex justify-between w-full mt-2 space-x-5">
-              <div className="w-full">
-              <h1 className="italic text-sm">Progress Note</h1>
-              <div className="border border-gray-300 p-2 rounded mt-2 h-full text-sm bg-green-100/50 max-w-[400px] break-words whitespace-pre-wrap">
-                {entry?.progressNotes}
-              </div>
-            </div>
-            <div className="w-full">
-              <h1 className="italic text-sm">Risks & Issues</h1>
-              <div className="border border-gray-300 p-2 h-full rounded mt-2 text-sm bg-red-100/50 max-w-[400px] break-words whitespace-pre-wrap">
-                {entry?.risksIssues }
-              </div>
-            </div>
-             <div className="w-full">
-              <h1 className="italic text-sm">Next Step</h1>
-              <div className="border border-gray-300 p-2 h-full rounded mt-2 text-sm bg-green-100/50 max-w-[400px] break-words whitespace-pre-wrap">
-                {entry?.nextSteps}
-              </div>
-            </div>
-            </div>
-          </div>
-        ))}
-      </CardContent>)}
-    </Card>
-  ))}
-</section>
+            <section className="space-y-6 mt-5">
+              <h1 className="py-5">Milestone History</h1>
+              {(projectProgress?.milestone_history || []).map(
+                (milestone, index) => (
+                  <Card key={index} className="w-full p-2 rounded shadow">
+                    <CardHeader
+                      onClick={() => toggleCard(index)}
+                      className="text-lg font-bold py-5 pb-3 pl-8 flex-row justify-between items-center cursor-pointer"
+                    >
+                      <div>{milestone.milestone}</div>
+                      <div>
+                        {expandedCardIndex === index ? (
+                          <ChevronUp />
+                        ) : (
+                          <ChevronDown />
+                        )}
+                      </div>
+                    </CardHeader>
+                    {expandedCardIndex === index && (
+                      <CardContent className="mt-0 space-y-4">
+                        {milestone.history.map((entry, idx) => (
+                          <div className="py-10 pt-5 px-5 shadow border border-gray-300 rounded-md ">
+                            <div className="font-bold">{entry.month}</div>
+                            <div className="flex justify-between w-full mt-2 space-x-5">
+                              <div className="w-full">
+                                <h1 className="italic text-sm">
+                                  Progress Note
+                                </h1>
+                                <div className="border border-gray-300 p-2 rounded mt-2 h-full text-sm bg-green-100/50 max-w-[400px] break-words whitespace-pre-wrap">
+                                  {entry?.progressNotes}
+                                </div>
+                              </div>
+                              <div className="w-full">
+                                <h1 className="italic text-sm">
+                                  Risks & Issues
+                                </h1>
+                                <div className="border border-gray-300 p-2 h-full rounded mt-2 text-sm bg-red-100/50 max-w-[400px] break-words whitespace-pre-wrap">
+                                  {entry?.risksIssues}
+                                </div>
+                              </div>
+                              <div className="w-full">
+                                <h1 className="italic text-sm">Next Step</h1>
+                                <div className="border border-gray-300 p-2 h-full rounded mt-2 text-sm bg-green-100/50 max-w-[400px] break-words whitespace-pre-wrap">
+                                  {entry?.nextSteps}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </CardContent>
+                    )}
+                  </Card>
+                )
+              )}
+            </section>
+            </section>)}
           </TabsContent>
         </Tabs>
       </div>
