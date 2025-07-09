@@ -37,7 +37,6 @@ function ChooseCostControlProject() {
           search
         );
         const data = await res.data;
-
         setProjectList(data);
       } catch (error) {
         console.error("Error fetching Project List:", error);

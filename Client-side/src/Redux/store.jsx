@@ -4,6 +4,7 @@ import usersReducer from './Slices/usersSlice';
 import settingsReducer from './Slices/settingsSlice';
 import signatureSheetReducer from './Slices/signatureSheetSlice';
 import selectedProject from './Slices/SelectedProject';
+import selectedSalesOrder from './Slices/orderBookingSlice';
 import costControlSheetReducer from './Slices/costControlsheet';
 import scheduleSheetReducer from './Slices/scheduleSheetslice';
 
@@ -20,6 +21,9 @@ const store = configureStore({
     //project-management
     projectSheet: projectSheetReducer,
     selectedProject: selectedProject,
+
+    //order-booking
+    selectedSalesOrder: selectedSalesOrder,
 
     //Cost Control
     costControlSheet: costControlSheetReducer,

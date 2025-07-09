@@ -34,8 +34,8 @@ export function ChooseProject({ project_name }) {
           search
         );
         const data = await res.data;
-
         setProjectList(data);
+        console.log("Project List:", data);
         
       } catch (error) {
         console.error("Error fetching Project List:", error);

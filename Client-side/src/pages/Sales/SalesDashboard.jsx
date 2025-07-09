@@ -17,7 +17,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { fetchSettings } from "../../Redux/Slices/settingsSlice";
 import ScaleLoading from "../../components/UI/ScaleLoader";
 import { useAuthRedirect } from "../../Hooks/useAuthRoute";
-import { OrderBookingFYTDGrid } from "../../components/Sales-Pipeline/OrderBookingFYTDGrid";
+import OrderBookingFYTDGrid from "../../components/Sales-Pipeline/OrderBookingPerformance";
 import { data } from "react-router-dom";
 
 function SalesDashboard() {
@@ -30,6 +30,7 @@ function SalesDashboard() {
   const [sumFunnelData, setSumFunnelData] = useState([]);
   const [countFunnelData, setCountFunnelData] = useState([]);
   const [orderBookingData, setOrderBookingData] = useState([]);
+  const [orderSummaryData, setOrderSummaryData] = useState([]);
   const [monthlyOrderBookingData, setMonthlyOrderBookingData] = useState({
     dateList: [],
     valueList: [],
@@ -57,6 +58,7 @@ function SalesDashboard() {
           countRes,
           orderRes,
           monthlyRes,
+          summaryRes,
         ] = await Promise.all([
           axios.get(`${import.meta.env.VITE_CS365_URI}/api/sales-pipeline/top-opportunities`),
           axios.get(`${import.meta.env.VITE_CS365_URI}/api/sales-pipeline/sum`),
@@ -67,6 +69,7 @@ function SalesDashboard() {
             usd: settings.usdToinr || 0,
             aed: settings.usdToaed || 0,
           }),
+          axios.get(`${base}/api/orders/order-summary`),
         ]);
 
         setTopOpportunities(topRes.data);
@@ -74,6 +77,8 @@ function SalesDashboard() {
         setCountFunnelData(countRes.data);
         setOrderBookingData(orderRes.data);
         setMonthlyOrderBookingData(monthlyRes.data);
+        setOrderSummaryData(summaryRes.data);
+
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -150,7 +155,7 @@ function SalesDashboard() {
         </TabsContent>
 
         <TabsContent value="sales-analysis" className="bg-[var(--csgray)]">
-          
+
           <div className="mx-8 ml-20 mb-2 flex flex-col md:flex-row gap-2">
             <div className="flex flex-col gap-2 md:w-1/4 w-full">
               {orderBookingData?.map((data) => (
@@ -172,10 +177,11 @@ function SalesDashboard() {
               />
             </div>
           </div>
-          <div className="mx-8 ml-20 mb-2 flex justify-center">
+          <div className="mx-8 ml-20 flex justify-center">
             <OrderBookingFYTDGrid
               orderBookingData={orderBookingData}
               groupValue={orderBookingGroupedValueUSD}
+              orderSummaryData={orderSummaryData}
             />
           </div>
           <div className="flex justify-center mx-8 ml-20 mb-12">

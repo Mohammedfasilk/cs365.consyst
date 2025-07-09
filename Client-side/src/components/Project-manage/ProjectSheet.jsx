@@ -212,7 +212,8 @@ const ProjectSheet = ({ fetchData }) => {
         );
 
         const projects = res.data;
-
+        console.log("Projects Data:", projects);
+        
         const data = projects.filter(
           (project) => project?.project_name == project_name
         )[0];
@@ -420,7 +421,6 @@ const ProjectSheet = ({ fetchData }) => {
                           </FormItem>
                         )}
                       />
-                      <div></div>
                       <FormField
                         control={form.control}
                         name="company"

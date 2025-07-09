@@ -17,6 +17,7 @@ const emailSignature = require('./Routes/emailSignatureRoutes')
 const emailSignatureGlobal = require('./Routes/emailSignatureGlobalRoutes')
 const Signature= require('./Routes/SignatureRoute')
 const Project= require('./Routes/ProjectRoutes')
+const OrderBooking = require('./Routes/OrderBookingRoutes')
 const costControl = require('./Routes/costControlRoute')
 const projectReport = require('./Routes/projectReportRoute')
 const timeLine = require('./Routes/timelineRoute')
@@ -39,6 +40,7 @@ app.use('/api/emailSignature',emailSignature)
 app.use('/api/emailSignatureGlobal', emailSignatureGlobal);
 app.use('/api/signature', Signature);
 app.use('/api/projects',Project);
+app.use('/api/orders', OrderBooking);
 app.use('/api/cost-control',costControl);
 app.use('/api/project-report',projectReport);
 app.use('/api/timeline',timeLine);

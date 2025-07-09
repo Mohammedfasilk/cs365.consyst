@@ -34,6 +34,14 @@
   --radius: 8px; /* Example radius */
 }
 
+.apexcharts-legend {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  gap: 1rem;
+}
+
+
 /* Custom Border Radius */
 :root {
   --radius-lg: var(--radius);
@@ -80,3 +88,5 @@
   }
 }
 @plugin 'tailwindcss-animate'
+
+
