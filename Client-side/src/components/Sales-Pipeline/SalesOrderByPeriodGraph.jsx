@@ -101,7 +101,7 @@ export function SalesOrderByPeriodGraph(props) {
     },
     plotOptions: {
       bar: {
-        columnWidth: "50%",
+        columnWidth: "50px",
         dataLabels: {
           position: "top",
         },

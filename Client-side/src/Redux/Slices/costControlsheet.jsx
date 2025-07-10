@@ -5,6 +5,7 @@ const initialState = {
   selectedProjectName: "",
   selectedMonth: "",
   choosenProject: "",
+  projectStatus: "",
   saved: false,
 };
 
@@ -24,6 +25,9 @@ const costControlSlice = createSlice({
     setChoosenProject(state, action) {
       state.choosenProject = action.payload;
     },
+    setProjectStatus(state, action) {
+      state.projectStatus = action.payload;
+    },
     setSaved(state, action) {
       state.saved = action.payload;
     },
@@ -36,6 +40,7 @@ export const {
   setSelectedProjectName,
   setSelectedMonth,
   setChoosenProject,
+  setProjectStatus,
   setSaved,
 } = costControlSlice.actions;
 

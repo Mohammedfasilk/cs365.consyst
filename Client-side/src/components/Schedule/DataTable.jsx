@@ -50,6 +50,11 @@ export default function DataTable({ columns, data, loading, filterKey = "task" }
       rowSelection,
       globalFilter, // ← Add this
     },
+    initialState: {
+    pagination: {
+      pageSize: 25,
+    },
+  },
     onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -126,6 +131,7 @@ export default function DataTable({ columns, data, loading, filterKey = "task" }
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
+                      className={cell.column.id == "project_description" ? 'max-w-[150px] truncate whitespace-nowrap overflow-hidden' : ''}
                       key={cell.id}
                       onClick={() => {
                         if (cell.column.id !== "actions") {

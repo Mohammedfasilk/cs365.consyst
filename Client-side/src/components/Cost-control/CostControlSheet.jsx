@@ -24,6 +24,7 @@ import {
   setSelectedProjectName,
   setSaved,
   setSelectedMonth,
+  setProjectStatus,
 } from "../../Redux/Slices/costControlsheet";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -37,6 +38,8 @@ export function CostControlSheet() {
   );
   const { saved } = useSelector((state) => state.costControlSheet);
   const { isOpen } = useSelector((state) => state.costControlSheet);
+  const { projectStatus } = useSelector((state) => state.costControlSheet);
+
   const sessionUser = useSessionUser();
   const { selectedMonth } = useSelector((state) => state.costControlSheet);
   const [project, setProject] = useState({});
@@ -52,6 +55,11 @@ export function CostControlSheet() {
         );
         const projects = res.data;
         setProject(projects);
+
+        const status = projects.monthly_cost_control[0].status
+
+        dispatch(setProjectStatus(status))
+        
       } catch (error) {
         console.error("Error fetching  projects:", error);
       }
@@ -62,6 +70,16 @@ export function CostControlSheet() {
   }, [selectedProjectName, selectedMonth]);
 
   const handleSubmit = async () => {
+    if (projectStatus === "approved") {
+          toast({
+            title: "Error: Approved Cost Cannot Be Edited",
+            description: "There was an error saving the Cost.",
+            variant: "destructive",
+            icon: <CircleXIcon className="mr-4" color="red" />,
+          });
+          return;
+      }
+
     if(isSaveDisabled){
        toast({
           title: "Projected must be greater",

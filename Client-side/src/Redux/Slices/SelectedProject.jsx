@@ -4,6 +4,7 @@ const initialState = {
   project: '',
   isOpen: false,
   selectedProjectName: '',
+  selectedProjectStatus: '',
   isSaved:false
 };
 
@@ -17,6 +18,9 @@ const selectedProjectSlice = createSlice({
     setSelectedProjectName(state, action) {
       state.selectedProjectName = action.payload;      
     },
+    setSelectedProjectStatus(state, action) {
+      state.selectedProjectStatus = action.payload;      
+    },
     setIsOpen(state, action) {
       state.isOpen = action.payload;
     },
@@ -29,5 +33,5 @@ const selectedProjectSlice = createSlice({
   },
 });
 
-export const { setSelectedProject, clearSelectedProject,setIsOpen,setSelectedProjectName, setIsSaved } = selectedProjectSlice.actions;
+export const { setSelectedProject, clearSelectedProject,setIsOpen,setSelectedProjectName,setSelectedProjectStatus, setIsSaved } = selectedProjectSlice.actions;
 export default selectedProjectSlice.reducer;

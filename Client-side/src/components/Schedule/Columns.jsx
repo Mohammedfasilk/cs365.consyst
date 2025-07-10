@@ -23,6 +23,7 @@ import { useSessionUser } from "../../Hooks/useSessionUser";
 import { useToast } from "../../Hooks/use-toast";
 import { CircleCheckIcon } from "lucide-react";
 import { Badge } from "../UI/Badge";
+import { useSessionRole } from "../../Hooks/useSessionRole";
 
 // Actions Cell Component
 const Actions = ({ row, onDelete }) => {
@@ -176,29 +177,10 @@ const Actions = ({ row, onDelete }) => {
 };
 
 // Column Definitions for Schedule Milestones
-export const columns = (fetchData) => [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
+export const columns = (fetchData) => {
+  const role = useSessionRole(); 
+      const baseColumns = [
+  
   {
     accessorKey: "project_name",
     header: "Project Name",
@@ -241,16 +223,20 @@ export const columns = (fetchData) => [
     cell: ({ row }) => (
       <Badge
         variant="default"
-        className={`bg-gray-500 ${row.getValue("stage") === "open" ? "bg-green-600 text-white" : "bg-red-400 text-white text-white"}`}
+        className={`bg-gray-500 ${row.getValue("stage") === "open" ? "bg-green-600 text-white" : "bg-red-400 text-white"}`}
       >
         {row.getValue("stage")}
       </Badge>
     ),
-  },
-  {
-    id: "actions",
-    enableHiding: false,
-    header: "Actions",
-    cell: ({ row }) => <Actions row={row} onDelete={fetchData} />,
-  },
-];
+  },]
+  if (role.includes("admin")) {
+    baseColumns.push({
+      id: "actions",
+      enableHiding: false,
+      header: "Actions",
+      cell: ({ row }) => <Actions row={row} onDelete={fetchData} />,
+    });
+  }
+
+  return baseColumns;
+}

@@ -47,6 +47,7 @@ import {
   setIsOpen,
   setIsSaved,
   setSelectedProjectName,
+  setSelectedProjectStatus,
 } from "../../Redux/Slices/SelectedProject";
 import GanttChart from "./GanttChart";
 import { useToast } from "../../Hooks/use-toast";
@@ -77,6 +78,8 @@ const ProjectSheet = ({ fetchData }) => {
   const isOpen = useSelector((state) => state.selectedProject.isOpen);
 
   const isSaved = useSelector((state) => state.selectedProject.isSaved);
+
+  const selectedStatus = useSelector((state) => state.selectedProject.selectedProjectStatus);
 
   const [tabValue, setTabValue] = useState("project-details");
 
@@ -129,6 +132,15 @@ const ProjectSheet = ({ fetchData }) => {
     };
 
     const createProject = async () => {
+      if (selectedStatus === "approved") {
+                toast({
+                  title: "Error: Approved Projects Cannot Be Edited",
+                  description: "There was an error saving the Project.",
+                  variant: "destructive",
+                  icon: <CircleXIcon className="mr-4" color="red" />,
+                });
+                return;
+            }
       try {
         const res = await axios.post(
           `${import.meta.env.VITE_CS365_URI}/api/projects/save-project`,
@@ -179,14 +191,14 @@ const ProjectSheet = ({ fetchData }) => {
         const salesOrderId = {
           sales_order: selectedProject?.sales_order || "",
         };
-
+        console.log("salesorder",salesOrderId);
+        
         const res = await axios.post(
           `${import.meta.env.VITE_CS365_URI}/api/projects/sales-order`,
           salesOrderId
         );
 
         const salesOrder = res.data[0];
-        console.log(salesOrder);
         
         if (salesOrder) {
           const {
@@ -222,18 +234,18 @@ const ProjectSheet = ({ fetchData }) => {
 
         const projects = res.data;
         
-        const data = projects.filter(
+        const data = await projects.filter(
           (project) => project?.project_name == project_name
         )[0];
-        console.log("new",data);
         
         if (data) {
+          dispatch(setSelectedProjectStatus(data.status))
           dispatch(setIsSaved(true));
           setProject(data);
           form.setValue("customerName", data.customer_name);
           form.setValue("projectCurrency", data.project_currency);
           form.setValue("customerPoDate", new Date(data.customer_po_date));
-          form.setValue("customerPoValue",);
+          form.setValue("customerPoValue", data.customer_po_value);
           form.setValue("projectDescription", data.project_description);
           form.setValue("company", data.company);
           form.setValue("commencementDate", new Date(data.commencement_date));
@@ -256,16 +268,7 @@ const ProjectSheet = ({ fetchData }) => {
     }
   }, [selectedProjectName]);
 
-  // const handleNavigation = () => {
-  //   if (!isSaved) {
-  //     toast({
-  //       title: "Project Not Saved !",
-  //       description: "Please the project",
-  //       variant: "destructive",
-  //       icon: <CircleXIcon className="mr-4" color="red" />,
-  //     });
-  //   }
-  // };
+
 
   return (
     <Sheet

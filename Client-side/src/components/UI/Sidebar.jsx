@@ -18,14 +18,9 @@ import { SettingsSheet } from "../Settings/settings-sheet";
 export default function Sidebar() {
   const [isHovered, setIsHovered] = useState(false);
   const Currentuser = JSON.parse(sessionStorage.getItem("user"));
-
+  console.log(Currentuser);
+  
   const menuItems = [
-    {
-      icon: <BriefcaseBusiness className="h-5 w-5" />,
-      label: "Business Tools",
-      href: "/business-tools/tools",
-      subItems: [],
-    },
     {
       icon: <ChartNoAxesCombined className="h-5 w-5" />,
       label: "Sales",
@@ -57,6 +52,45 @@ export default function Sidebar() {
     },
   ];
 
+const userRole = Currentuser?.roles
+const allowedMenuItems = [
+   {
+      icon: <BriefcaseBusiness className="h-5 w-5" />,
+      label: "Business Tools",
+      href: "/business-tools/tools",
+      subItems: [],
+    },
+];
+
+menuItems.forEach((item) => {
+  if (userRole.includes("admin")) {
+    allowedMenuItems.push(item);
+    return;
+  }
+
+  switch (item.label) {
+    case "Sales":
+      if (userRole.includes("sales-user") || userRole.includes("sales-manager")) {
+        allowedMenuItems.push(item);
+      }
+      break;
+    case "Finance":
+      if (userRole.includes("finance-user") || userRole.includes("finance-manager")) {
+        allowedMenuItems.push(item);
+      }
+      break;
+    case "Project Management":
+      if (userRole.includes("project-user") || userRole.includes("project-manager")) {
+        allowedMenuItems.push(item);
+      }
+      break;
+    default:
+      // Do nothing
+      break;
+  }
+});
+
+
   return (
     <div
       className={`z-50 fixed top-12 h-[calc(100vh-48px)] flex max-h-screen ${isHovered ? "w-64" : "w-14"
@@ -68,7 +102,7 @@ export default function Sidebar() {
         onMouseLeave={() => setIsHovered(false)}
       >
         <ul className="grid gap-4 px-2 transition-all">
-          {menuItems.map((item, index) => (
+          {allowedMenuItems.map((item, index) => (
             <li key={index}>
               <div className={`${isHovered ? "h-auto" : "h-10"} max-h`}>
                 <Link

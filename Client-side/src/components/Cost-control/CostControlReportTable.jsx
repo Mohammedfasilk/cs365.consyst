@@ -16,8 +16,8 @@ const HEADING_ROW_HEIGHT = 40;
 
 const getPurchaseOrderData = (project) => {
   return {
-    po_value: project.po_value || 0,
-    additional_po_value: project.additional_po_value || 0,
+    po_value: project?.po_value || 0,
+    additional_po_value: project?.additional_po_value || 0,
   };
 };
 
@@ -69,24 +69,24 @@ const headerRow2 = {
 };
 
 const getTotalPoValue = (project) => {
-  return project.total_po_value || 0
+  return project?.total_po_value || 0
 }
 
 const getBillingTotal = (project) =>{
-  return project.billing_total || 0
+  return project?.billing_total || 0
 }
   
 
 const getTotalDirectExpenses = (project) =>{
-  return project.total_direct_expenses || 0
+  return project?.total_direct_expenses || 0
 }
 
 const getGrossProfitAmount = (project) => {
-  return project.gross_profit_amount || 0
+  return project?.gross_profit_amount || 0
 }
 
 const getGrossProfitPercent = (project) => {
-  return project.gross_profit_percent || 0
+  return project?.gross_profit_percent || 0
 }
 
 const getInvestorProfitSharePercent = (project) => project?.investor_profit_share_percent || 0;
@@ -97,7 +97,7 @@ const getInvestorProfitShareAmount = (project) => project?.investor_profit_share
 
 const getTotalIndirectExpenses = (project) => project?.total_indirect_expenses || 0
 
-const getTotalExpenses = (project) =>  project.total_expenses || 0 
+const getTotalExpenses = (project) =>  project?.total_expenses || 0 
 
 const getNetProfitLoss = (project) => project?.net_profit_loss || 0
 

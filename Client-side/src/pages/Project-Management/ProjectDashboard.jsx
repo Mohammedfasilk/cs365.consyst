@@ -277,6 +277,7 @@ function ProjectDashboard() {
                     >
                       {showCurrent || ShowProjected
                         ? monthWiseData.map((months, index) => {
+                          console.log(months);
                             return (
                               <div
                                 key={index}
@@ -423,16 +424,17 @@ function ProjectDashboard() {
                   <Card key={index} className="w-full p-2 rounded shadow">
                     <CardHeader
                       onClick={() => toggleCard(index)}
-                      className="text-lg font-bold py-5 pb-3 pl-8 flex-row justify-between items-center cursor-pointer"
+                      className="text-lg font-semibold py-5 pb-3 pl-8 flex-row items-center cursor-pointer space-y-0 space-x-2 text-gray-600"
                     >
-                      <div>{milestone.milestone}</div>
-                      <div>
+                      <div className="pt-1">
                         {expandedCardIndex === index ? (
                           <ChevronUp />
                         ) : (
                           <ChevronDown />
                         )}
                       </div>
+                      <div>{milestone.milestone}</div>
+                      
                     </CardHeader>
                     {expandedCardIndex === index && (
                       <CardContent className="mt-0 space-y-4">

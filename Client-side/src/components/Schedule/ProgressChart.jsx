@@ -1,40 +1,43 @@
-import { BarChart } from '@mui/x-charts/BarChart';
+import Chart from 'react-apexcharts';
 
-const chartSetting = {
-  yAxis: [
-    {
-      label: 'Progress',
-      width: 60,
+
+
+export default function ProgressChart({data}) {
+const categories = data.map(d => d.month);
+
+// Extract planned and actual data arrays
+const plannedData = data.map(d => d.planned);
+const actualData = data.map(d => d.actual);
+
+const options = {
+  chart: {
+    type: 'bar',
+    height: 350,
+  },
+  plotOptions: {
+    bar: {
+      horizontal: false,
+      columnWidth: '50%', // Adjust as needed
     },
-  ],
-  height: 400,
+  },
+  dataLabels: {
+    enabled: false,
+  },
+  xaxis: {
+    categories,
+  },
 };
 
-// const dataset = [
-//   { month: 'Jan', planned: 59, actual: 57 },
-//   { month: 'Feb', planned: 61, actual: 70 },
-//   { month: 'Mar', planned: 50, actual: 30 },
-//   { month: 'Apr', planned: 61, actual: 70 },
-//   { month: 'May', planned: 61, actual: 70 },
-//   { month: 'Jun', planned: 61, actual: 70 },
-//   { month: 'Jul', planned: 61, actual: 70 },
-//   { month: 'Aug', planned: 85, actual: 80 },
-//   { month: 'Sep', planned: 61, actual: 70 },
-// ];
-function valueFormatter(value) {
-  return `${value}%`;
-}
-export default function ProgressChart({data}) {
-  return (
-    <BarChart
-      dataset={data}
-      xAxis={[{ dataKey: 'month', }]}
-      series={[
-        { dataKey: 'planned', label: 'Planned',valueFormatter},
-        { dataKey: 'actual', label: 'Actual',valueFormatter},
-      ]}
-      width={3000}
-      {...chartSetting}
-    />
-  );
+const series = [
+  {
+    name: 'Planned',
+    data: plannedData,
+  },
+  {
+    name: 'Actual',
+    data: actualData,
+  },
+];
+  return <Chart options={options} series={series} type="bar" width={2000} height={350} />;
+
 }

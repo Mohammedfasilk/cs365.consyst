@@ -48,6 +48,7 @@ import {
   setSelectedScheduleProjectName,
   setIsOpen,
   setSelectedMonth,
+  setSelectedScheduleStatus,
 } from "../../Redux/Slices/scheduleSheetslice";
 import axios from "axios";
 
@@ -223,6 +224,9 @@ const ScheduleSheet = ({ fetchData }) => {
         );
 
         const data = res.data;
+        
+        dispatch(setSelectedScheduleStatus(data?.schedule?.status))
+        
 
         if (selectedMonth && data?.schedule?.milestones) {
           const currentMilestones = data.schedule.milestones;

@@ -21,6 +21,7 @@ import {
 } from "../UI/Alert_Dialog";
 import axios from "axios";
 import { useSessionUser } from "../../Hooks/useSessionUser";
+import { useSessionRole } from "../../Hooks/useSessionRole";
 import { useToast } from "../../Hooks/use-toast";
 import { CircleCheckIcon } from "lucide-react";
 // Actions Cell Component
@@ -33,7 +34,7 @@ const Actions = ({ row, onDelete }) => {
     field: null,
     value: null,
   });
-  const sessionUser = useSessionUser();
+  const sessionUser = useSessionUser(); 
   const status = row.getValue("status");
   const stage = row.getValue("stage");
   const projectName = row.getValue("project_name");
@@ -121,7 +122,7 @@ const Actions = ({ row, onDelete }) => {
             </DropdownMenuItem>
           )}
           {stage === "closed" && (
-            <DropdownMenuItem
+            (<DropdownMenuItem
               onClick={() =>
                 setConfirmDialog({
                   open: true,
@@ -131,7 +132,7 @@ const Actions = ({ row, onDelete }) => {
               }
             >
               Open Project
-            </DropdownMenuItem>
+            </DropdownMenuItem>)
           )}
           <DropdownMenuItem onClick={() => setAlertOpen(true)}>
             Delete
@@ -228,74 +229,62 @@ const Actions = ({ row, onDelete }) => {
   );
 };
 
-// Column Definitions (no TypeScript)
-export const columns = (fetchData) => [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "project_name",
-    header: "Project Title",
-  },
-  {
-    accessorKey: "customer_name",
-    header: "Customer",
-  },
-  {
-    accessorKey: "status",
-    header: "Doc Status",
-    cell: ({ row }) => (
-      <Badge
-        variant="secondary"
-        className={`bg-gray-200 ${
-          row.getValue("status") === "approved" ? "bg-blue-200" : ""
-        }`}
-      >
-        {row.getValue("status")}
-      </Badge>
-    ),
-  },
-  {
-    accessorKey: "stage",
-    header: "Project Stage",
-    cell: ({ row }) => {
-      const stage = row.getValue("stage");
-      const bgColor =
-        stage === "closed"
-          ? "bg-red-400 text-white"
-          : stage === "open"
-          ? "bg-green-600 text-white"
-          : "bg-gray-500";
-      return (
-        <Badge variant="default" className={bgColor}>
-          {stage}
-        </Badge>
-      );
+
+
+export const columns = (fetchData) => {
+  const role = useSessionRole(); 
+  const baseColumns = [
+   
+    {
+      accessorKey: "project_name",
+      header: "Project Title",
     },
-  },
-  {
-    id: "actions",
-    enableHiding: false,
-    header: "Actions",
-    cell: ({ row }) => <Actions row={row} onDelete={fetchData} />,
-  },
-];
+    {
+      accessorKey: "customer_name",
+      header: "Customer",
+    },
+    {
+      accessorKey: "status",
+      header: "Doc Status",
+      cell: ({ row }) => (
+        <Badge
+          variant="secondary"
+          className={`bg-gray-200 ${
+            row.getValue("status") === "approved" ? "bg-blue-200" : ""
+          }`}
+        >
+          {row.getValue("status")}
+        </Badge>
+      ),
+    },
+    {
+      accessorKey: "stage",
+      header: "Project Stage",
+      cell: ({ row }) => {
+        const stage = row.getValue("stage");
+        const bgColor =
+          stage === "closed"
+            ? "bg-red-400 text-white"
+            : stage === "open"
+            ? "bg-green-600 text-white"
+            : "bg-gray-500";
+        return (
+          <Badge variant="default" className={bgColor}>
+            {stage}
+          </Badge>
+        );
+      },
+    },
+  ];
+
+  if (role.includes("admin")) {
+    baseColumns.push({
+      id: "actions",
+      enableHiding: false,
+      header: "Actions",
+      cell: ({ row }) => <Actions row={row} onDelete={fetchData} />,
+    });
+  }
+
+  return baseColumns;
+};

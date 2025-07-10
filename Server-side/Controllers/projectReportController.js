@@ -14,7 +14,16 @@ exports.getProjectReport = async (req,res) =>{
     if (!projectData) {
       return res.status(404).json({ error: "Project report not found" });
     }
-        res.status(200).json(projectData)
+      const approvedControls = projectData.monthly_cost_control?.filter(
+      (entry) => entry.status === "approved"
+    ) || [];
+
+    res.status(200).json({
+      project_name: projectData.project_name,
+      budget: projectData.budget,
+      monthly_cost_control: approvedControls,
+    });
+        
     }catch(err){
         res.status(500).json({error:'Failed to get Project reports'})
     }

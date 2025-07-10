@@ -57,6 +57,12 @@ export function DataTable({ columns, data , loading }) {
       columnVisibility,
       rowSelection,
     },
+    initialState: {
+    pagination: {
+      pageSize: 25,
+    },
+  },
+    
   })
 
   return (

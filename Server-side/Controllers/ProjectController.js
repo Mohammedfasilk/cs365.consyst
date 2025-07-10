@@ -38,7 +38,7 @@ exports.fetchProjectList = async (req, res) => {
 exports.fetchSalesOrder = async (req, res) => {
   try {
     const { sales_order } = req.body;
-    const filters = encodeURIComponent(`[["name", "=", "${sales_order}"]]`);
+    const filters = encodeURIComponent(`[["name", "=", "${sales_order}"],["docstatus", "!=", 2]]`);
     const response = await axios.get(
       `${process.env.ERPNEXT_BASE_URL}/api/resource/Sales Order?fields=["po_date","customer_name","currency","net_total","company","title","name"]&filters=${filters}`,
       {

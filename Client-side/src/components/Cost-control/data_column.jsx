@@ -30,6 +30,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   setIsOpen,
+  setProjectStatus,
   setSelectedMonth,
   setSelectedProjectName,
 } from "../../Redux/Slices/costControlsheet";
@@ -53,6 +54,11 @@ export function DataTable({ data, columns }) {
       rowSelection,
       globalFilter, // ← Add this
     },
+    initialState: {
+    pagination: {
+      pageSize: 25,
+    },
+  },
     onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -131,11 +137,13 @@ export function DataTable({ data, columns }) {
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
+                      className={cell.column.id == "project_description" ? 'max-w-[150px] truncate whitespace-nowrap overflow-hidden' : ''}
                       key={cell.id}
                       onClick={() => {
                         if (cell.column.id !== "actions") {
                           dispatch(setIsOpen(true));
                           dispatch(setSelectedMonth(row.getValue("month")));
+                          dispatch(setProjectStatus(row.getValue("status")))
                           dispatch(
                             setSelectedProjectName(row.getValue("project_name"))
                           );
