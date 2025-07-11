@@ -389,7 +389,7 @@ const OrderBookingSheet = ({ fetchData }) => {
                                                         <FormControl>
                                                             <Input
                                                                 inputMode="decimal"
-                                                                value={field.value === 0 ? '' : field.value}
+                                                                value={field.value === 0 ? 0 : field.value}
                                                                 onChange={e => {
                                                                     const val = e.target.value;
                                                                     if (val === '' || val === '-' || /^-?\d*(\.\d*)?$/.test(val)) {
@@ -445,7 +445,7 @@ const OrderBookingSheet = ({ fetchData }) => {
                                                                 value={!isNaN(field.value) ? field.value.toLocaleString(undefined, {
                                                                     minimumFractionDigits: 2,
                                                                     maximumFractionDigits: 2
-                                                                }) : ''}
+                                                                }) : 0}
                                                                 readOnly
                                                             />
                                                         </FormControl>
