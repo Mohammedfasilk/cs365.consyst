@@ -46,13 +46,13 @@ const options = {
   labels: ["Average Results"],
 };
 
-const OrderBookingFYTD = ({ company, value: initialValue, isGroup }) => {
+const OrderBookingFYTD = ({ company, usdValue, localValue, isGroup }) => {
   const dispatch = useDispatch();
   const { settings } = useSelector((state) => state.settings);
-
-  const [value, setValue] = useState(initialValue);
+  const [displayValue, setDisplayValue] = useState(usdValue);
   const [series, setSeries] = useState([0]);
   const [isUsd, setIsUsd] = useState(false);
+  const [currency, setCurrency] = useState("USD");
 
   useEffect(() => {
     if (!settings || Object.keys(settings).length === 0) {
@@ -60,58 +60,63 @@ const OrderBookingFYTD = ({ company, value: initialValue, isGroup }) => {
     }
   }, [dispatch, settings]);
 
-  const getPercent = (companyName) => {
-    let percent = 0;
-    switch (companyName) {
-      case "CONSYST Digital Industries Pvt. Ltd":
-        percent = (initialValue / settings?.cdiplTarget || 0) * 100;
-        break;
-      case "CONSYST Technologies (India) Pvt. Ltd.":
-        percent = (initialValue / settings?.ctiplTarget || 0) * 100;
-        break;
-      case "CONSYST Middle East FZ-LLC":
-        percent = (initialValue / settings?.cmefTarget || 0) * 100;
-        break;
-      case "Consyst Group":
-        percent = (initialValue / settings?.groupTarget || 0) * 100;
-        break;
-      default:
-        percent = 0;
-    }
-    setSeries([Number(percent.toFixed(2))]);
-  };
-
   useEffect(() => {
-    getPercent(company);
-  }, [company, initialValue]);
+    // Calculate percentage for radial chart
+    const getPercent = () => {
+      let percent = 0;
+      const targetValue = isGroup ? usdValue : (isUsd ? usdValue : localValue);
+      
+      switch (company) {
+        case "CONSYST Digital Industries Pvt. Ltd":
+          percent = (targetValue / settings?.cdiplTarget || 0) * 100;
+          break;
+        case "CONSYST Technologies (India) Pvt. Ltd.":
+          percent = (targetValue / settings?.ctiplTarget || 0) * 100;
+          break;
+        case "CONSYST Middle East FZ-LLC":
+          percent = (targetValue / settings?.cmefTarget || 0) * 100;
+          break;
+        case "Consyst Group":
+          // Always use USD value and group target for Consyst Group
+          percent = (usdValue / settings?.groupTarget || 0) * 100;
+          break;
+        default:
+          percent = 0;
+      }
+      setSeries([Number(percent.toFixed(2))]);
+    };
 
-  useEffect(() => {
-    if (company === "CONSYST Middle East FZ-LLC") {
-      const converted = initialValue / settings?.usdToaed || 0;
-      setValue(converted);
-      setIsUsd(true);
+    getPercent();
+
+    // Set initial display value and currency
+    if (isGroup) {
+      // Always show USD for Consyst Group
+      setDisplayValue(usdValue);
+      setCurrency("USD");
+    } else if (isUsd) {
+      setDisplayValue(usdValue);
+      setCurrency("USD");
+    } else {
+      setDisplayValue(localValue);
+      setCurrency(company === "CONSYST Middle East FZ-LLC" ? "AED" : "INR");
     }
-  }, []);
-
-  const formatValue = (val) => {
-    const currency = isUsd
-      ? "USD"
-      : company === "CONSYST Middle East FZ-LLC"
-      ? "AED"
-      : "INR";
-
-    return val >= 1e6
-      ? `${currency} ${(val / 1e6).toFixed(2)}M`
-      : `${currency} ${(val / 1e3).toFixed(2)}K`;
-  };
+  }, [company, usdValue, localValue, settings, isUsd, isGroup]);
 
   const handleUSDConvertion = (checked) => {
     setIsUsd(checked);
-    const rate =
-      company === "CONSYST Middle East FZ-LLC"
-        ? settings?.usdToaed || 1
-        : settings?.usdToinr || 1;
-    setValue(checked ? initialValue / rate : initialValue);
+    if (checked) {
+      setDisplayValue(usdValue);
+      setCurrency("USD");
+    } else {
+      setDisplayValue(localValue);
+      setCurrency(company === "CONSYST Middle East FZ-LLC" ? "AED" : "INR");
+    }
+  };
+
+  const formatValue = (val) => {
+    return val >= 1e6
+      ? `${currency} ${(val / 1e6).toFixed(2)}M`
+      : `${currency} ${(val / 1e3).toFixed(2)}K`;
   };
 
   const hideChartCompanies = [
@@ -133,12 +138,12 @@ const OrderBookingFYTD = ({ company, value: initialValue, isGroup }) => {
           </p>
           <p className="mb-4 text-xs text-gray-500">{company}</p>
         </div>
-        {!isGroup && (
+        {!isGroup && company !== "Consyst Group" && (
           <div className="flex items-center space-x-2">
             <Switch
               onCheckedChange={handleUSDConvertion}
               id="is-usd"
-              defaultChecked={company === "CONSYST Middle East FZ-LLC"}
+              checked={isUsd}
             />
             <Label htmlFor="is-usd">USD</Label>
           </div>
@@ -158,17 +163,10 @@ const OrderBookingFYTD = ({ company, value: initialValue, isGroup }) => {
       )}
 
       <p className="text-center font-medium text-xl text-[var(--csblue)]">
-        {isGroup
-          ? `USD ${
-              initialValue >= 1e6
-                ? (initialValue / 1e6).toFixed(2) + "M"
-                : (initialValue / 1e3).toFixed(2) + "K"
-            }`
-          : formatValue(value)}
+        {formatValue(displayValue)}
       </p>
     </Card>
   );
 };
 
 export default OrderBookingFYTD;
-

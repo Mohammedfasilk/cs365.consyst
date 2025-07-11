@@ -5,7 +5,8 @@ const {
   getOrders,
   deleteOrder,
   fetchSalesOrderList, fetchSalesOrderByName,
-  getOrderSummary
+  getOrderSummary,
+  getOrderSummaryByCompany
 } = require('../Controllers/OrderBookingController');
 
 router.post('/save-order', saveOrder);
@@ -13,6 +14,7 @@ router.post('/list', fetchSalesOrderList);
 router.post('/order-booking', fetchSalesOrderByName);
 router.get('/', getOrders);
 router.get('/order-summary', getOrderSummary);
+router.get('/summary-by-company', getOrderSummaryByCompany);
 router.post('/delete', deleteOrder);
 
 module.exports = router;

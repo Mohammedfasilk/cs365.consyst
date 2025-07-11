@@ -70,7 +70,7 @@ const ProjectSheet = ({ fetchData }) => {
       dispatch(fetchSettings());
     }
   }, [dispatch, settings]);
- console.log(settings);
+  
   const selectedProjectName = useSelector(
     (state) => state.selectedProject.selectedProjectName
   );

@@ -13,6 +13,8 @@ import {
   CalendarClock,
   ChevronDown,
   ChevronUp,
+  CircleCheckBig,
+  Clock,
   Flag,
   Section,
   SquareChartGantt,
@@ -29,6 +31,7 @@ import { setChoosenProject } from "../../Redux/Slices/costControlsheet";
 import ScaleLoading from "../../components/UI/ScaleLoader";
 import { Checkbox } from "../../components/UI/Checkbox";
 import MonthlyLineChart from "../../components/Project/MonthlyLineChart";
+import { Badge } from "../../components/UI/Badge";
 import {
   Card,
   CardContent,
@@ -418,7 +421,7 @@ function ProjectDashboard() {
             </div>
 
             <section className="space-y-6 mt-5">
-              <h1 className="py-5">Milestone History</h1>
+              <h1 className="py-5">Milestones</h1>
               {(projectProgress?.milestone_history || []).map(
                 (milestone, index) => (
                   <Card key={index} className="w-full p-2 rounded shadow">
@@ -437,37 +440,48 @@ function ProjectDashboard() {
                       
                     </CardHeader>
                     {expandedCardIndex === index && (
-                      <CardContent className="mt-0 space-y-4">
-                        {milestone.history.map((entry, idx) => (
-                          <div className="py-10 pt-5 px-5 shadow border border-gray-300 rounded-md ">
-                            <div className="font-bold">{entry.month}</div>
-                            <div className="flex justify-between w-full mt-2 space-x-5">
-                              <div className="w-full">
-                                <h1 className="italic text-sm">
-                                  Progress Note
-                                </h1>
-                                <div className="border border-gray-300 p-2 rounded mt-2 h-full text-sm bg-green-100/50 max-w-[400px] break-words whitespace-pre-wrap">
-                                  {entry?.progressNotes}
-                                </div>
-                              </div>
-                              <div className="w-full">
-                                <h1 className="italic text-sm">
-                                  Risks & Issues
-                                </h1>
-                                <div className="border border-gray-300 p-2 h-full rounded mt-2 text-sm bg-red-100/50 max-w-[400px] break-words whitespace-pre-wrap">
-                                  {entry?.risksIssues}
-                                </div>
-                              </div>
-                              <div className="w-full">
-                                <h1 className="italic text-sm">Next Step</h1>
-                                <div className="border border-gray-300 p-2 h-full rounded mt-2 text-sm bg-green-100/50 max-w-[400px] break-words whitespace-pre-wrap">
-                                  {entry?.nextSteps}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </CardContent>
+                      <CardContent className="mt-0 space-y-4 relative">
+                       <div className="flex space-x-2 pl-6"><Clock className="w-5"/><h1 className="font-bold "> History</h1></div>
+  {milestone.history.map((entry, idx) => (
+    <div key={idx} className="relative pl-6">
+      {/* Vertical line inside CardContent */}
+      {idx !== milestone.history.length -1 && (
+        <div className="absolute left-1.5 top-0 bottom-0 w-[3px] bg-gray-300"></div>
+      )}
+
+      {/* Timeline dot */}
+      {/* <div className="absolute left-0 top-5 w-4 h-4 bg-gray-300 border border-gray-400 rounded-full z-10"></div> */}
+      {entry.progress == 100 ? <CircleCheckBig className="absolute left-0 top-5 w-4 h-4 bg-gray-200 text-green-500 border border-gray-400 rounded-full z-10" />: <Clock className="absolute left-0 top-5 w-4 h-4 text-orange-500 bg-gray-200 border border-gray-400 rounded-full z-10"/>}
+
+      <div className="py-10 pt-5 px-5 shadow border border-gray-300 rounded-md bg-white">
+        <div className="font-bold flex items-center">{entry.month}
+          <Badge className='ml-5 rounded-full bg-gray-200 p-0 px-2'>{entry.progress}%</Badge>
+        </div>
+        <div className="flex justify-between w-full mt-2 space-x-5">
+          <div className="w-full">
+            <h1 className="italic text-sm">Progress Note</h1>
+            <div className="border border-gray-200 p-2 rounded mt-2 h-full text-sm bg-green-100/50 max-w-[400px] break-words whitespace-pre-wrap">
+              {entry?.progressNotes}
+            </div>
+          </div>
+          <div className="w-full">
+            <h1 className="italic text-sm">Risks & Issues</h1>
+            <div className="border border-gray-200 p-2 h-full rounded mt-2 text-sm bg-red-100/50 max-w-[400px] break-words whitespace-pre-wrap">
+              {entry?.risksIssues}
+            </div>
+          </div>
+          <div className="w-full">
+            <h1 className="italic text-sm">Next Step</h1>
+            <div className="border border-gray-200 p-2 h-full rounded mt-2 text-sm bg-green-100/50 max-w-[400px] break-words whitespace-pre-wrap">
+              {entry?.nextSteps}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  ))}
+</CardContent>
+
                     )}
                   </Card>
                 )

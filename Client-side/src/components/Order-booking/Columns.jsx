@@ -196,7 +196,29 @@ export const columns = (fetchData) => [
     header: "Sub Category",
     cell: ({ row }) => row.getValue("subCategory"),
   },
-  {
+{
+  accessorKey: "salesOrderValue",
+  header: "Value",
+cell: ({ row }) => {
+  const value = row.getValue("salesOrderValue");
+  const currency = row.original?.currency;
+
+  if (typeof value !== "number") return null;
+
+  const symbols = { INR: "₹", USD: "$" };
+  const currencySymbol = symbols[currency] || "";
+
+  return (
+    <div>
+      {currencySymbol} {value.toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}
+    </div>
+  );
+},
+},
+{
     accessorKey: "Status",
     header: "Doc Status",
     cell: ({ row }) => (

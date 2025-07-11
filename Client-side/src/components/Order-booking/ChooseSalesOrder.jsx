@@ -23,7 +23,7 @@ export function ChooseSalesOrder({ sales_order_name }) {
     const [salesOrderList, setSalesOrderList] = useState([]);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [search, setSearch] = useState({ search: "" });
-
+    
     useEffect(() => {
         const fetchData = async () => {
             try {

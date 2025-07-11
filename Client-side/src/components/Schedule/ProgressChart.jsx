@@ -17,7 +17,7 @@ const options = {
   plotOptions: {
     bar: {
       horizontal: false,
-      columnWidth: '50%', // Adjust as needed
+      columnWidth: '50px', // Adjust as needed
     },
   },
   dataLabels: {

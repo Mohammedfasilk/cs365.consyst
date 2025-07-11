@@ -91,7 +91,7 @@ exports.getOrderSummary = async (req, res) => {
         for (const order of orders) {
             const category = order.category === "Product/Platform" ? "Product/Service" : order.category;
             const subCategory = order.subCategory;
-            const value = order.adjustedSalesValue || 0;
+            const value = order.adjustedSalesValueUsd || 0; // Changed from adjustedSalesValue to usdValue
 
             if (!grouped[category]) {
                 grouped[category] = {};
@@ -122,6 +122,80 @@ exports.getOrderSummary = async (req, res) => {
     }
 };
 
+// get order summary by company
+exports.getOrderSummaryByCompany = async (req, res) => {
+    try {
+        const orders = await OrderBooking.find({});
+        
+        const companyData = {
+            "CONSYST Digital Industries Pvt. Ltd": {
+                usdTotal: 0,
+                localTotal: 0
+            },
+            "CONSYST Technologies (India) Pvt. Ltd.": {
+                usdTotal: 0,
+                localTotal: 0
+            },
+            "CONSYST Middle East FZ-LLC": {
+                usdTotal: 0,
+                localTotal: 0
+            },
+            "Consyst Group": {
+                usdTotal: 0,
+                localTotal: 0
+            }
+        };
+
+        for (const order of orders) {
+            const company = order.company;
+            const usdValue = order.adjustedSalesValueUsd || 0;
+            const localValue = order.adjustedSalesValueLocal || 0;
+            
+            if (companyData.hasOwnProperty(company)) {
+                companyData[company].usdTotal += usdValue;
+                companyData[company].localTotal += localValue;
+            }
+        }
+
+        // Calculate Consyst Group totals
+        companyData["Consyst Group"].usdTotal = 
+            companyData["CONSYST Digital Industries Pvt. Ltd"].usdTotal +
+            companyData["CONSYST Technologies (India) Pvt. Ltd."].usdTotal +
+            companyData["CONSYST Middle East FZ-LLC"].usdTotal;
+            
+        companyData["Consyst Group"].localTotal = 
+            companyData["CONSYST Digital Industries Pvt. Ltd"].localTotal +
+            companyData["CONSYST Technologies (India) Pvt. Ltd."].localTotal +
+            companyData["CONSYST Middle East FZ-LLC"].localTotal;
+
+        const result = [
+            {
+                company: "CONSYST Digital Industries Pvt. Ltd",
+                adjustedUsdTotal: companyData["CONSYST Digital Industries Pvt. Ltd"].usdTotal,
+                adjustedLocalTotal: companyData["CONSYST Digital Industries Pvt. Ltd"].localTotal
+            },
+            {
+                company: "CONSYST Technologies (India) Pvt. Ltd.",
+                adjustedUsdTotal: companyData["CONSYST Technologies (India) Pvt. Ltd."].usdTotal,
+                adjustedLocalTotal: companyData["CONSYST Technologies (India) Pvt. Ltd."].localTotal
+            },
+            {
+                company: "CONSYST Middle East FZ-LLC",
+                adjustedUsdTotal: companyData["CONSYST Middle East FZ-LLC"].usdTotal,
+                adjustedLocalTotal: companyData["CONSYST Middle East FZ-LLC"].localTotal
+            },
+            {
+                company: "Consyst Group",
+                adjustedUsdTotal: companyData["Consyst Group"].usdTotal,
+                adjustedLocalTotal: companyData["Consyst Group"].localTotal
+            }
+        ];
+
+        res.json(result);
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to summarize order bookings by company' });
+    }
+};
 
 // Delete an order booking
 exports.deleteOrder = async (req, res) => {

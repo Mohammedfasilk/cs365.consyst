@@ -12,7 +12,12 @@ const orderBookingSchema = new mongoose.Schema({
   category: { type: String, required: true },
   subCategory: { type: String, required: true },
   Status: { type: String, default: 'draft' },
-  Stage: { type: String, default: 'open' },
+  usdValue: { type: Number, required: true },
+  inrValue: { type: Number, required: true },
+  adjustedSalesValueUsd: { type: Number, required: true },
+  adjustedSalesValueLocal: { type: Number, required: true },
+
+
 });
 
 module.exports = mongoose.model('OrderBooking', orderBookingSchema);

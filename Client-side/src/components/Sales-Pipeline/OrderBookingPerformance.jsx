@@ -2,7 +2,7 @@ import React from "react";
 import ReactApexChart from "react-apexcharts";
 import { useSelector } from "react-redux";
 
-export default function OrderBookingFYTDGrid({ orderBookingData, orderSummaryData }) {
+export default function OrderBookingPerformance({ orderBookingData, orderSummaryData }) {
 
     const { settings } = useSelector((state) => state.settings);
 

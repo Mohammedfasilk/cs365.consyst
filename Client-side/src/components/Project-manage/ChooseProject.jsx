@@ -45,7 +45,6 @@ export function ChooseProject({ project_name }) {
     fetchData();
   }, [search]);
 
-
   return (
     <Popover open={dropdownOpen} onOpenChange={setDropdownOpen}>
       <PopoverTrigger asChild>
