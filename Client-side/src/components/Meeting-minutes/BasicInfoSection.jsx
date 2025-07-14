@@ -1,9 +1,9 @@
 import { Input } from '../UI/Input';
 import {Label} from '../UI/Label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../UI/Select';
+import { TIMEZONES, getDefaultTimezone } from '../../utils/timezoneUtils';
 
-
-export const BasicInfoSection = ({
+ const BasicInfoSection = ({
   title,
   date,
   time,
@@ -73,18 +73,18 @@ export const BasicInfoSection = ({
             <SelectTrigger>
               <SelectValue placeholder="Select timezone" />
             </SelectTrigger>
-            {/* <SelectContent>
+            <SelectContent className='bg-white'>
               {TIMEZONES.map(tz => (
                 <SelectItem key={tz.value} value={tz.value}>
                   {tz.label}
                 </SelectItem>
               ))}
-            </SelectContent> */}
+            </SelectContent>
           </Select>
         </div>
       </div>
-
-
     </div>
   );
 };
+
+export { BasicInfoSection };

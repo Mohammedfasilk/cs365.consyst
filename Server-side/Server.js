@@ -22,6 +22,7 @@ const costControl = require('./Routes/costControlRoute')
 const projectReport = require('./Routes/projectReportRoute')
 const timeLine = require('./Routes/timelineRoute')
 const activity = require('./Routes/ActivityRoute')
+const meetings = require('./Routes/MeetingRoute')
 
 //middlewares
 app.use(express.json())
@@ -45,6 +46,7 @@ app.use('/api/cost-control',costControl);
 app.use('/api/project-report',projectReport);
 app.use('/api/timeline',timeLine);
 app.use('/api/activity',activity);
+app.use('/api/meeting',meetings);
 
 
 const PORT = process.env.PORT || 3000;

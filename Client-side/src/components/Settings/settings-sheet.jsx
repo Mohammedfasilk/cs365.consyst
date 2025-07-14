@@ -67,7 +67,7 @@ const userRoles = [
 ];
 
 export function SettingsSheet() {
-  const [loading, setLoading] = useState(false);
+  // const [loading] = useState(false);
   const [resetKey, setResetKey] = useState(0);
   const sessionUser = useSessionUser();
 
@@ -97,7 +97,7 @@ export function SettingsSheet() {
   });
 
   const createUser = async (user) => {
-    setLoading(true);
+(true);
     const doc = {
       name: user.name,
       email: user.email,
@@ -145,7 +145,7 @@ export function SettingsSheet() {
       }
     }
 
-    setLoading(false);
+(false);
     form.reset();
     setResetKey((prevKey) => prevKey + 1);
     fetchUsers();
@@ -230,7 +230,7 @@ useEffect(() => {
                         <Button
                           className="bg-[var(--csblue)] hover:bg-[var(--csblue)]/90 px-8"
                           type="submit"
-                          disabled={loading}
+                          // disabled={loading}
                         >
                           Save
                         </Button>
@@ -270,7 +270,6 @@ useEffect(() => {
                         <Button
                           className="bg-[var(--csblue)] hover:bg-[var(--csblue)]/90 px-8"
                           type="submit"
-                          disabled={loading}
                         >
                           New
                         </Button>

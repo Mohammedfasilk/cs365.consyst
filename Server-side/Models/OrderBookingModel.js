@@ -15,6 +15,7 @@ const orderBookingSchema = new mongoose.Schema({
   usdValue: { type: Number, required: true },
   inrValue: { type: Number, required: true },
   adjustedSalesValueUsd: { type: Number, required: true },
+  country: { type: String, required: true },
   adjustedSalesValueLocal: { type: Number, required: true },
 
 

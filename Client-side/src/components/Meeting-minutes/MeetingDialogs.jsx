@@ -2,10 +2,10 @@ import React from 'react'
 import CreateMeetingDialog from './CreateMeetingDialog'
 
 function MeetingDialogs({
-  isCreateDialogOpen,
+  isOpen,
   isEditDialogOpen,
   selectedMeeting,
-  onCloseCreateDialog,
+  onCloseDialog,
   onCloseEditDialog,
   onCreateMeeting,
   onUpdateMeeting,
@@ -14,8 +14,8 @@ function MeetingDialogs({
   return (
     <>
       <CreateMeetingDialog
-        isOpen={isCreateDialogOpen}
-        onClose={onCloseCreateDialog}
+        isOpen={isOpen}
+        onClose={onCloseDialog}
         onCreateMeeting={onCreateMeeting}
       />
 

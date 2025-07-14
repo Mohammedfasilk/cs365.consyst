@@ -7,6 +7,7 @@ import selectedProject from './Slices/SelectedProject';
 import selectedSalesOrder from './Slices/orderBookingSlice';
 import costControlSheetReducer from './Slices/costControlsheet';
 import scheduleSheetReducer from './Slices/scheduleSheetslice';
+import sessionReducer from './Slices/sessionSlice';
 
 const store = configureStore({
   reducer: {    
@@ -29,7 +30,9 @@ const store = configureStore({
     costControlSheet: costControlSheetReducer,
 
     //Schedule
-    scheduleSheet: scheduleSheetReducer
+    scheduleSheet: scheduleSheetReducer,
+
+    session : sessionReducer,
   },
 });
 

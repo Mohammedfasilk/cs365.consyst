@@ -197,6 +197,33 @@ exports.getOrderSummaryByCompany = async (req, res) => {
     }
 };
 
+// Get order bookings summarized by country
+exports.getCountryOrderSummary = async (req, res) => {
+  try {
+    const orders = await OrderBooking.find({});
+
+    const countryTotals = {};
+
+    for (const order of orders) {
+      const country = order.country || "Unknown";
+      const value = order.adjustedSalesValueUsd || 0;
+
+      countryTotals[country] = (countryTotals[country] || 0) + value;
+    }
+
+    const result = Object.entries(countryTotals).map(([country, total]) => ({
+      country,
+      total: +total.toFixed(2),
+    }));
+
+    res.json(result);
+  } catch (error) {
+    console.error("Error summarizing order bookings by country:", error);
+    res.status(500).json({ error: "Failed to summarize order bookings by country" });
+  }
+};
+
+
 // Delete an order booking
 exports.deleteOrder = async (req, res) => {
     try {

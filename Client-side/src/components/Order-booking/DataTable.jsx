@@ -26,6 +26,7 @@ import { ChevronDownIcon } from "lucide-react";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setIsSaved, setIsOpen, setSelectedSalesOrder, setSelectedSalesOrderName } from "../../Redux/Slices/orderBookingSlice";
+import ScaleLoading from "../UI/ScaleLoader";
 
 export default function DataTable({ columns, data, loading }) {
   const [sorting, setSorting] = useState([]);
@@ -151,7 +152,7 @@ export default function DataTable({ columns, data, loading }) {
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  {loading ? 'Loading...' : 'No results.'}
+                  {loading ? <ScaleLoading size={30}/> :'No results.'}
                 </TableCell>
               </TableRow>
             )}

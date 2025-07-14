@@ -14,7 +14,7 @@ function SearchAndFilterSection({
 
       const roleOptions = [
     { id: "host", label: "Host" },
-    { id: "participant", label: "Participant" },
+    { id: "attendees", label: "Participant" },
   ];
 
   const handleRoleChange = (roleId, checked) => {
@@ -47,7 +47,7 @@ function SearchAndFilterSection({
             <div key={role.id} className="flex items-center space-x-2">
               <Checkbox
                 id={role.id}
-                // checked={roleFilters.includes(role.id)}
+                checked={roleFilters.includes(role.id)}
                 onCheckedChange={(checked) => handleRoleChange(role.id, checked)}
               />
               <label htmlFor={role.id} className="text-sm text-gray-600 cursor-pointer">

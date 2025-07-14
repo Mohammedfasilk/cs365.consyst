@@ -19,10 +19,13 @@ import {
 import { useToast } from "../../Hooks/use-toast";
 import dayjs from "dayjs";
 import { useSessionUser } from "../../Hooks/useSessionUser";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 export default function GeneralSettings() {
   const { toast } = useToast();
   const sessionUser = useSessionUser();
+
 
   const form = useForm({
     defaultValues: {
@@ -213,36 +216,6 @@ export default function GeneralSettings() {
 
         <h1>Sales Targets (Current FY)</h1>
         <div className="grid w-full grid-cols-[1fr_1fr_1fr] gap-6 mt-4 mb-8">
-          {[
-            { name: "cmefTarget", label: "CMEF Target (AED)" },
-            { name: "ctiplTarget", label: "CTIPL Target (INR)" },
-            { name: "cdiplTarget", label: "CDIPL Target (INR)" },
-          ].map(({ name, label }) => (
-            <FormField
-              key={name}
-              control={form.control}
-              name={name}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{label}</FormLabel>
-                  <FormControl>
-                    <Input
-                      className="text-right shadow"
-                      {...field}
-                      onChange={(e) => {
-                        field.onChange(Number(e.target.value));
-                        const values = form.getValues();
-                        const group_value = calculateGroupTargetUSD(values);
-                        form.setValue("groupTarget", group_value);
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          ))}
-
           <FormField
             control={form.control}
             name="groupTarget"
@@ -250,7 +223,7 @@ export default function GeneralSettings() {
               <FormItem>
                 <FormLabel>Group Target (USD)</FormLabel>
                 <FormControl>
-                  <Input disabled className="text-right shadow" {...field} />
+                  <Input className="text-right shadow" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

@@ -9,12 +9,15 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useState } from "react";
 import ScaleLoading from "./ScaleLoader";
+import { useDispatch } from "react-redux";
+import { setSessionRole, setSessionUser } from "../../Redux/Slices/sessionSlice";
 
 function SignInButton() {
 
   const [loading,setLoading] = useState()
   const { instance } = useMsal();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
  const handleLogin = async () => {
   try {
@@ -46,6 +49,8 @@ function SignInButton() {
     if (userExist.success) {
       const date = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
       sessionStorage.setItem("user", JSON.stringify(userExist.user));
+      dispatch(setSessionUser(userExist.user.name))
+      dispatch(setSessionRole(userExist.user.roles))
       setLoading(false);
       navigate("/home");
 

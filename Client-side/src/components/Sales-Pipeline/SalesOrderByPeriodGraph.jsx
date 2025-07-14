@@ -13,7 +13,7 @@ export function SalesOrderByPeriodGraph(props) {
   const dispatch = useDispatch();
   // Get FY start date from settings or default to 2024-04-01
   // Always use settings?.currentFyStartDate for consistency
-  const fyStartDate = settings?.currentFyStartDate || "2024-04-01";
+  const fyStartDate = settings?.currentFyStartDate;
   // Generate months for the FY, returning array of {iso, label}
   const generateFYMonthLabels = (fyStartDate) => {
     const months = [];
@@ -187,21 +187,40 @@ export function SalesOrderByPeriodGraph(props) {
   };
 
   // Fetch data from API and align to months
-  async function fetchData(fyDate) {
-    const usd = settings?.usdToinr;
-    const aed = settings?.usdToaed;
-    const endpoint = "/api/sales-analysis/order-booking-monthly";
-    const response = await axios.post(`${import.meta.env.VITE_CS365_URI}${endpoint}`, {
-      fyDate,
-      usd,
-      aed,
-    });
+async function fetchData(fyDate) {
+  try {
+    const endpoint = "/api/orders";
+    const response = await axios.get(`${import.meta.env.VITE_CS365_URI}${endpoint}`);
     const data = response.data;
+
+    // Generate FY months
     const monthsArr = generateFYMonthLabels(fyDate);
-    const aligned = alignValuesToMonths(monthsArr, data.valueList);
+
+    // Group and sum adjustedSalesValueUsd by month
+    const monthlyMap = {};
+
+    data.forEach((order) => {
+      const orderDate = new Date(order.salesOrderDate);
+      const monthKey = new Date(orderDate.getFullYear(), orderDate.getMonth(), 1).toISOString().split("T")[0];
+      console.log("Month key:", monthKey);
+
+      if (!monthlyMap[monthKey]) {
+        monthlyMap[monthKey] = 0;
+      }
+      monthlyMap[monthKey] += order.adjustedSalesValueUsd || 0;
+    });
+
+    // Align values to months array
+    const aligned = monthsArr.map((m) => monthlyMap[m.iso] ?? 0);
+    console.log("Aligned values:", aligned);
+    
     setDates(monthsArr);
     setValues(aligned);
+  } catch (error) {
+    console.error("Failed to fetch sales order data:", error);
+    setValues(Array(12).fill(0));
   }
+}
 
   // Switch handler only sets state
   const handleSwitch = setIsQuarterly;

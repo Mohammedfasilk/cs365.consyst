@@ -20,6 +20,8 @@ import { useAuthRedirect } from "../../Hooks/useAuthRoute";
 import { Switch } from "../../components/UI/Switch";
 import MonthlyOrderBookingChart from "../../components/Sales-Pipeline/MonthlyOrdeBookingChart";
 import OrderBookingPerformance from "../../components/Sales-Pipeline/OrderBookingPerformance";
+import { CardHeader } from "@mui/material";
+import DonutChart from "../../components/Sales-Pipeline/DonutChart";
 
 function SalesDashboard() {
   useAuthRedirect();
@@ -35,7 +37,7 @@ function SalesDashboard() {
   const [usd, setUsd] = useState();
   const [rawTopOpportunities, setRawTopOpportunities] = useState([]);
   const [companySummaryData, setCompanySummaryData] = useState([]);
-
+  const [countrySummaryData, setCountrySummaryData] = useState([]);
   const [monthlyOrderBookingData, setMonthlyOrderBookingData] = useState({
     dateList: [],
     valueList: [],
@@ -84,6 +86,7 @@ function SalesDashboard() {
           monthlyRes,
           summaryRes,
           companySummaryRes,
+          countrySummaryRes,
         ] = await Promise.all([
           axios.get(`${base}/api/sales-pipeline/top-opportunities`),
           axios.get(`${base}/api/sales-pipeline/sum`),
@@ -96,6 +99,7 @@ function SalesDashboard() {
           }),
           axios.get(`${base}/api/orders/order-summary`),
           axios.get(`${base}/api/orders/summary-by-company`),
+          axios.get(`${base}/api/orders/summary-by-country`),
         ]);
 
         setRawTopOpportunities(topRes.data);
@@ -105,6 +109,7 @@ function SalesDashboard() {
         setMonthlyOrderBookingData(monthlyRes.data);
         setOrderSummaryData(summaryRes.data);
         setCompanySummaryData(companySummaryRes.data);
+        setCountrySummaryData(countrySummaryRes.data);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -215,8 +220,8 @@ function SalesDashboard() {
               })}
             </div>
 
-            <div className="flex-1 flex flex-col md:flex-row gap-2">
-              <div className="md:w-2/5 w-full">
+            <div className="flex-1 flex flex-col md:flex-row gap-2 justify-center">
+              <div className="md:w-[30%] w-full flex flex-col gap-2">
                 <OrderBookingFYTD
                   key="group"
                   company="Consyst Group"
@@ -224,17 +229,22 @@ function SalesDashboard() {
                   localValue={companySummaryData.find(c => c.company === "Consyst Group")?.adjustedLocalTotal || 0}
                   isGroup={true}
                 />
+                <div>
+
+                <DonutChart countrySummaryData={countrySummaryData}/>
+                </div>
               </div>
 
-              <div className="md:w-3/5 w-full">
+              <div className="md:w-[70%] w-full">
                 <Card className="h-full p-4 bg-white">
-                  <h1 className="m-2 mb-6">Monthly Order Booking Trends</h1>
+                  <p className="text-sm font-semibold text-gray-700 mb-5 text-center">Monthly Order Booking Trends</p>
                   <div className="h-[300px]">
                     <MonthlyOrderBookingChart data={monthlyOrderBookingData} />
                   </div>
                 </Card>
               </div>
             </div>
+
           </div>
           <div className="mx-8 ml-20 flex justify-center">
             <OrderBookingPerformance
