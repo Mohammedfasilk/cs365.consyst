@@ -28,11 +28,12 @@ export const MeetingForm = ({
   const sessionUser = useSelector((state)=>state.session.sessionUser)
     const { accounts } = useMsal();
     const userName = accounts[0]?.name
+    const userEmail = accounts[0]?.username
   const [formData, setFormData] = useState({
     // Basic Info
     title: initialData.title || "",
-    host: userName || null,
     date: initialData.date || "",
+    owner: userName || null,
     time: initialData.time || "",
     duration: initialData.duration || "60",
     timezone: initialData.timezone || getDefaultTimezone(),
@@ -44,6 +45,7 @@ export const MeetingForm = ({
     agenda: initialData.agenda || [],
   });
   const { toast } = useToast();
+  
   
     
 
@@ -83,49 +85,67 @@ export const MeetingForm = ({
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!isFormValid() || isSubmitting) {
-      return;
-    }
+  if (!isFormValid() || isSubmitting) {
+    return;
+  }
 
-    try {
-      const createMeeting = async () => {  
-              
-        const res = await axios.post(
-          `${import.meta.env.VITE_CS365_URI}/api/meeting/create`,
-          formData
-        );
+  try {
+    const createMeeting = async () => {
+      // Clone current attendees and ensure current user is added
+      const updatedAttendees = [...formData.attendees];
 
-        fetchMeetings();
-        
-        if (res.status == 200) {
-          toast({
-            title: "Meeting Created",
-            description: "Meetting has been successfully created.",
-            icon: <CircleCheckIcon className="mr-4" color="green" />,
-          });
-        } else {
-          toast({
-            title: "Meeting Not Created",
-            description: "There was an error creating meeting.",
-            variant: "destructive",
-            icon: <CircleXIcon className="mr-4" color="red" />,
-          });
+      const alreadyExists = updatedAttendees.some(
+        (attendee) => attendee.email === userEmail
+      );
+
+      if (!alreadyExists && userEmail) {
+        updatedAttendees.push({
+          email: userEmail,
+          name: userName,
+          role: 'host',
+        });
+      }
+
+      const res = await axios.post(
+        `${import.meta.env.VITE_CS365_URI}/api/meeting/create`,
+        {
+          ...formData,
+          attendees: updatedAttendees,
         }
-      };
+      );
 
-      createMeeting();
-    } catch (error) {
-      console.error("Error submitting meeting:", error);
-      toast({
-        title: "Meeting Not Created",
-        description: "There was an error creating meeting.",
-        variant: "destructive",
-        icon: <CircleXIcon className="mr-4" color="red" />,
-      });
-    }
-  };
+      fetchMeetings();
+
+      if (res.status === 200) {
+        toast({
+          title: "Meeting Created",
+          description: "Meeting has been successfully created.",
+          icon: <CircleCheckIcon className="mr-4" color="green" />,
+        });
+      } else {
+        toast({
+          title: "Meeting Not Created",
+          description: "There was an error creating meeting.",
+          variant: "destructive",
+          icon: <CircleXIcon className="mr-4" color="red" />,
+        });
+      }
+    };
+
+    createMeeting();
+  } catch (error) {
+    console.error("Error submitting meeting:", error);
+    toast({
+      title: "Meeting Not Created",
+      description: "There was an error creating meeting.",
+      variant: "destructive",
+      icon: <CircleXIcon className="mr-4" color="red" />,
+    });
+  }
+};
+
 
   const handleCancel = () => {
     onCancel();

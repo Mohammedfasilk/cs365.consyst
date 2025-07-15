@@ -18,7 +18,6 @@ import { SettingsSheet } from "../Settings/settings-sheet";
 export default function Sidebar() {
   const [isHovered, setIsHovered] = useState(false);
   const Currentuser = JSON.parse(sessionStorage.getItem("user"));
-  console.log(Currentuser);
   
   const menuItems = [
     {

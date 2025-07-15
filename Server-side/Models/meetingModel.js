@@ -6,7 +6,7 @@ const meetingSchema = new mongoose.Schema({
     required: true,
   },
 
-  host: {
+  owner: {
     type: String,
   },
 
@@ -29,7 +29,18 @@ const meetingSchema = new mongoose.Schema({
     default:'upcoming'
   },
 
-  attendees: [],
+  attendees: [{
+    name:{type:String,default:null},
+    email:String,
+    role:{type:String,default:'participant'}
+  }],
+  agreement: [{
+    assignees:[],
+    deadline:{type:String},
+    description:{type:String},
+    title:{type:String},
+    type:{type:String}
+  }],
 
   agenda: [],
 });

@@ -36,18 +36,23 @@ function MeetingMinutes() {
         return;
       }
 
-      const filtered = meetings.filter((meeting) => {
-        const isHost = roleFilters.includes("host") && meeting.host === accounts[0]?.name;  
-  
-              
-        const isAttendee =
-          roleFilters.includes("attendees") &&
-          Array.isArray(meeting.attendees) &&
-          meeting.attendees.some((a) => a.email === accounts[0]?.username); // ← double check this email check
+     const filtered = meetings.filter((meeting) => {
+  const email = accounts[0]?.username;
 
-        return isHost || isAttendee;
-      });
+  const isHost =
+    roleFilters.includes("host") &&
+    meeting.attendees.some(
+      (a) => a.email === email && a.role === "host"
+    );
 
+  const isAttendee =
+    roleFilters.includes("participant") &&
+    meeting.attendees.some(
+      (a) => a.email === email && a.role !== "host"
+    );
+
+  return isHost || isAttendee;
+});
       setFilteredMeetings(filtered);
 
       

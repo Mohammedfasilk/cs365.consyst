@@ -2,12 +2,13 @@ import React from 'react';
 import MeetingCardHeader from './MeetingCardHeader';
 // import MeetingDateTime from './MeetingDateTime';
 import { Button } from '../UI/Button';
-import { Calendar, Clock, FileText, User, Users } from 'lucide-react';
+import { Calendar, CheckSquare, Clock, FileText, User, UserCheck, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const MeetingCard = ({ meeting, onEditMeeting, onDeleteMeeting }) => {
   const navigate = useNavigate();
-
+  const generalAgreements = meeting?.agreement?.filter((agreement)=>agreement.type === 'general').length || 0
+  const tasks = meeting?.agreement?.filter((agreement)=>agreement.type === 'task_assignment').length || 0
   return (
     <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 p-6 border border-gray-100 flex flex-col min-h-[280px] w-full">
       <MeetingCardHeader 
@@ -61,14 +62,14 @@ const MeetingCard = ({ meeting, onEditMeeting, onDeleteMeeting }) => {
             <CheckSquare className="w-3 h-3 text-green-500" />
             <span className="text-green-700">
               Agreements: 
-              {/* {agreementsLoading ? 'Loading...' : generalAgreementsCount} */}
+              {generalAgreements}
             </span>
           </div>
           <div className="flex items-center gap-1.5">
             <UserCheck className="w-3 h-3 text-purple-500" />
             <span className="text-purple-700">
               Tasks: 
-              {/* {tasksLoading ? 'Loading...' : taskAssignmentsCount} */}
+              {tasks}
             </span>
           </div>
         </>

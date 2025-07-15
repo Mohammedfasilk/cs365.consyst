@@ -14,7 +14,7 @@ function SearchAndFilterSection({
 
       const roleOptions = [
     { id: "host", label: "Host" },
-    { id: "attendees", label: "Participant" },
+    { id: "participant", label: "Participant" },
   ];
 
   const handleRoleChange = (roleId, checked) => {

@@ -51,7 +51,7 @@ const MeetingDetailHeader = ({
   };
 
   return (
-    <div className="flex items-center ml-20 mt-16 justify-between mb-6">
+    <div className="flex items-center mt-16 justify-between mb-6">
       <div className="flex items-center gap-4">
         <Button 
           onClick={onBack} 
@@ -63,7 +63,7 @@ const MeetingDetailHeader = ({
           Back to Meetings
         </Button>
         <Badge >
-          upcoming
+          {status}
         </Badge>
       </div>
 
