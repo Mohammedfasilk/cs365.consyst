@@ -45,7 +45,7 @@ import {
     setIsOpen,
     setIsSaved,
     clearSelectedBillingPlan,
-} from "../../Redux/Slices/billingPlanSlice";
+} from "../../Redux/Slices/BillingPlanSlice";
 import { ChooseBillingPlan } from "./ChooseBillingPlan";
 import { fetchSettings } from "../../Redux/Slices/settingsSlice";
 import {
