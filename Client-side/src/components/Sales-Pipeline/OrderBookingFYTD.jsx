@@ -156,8 +156,8 @@ const OrderBookingFYTD = ({ company, usdValue, localValue, isGroup }) => {
             options={options}
             series={series}
             type="radialBar"
-            height={"100%"}
-            width={"100%"}
+            // height={"100%"}
+            // width={"100%"}
           />
         </div>
       )}

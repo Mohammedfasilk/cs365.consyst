@@ -17,7 +17,7 @@ const options = {
   plotOptions: {
     bar: {
       horizontal: false,
-      columnWidth: '50px', // Adjust as needed
+      columnWidth: '50%', // Adjust as needed
     },
   },
   dataLabels: {
@@ -38,6 +38,8 @@ const series = [
     data: actualData,
   },
 ];
-  return <Chart options={options} series={series} type="bar" width={2000} height={350} />;
+  return <div className='min-w-screen'>
+    <Chart options={options} series={series} type="bar" width="100%" height={350} />;
+  </div>
 
 }

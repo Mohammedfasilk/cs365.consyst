@@ -3,7 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   salesOrder: {}, // full sales order object
   salesOrderName: "", // selected sales order name
-  isopen: false,
+  isOpen: false,
   isSaved: false,
   source: "",
 };

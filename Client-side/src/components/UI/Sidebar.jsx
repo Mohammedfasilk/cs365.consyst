@@ -36,6 +36,7 @@ export default function Sidebar() {
       subItems: [
         { label: "Finance Dashboard", href: "/Finance/finance-dashboard" },
         { label: "Banking", href: "/Finance/Banking" },
+        { label: "Billing Plan", href: "/Finance/billing-plan" },
       ],
     },
     {

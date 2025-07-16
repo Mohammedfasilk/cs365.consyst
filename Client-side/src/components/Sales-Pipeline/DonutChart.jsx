@@ -12,12 +12,12 @@ export default function DonutChart({ countrySummaryData = [] }) {
   ];
 
   return (
-    <div className="w-full">
+    <div className="w-full h-full">
       <div className="bg-white rounded-lg shadow p-4 flex flex-col items-center justify-center h-full w-full">
         <span className="mb-2 text-sm font-semibold text-gray-700">
           Order Booking by Country (Total)
         </span>
-        <div className="w-full h-full flex items-center justify-center">
+        <div className="w-full h-[250px] flex items-center justify-center">
           {countryValues.length === 0 || countryValues.every((val) => val === 0) ? (
             <ReactApexChart
               options={{
@@ -27,10 +27,17 @@ export default function DonutChart({ countrySummaryData = [] }) {
                 legend: { show: false },
                 dataLabels: { enabled: false },
                 tooltip: { enabled: false },
+                plotOptions: {
+                  donut: {
+                    labels: {
+                      show: false
+                    }
+                  }
+                }
               }}
               series={[100]}
               type="donut"
-              height="300"
+              height="100%" 
               width="100%"
             />
           ) : (
@@ -39,15 +46,8 @@ export default function DonutChart({ countrySummaryData = [] }) {
                 chart: { type: "donut" },
                 labels: countryLabels,
                 colors: countryColors.slice(0, countryLabels.length),
-                legend: {
-                  position: "bottom",
-                  fontSize: "12px",
-                  labels: { colors: "#333" },
-                },
-                dataLabels: {
-                  enabled: true,
-                  formatter: (val) => `${val.toFixed(1)}%`,
-                },
+                legend: { show: false },
+                dataLabels: { enabled: false },
                 tooltip: {
                   y: {
                     formatter: (val) =>
@@ -58,10 +58,17 @@ export default function DonutChart({ countrySummaryData = [] }) {
                       }),
                   },
                 },
+                plotOptions: {
+                  donut: {
+                    labels: {
+                      show: false
+                    }
+                  }
+                }
               }}
               series={countryValues}
               type="donut"
-              height="300"
+              height="100%"
               width="100%"
             />
           )}

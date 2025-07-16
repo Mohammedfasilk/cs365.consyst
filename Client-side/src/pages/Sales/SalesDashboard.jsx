@@ -125,7 +125,6 @@ function SalesDashboard() {
     const company = companySummaryData.find(c => c.company === companyName);
     return company ? company.total : 0;
   };
-  console.log(getCompanyUsdValue("Consyst Group"))
   // Calculate USD group value from company summary data
   const orderBookingGroupedValueUSD = useMemo(() => {
     return getCompanyUsdValue("Consyst Group");
@@ -138,8 +137,6 @@ function SalesDashboard() {
   const handleUSDConvertion = (checked) => {
     setIsUsd(checked);
   };
-  console.log(companySummaryData);
-  console.log(orderBookingData);
 
   return (
     <div>
@@ -222,16 +219,18 @@ function SalesDashboard() {
 
             <div className="flex-1 flex flex-col md:flex-row gap-2 justify-center">
               <div className="md:w-[30%] w-full flex flex-col gap-2">
-                <OrderBookingFYTD
-                  key="group"
-                  company="Consyst Group"
-                  usdValue={companySummaryData.find(c => c.company === "Consyst Group")?.adjustedUsdTotal || 0}
-                  localValue={companySummaryData.find(c => c.company === "Consyst Group")?.adjustedLocalTotal || 0}
-                  isGroup={true}
-                />
-                <div>
+                <div className="h-[250px]"> {/* Fixed height for OrderBookingFYTD */}
+                  <OrderBookingFYTD
+                    key="group"
+                    company="Consyst Group"
+                    usdValue={companySummaryData.find(c => c.company === "Consyst Group")?.adjustedUsdTotal || 0}
+                    localValue={companySummaryData.find(c => c.company === "Consyst Group")?.adjustedLocalTotal || 0}
+                    isGroup={true}
+                  />
+                </div>
 
-                <DonutChart countrySummaryData={countrySummaryData}/>
+                <div className="h-[250px]"> {/* Same fixed height for DonutChart */}
+                  <DonutChart countrySummaryData={countrySummaryData} />
                 </div>
               </div>
 

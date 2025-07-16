@@ -24,11 +24,15 @@ ChartJS.register(
     Filler
 );
 
-// Helper to get all months
-const getAllMonths = () => {
-    return Array.from({ length: 12 }, (_, i) =>
-        new Date(0, i).toLocaleString('default', { month: 'short' })
-    );
+// Get 12-month names starting from a given date (fiscal year start)
+const getFiscalYearMonths = (startDate) => {
+    const months = [];
+    const baseDate = new Date(startDate);
+    for (let i = 0; i < 12; i++) {
+        const date = new Date(baseDate.getFullYear(), baseDate.getMonth() + i, 1);
+        months.push(date.toLocaleString('default', { month: 'short' }));
+    }
+    return months;
 };
 
 export default function MonthlyOrderBookingChart() {
@@ -40,41 +44,64 @@ export default function MonthlyOrderBookingChart() {
     const [loading, setLoading] = useState(true);
     const { settings } = useSelector((state) => state.settings);
     const targetValue = settings?.groupTarget || 0;
+    const fyStartDate = settings?.currentFyStartDate ; // fallback default
+    console.log("FY Start Date:", fyStartDate);
+    
 
-    useEffect(() => {
-        const fetchOrderData = async () => {
-            try {
-                setLoading(true);
-                const response = await axios.get(`${import.meta.env.VITE_CS365_URI}/api/orders`);
-                const orders = response.data;
+useEffect(() => {
+    const fetchOrderData = async () => {
+        try {
+            setLoading(true);
+            const fyStart = new Date(fyStartDate);
+            const fyMonths = Array.from({ length: 12 }, (_, i) => {
+                const date = new Date(fyStart.getFullYear(), fyStart.getMonth() + i, 1);
+                return {
+                    label: date.toLocaleString('default', { month: 'short' }),
+                    key: `${date.getFullYear()}-${date.getMonth()}`, // Unique key like 2024-3
+                    date,
+                };
+            });
 
-                const allMonths = getAllMonths();
-                const monthlyTotals = allMonths.reduce((acc, month) => {
-                    acc[month] = 0;
-                    return acc;
-                }, {});
+            const monthlyTotals = fyMonths.reduce((acc, m) => {
+                acc[m.key] = 0;
+                return acc;
+            }, {});
 
-                orders.forEach(order => {
-                    if (order.salesOrderDate) {
-                        const month = new Date(order.salesOrderDate).toLocaleString('default', { month: 'short' });
-                        monthlyTotals[month] += order.adjustedSalesValueUsd || 0;
+            const response = await axios.get(`${import.meta.env.VITE_CS365_URI}/api/orders`);
+            const orders = response.data;
+
+            orders.forEach(order => {
+                if (order.salesOrderDate) {
+                    const orderDate = new Date(order.salesOrderDate);
+                    const key = `${orderDate.getFullYear()}-${orderDate.getMonth()}`;
+
+                    if (monthlyTotals.hasOwnProperty(key)) {
+                        monthlyTotals[key] += order.adjustedSalesValueUsd || 0;
                     }
-                });
+                }
+            });
 
-                const months = Object.keys(monthlyTotals);
-                const values = Object.values(monthlyTotals);
-                const targets = Array(months.length).fill(targetValue);
+            const valuesRaw = fyMonths.map(m => monthlyTotals[m.key]);
+            const values = valuesRaw.reduce((acc, curr, i) => {
+                acc.push((acc[i - 1] || 0) + curr);
+                return acc;
+            }, []);
 
-                setChartData({ months, values, targets });
-            } catch (error) {
-                console.error('Error fetching order data:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
+            const monthlyTarget = targetValue / 12;
+            const targets = fyMonths.map((_, index) => monthlyTarget * (index + 1));
+            const months = fyMonths.map(m => m.label);
 
-        fetchOrderData();
-    }, [targetValue]);
+            setChartData({ months, values, targets });
+        } catch (error) {
+            console.error('Error fetching order data:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    fetchOrderData();
+}, [targetValue, fyStartDate]);
+
 
     if (loading) {
         return (
@@ -111,71 +138,71 @@ export default function MonthlyOrderBookingChart() {
     };
 
     const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-        legend: {
-            display: true,
-            position: 'bottom',
-            labels: {
-                font: {
-                    size: 12
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'bottom',
+                labels: {
+                    font: {
+                        size: 12
+                    }
+                }
+            },
+            tooltip: {
+                backgroundColor: '#ffffff',
+                titleColor: '#000000',
+                bodyColor: '#000000',
+                borderColor: '#dbdbdb',
+                borderWidth: 1,
+                cornerRadius: 8,
+                titleFont: {
+                    size: 14,
+                    weight: 'bold',
+                    family: 'Arial'
+                },
+                bodyFont: {
+                    size: 13,
+                    family: 'Arial'
+                },
+                padding: 12,
+                displayColors: true,
+                usePointStyle: true,
+                callbacks: {
+                    label: function (context) {
+                        const label = context.dataset.label || '';
+                        const value = context.parsed.y || 0;
+                        return `${label}: ${value.toLocaleString()}`;
+                    }
                 }
             }
         },
-        tooltip: {
-            backgroundColor: '#ffffff',
-            titleColor: '#000000',
-            bodyColor: '#000000',
-            borderColor: '#dbdbdb',
-            borderWidth: 1,
-            cornerRadius: 8,
-            titleFont: {
-                size: 14,
-                weight: 'bold',
-                family: 'Arial'
+        scales: {
+            x: {
+                title: {
+                    display: true
+                },
+                grid: {
+                    display: false
+                }
             },
-            bodyFont: {
-                size: 13,
-                family: 'Arial'
-            },
-            padding: 12,
-            displayColors: true,
-            usePointStyle: true,
-            callbacks: {
-                label: function (context) {
-                    const label = context.dataset.label || '';
-                    const value = context.parsed.y || 0;
-                    return `${label}: ${value.toLocaleString()}`;
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true
+                },
+                grid: {
+                    display: false
                 }
             }
-        }
-    },
-    scales: {
-        x: {
-            title: {
-                display: true,
-            },
-            grid: {
-                display: false
-            }
         },
-        y: {
-            beginAtZero: true,
-            title: {
-                display: true,
-            },
-            grid: {
-                display: false
-            }
+        interaction: {
+            mode: 'nearest',
+            axis: 'x',
+            intersect: false
         }
-    },
-    interaction: {
-        mode: 'nearest',
-        axis: 'x',
-        intersect: false
-    }
-};
+    };
 
     return (
         <Box height={400}>

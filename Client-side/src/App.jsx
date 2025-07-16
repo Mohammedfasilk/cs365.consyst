@@ -6,7 +6,7 @@ import MainLayout from '../src/components/UI/Mainlayout'
 import Project_management from './routes/home/Project_management'
 import { Toaster } from './components/UI/Toaster'
 import Business_Tools from './routes/BusinessTools'
-import Finance from './routes/home/Finance/Finance'
+import Finance from './routes/home/Finance'
 function App() {
 
   return (
