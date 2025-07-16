@@ -11,7 +11,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "../UI/Popover";
 import { Check } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { setSelectedBillingPlan, setSelectedBillingPlanName } from "../../Redux/Slices/billingPlanSlice";
+// import { setSelectedBillingPlan, setSelectedBillingPlanName } from "../../Redux/Slices/billingPlanSlice";
 import { cn } from "../../lib/utils";
 
 export function ChooseBillingPlan() {
@@ -68,8 +68,8 @@ export function ChooseBillingPlan() {
                   key={plan.id}
                   value={plan.name}
                   onSelect={() => {
-                    dispatch(setSelectedBillingPlan({ plan, source: "dropdown" }));
-                    dispatch(setSelectedBillingPlanName(plan.name));
+                    // dispatch(setSelectedBillingPlan({ plan, source: "dropdown" }));
+                    // dispatch(setSelectedBillingPlanName(plan.name));
                     setDropdownOpen(false);
                   }}
                 >
