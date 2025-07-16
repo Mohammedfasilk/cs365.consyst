@@ -9,6 +9,7 @@ const MeetingCard = ({ meeting, onEditMeeting, onDeleteMeeting }) => {
   const navigate = useNavigate();
   const generalAgreements = meeting?.agreement?.filter((agreement)=>agreement.type === 'general').length || 0
   const tasks = meeting?.agreement?.filter((agreement)=>agreement.type === 'task_assignment').length || 0
+  const pending = meeting?.pending?.length || 0
   return (
     <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 p-6 border border-gray-100 flex flex-col min-h-[280px] w-full">
       <MeetingCardHeader 
@@ -55,7 +56,7 @@ const MeetingCard = ({ meeting, onEditMeeting, onDeleteMeeting }) => {
             <Clock className="w-3 h-3 text-amber-500" />
             <span className="text-amber-700">
               Pending: 
-              {/* {pendingLoading ? 'Loading...' : pendingTopicsCount} */}
+              {pending}
             </span>
           </div>
           <div className="flex items-center gap-1.5">

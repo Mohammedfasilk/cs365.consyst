@@ -3,14 +3,31 @@ import { Badge } from "../UI/Badge";
 import { Button } from "../UI/Button";
 import { Trash2 } from "lucide-react";
 import { format } from "date-fns";
+import axios from "axios";
+import { useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "../UI/Alert_Dialog";
 
 const AgreementItem = ({ 
+  meetingId,
   agreement, 
   onEdit, 
   onDelete, 
   meetingStatus, 
-  agreementLoading 
+  agreementLoading ,
+  onRefresh
 }) => {
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
   const getSyncStatusBadge = (agreement) => {
     // Only show sync status for task assignments
     if (agreement.type !== 'task_assignment') {
@@ -54,10 +71,23 @@ const AgreementItem = ({
     }
   };
 
-  const handleDeleteClick = (e, agreementId) => {
+  const handleDeleteClick = (e) => {
     e.stopPropagation(); // Prevent triggering the edit dialog
-    if (window.confirm('Are you sure you want to delete this agreement? This action cannot be undone.')) {
-      onDelete(agreementId);
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDelete = async () => {
+    try {
+      await axios.post(`${import.meta.env.VITE_CS365_URI}/api/meeting/handle-agreement`,{
+        meetingId:meetingId,
+        agreementId:agreement._id,
+        action:'delete',
+      })
+      await onRefresh();
+      setShowDeleteDialog(false);
+    }catch(err){
+      console.log("Error deleting agreement",err);
+      setShowDeleteDialog(false);
     }
   };
 
@@ -67,6 +97,27 @@ const AgreementItem = ({
 
   return (
     <div className="p-4 border rounded-lg hover:bg-gray-50 transition-colors group">
+      {/* AlertDialog for delete confirmation */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Agreement</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this agreement? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={agreementLoading}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 text-white hover:bg-red-700"
+              onClick={confirmDelete}
+              disabled={agreementLoading}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <div className="flex items-start justify-between mb-2">
         <div 
           className="flex-1 cursor-pointer"
@@ -87,10 +138,10 @@ const AgreementItem = ({
           {getSyncStatusBadge(agreement)}
           {meetingStatus !== "completed" && (
             <Button
-              variant="outline"
+              variant="destructive"
               size="sm"
-              onClick={(e) => handleDeleteClick(e, agreement.id)}
-              className="h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={handleDeleteClick}
+              className="h-6 w-6 p-0 hover:text-red-700 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
               disabled={agreementLoading}
             >
               <Trash2 className="w-3 h-3" />

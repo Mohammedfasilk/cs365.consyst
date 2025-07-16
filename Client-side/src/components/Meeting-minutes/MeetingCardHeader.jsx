@@ -6,7 +6,7 @@ import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader,
 // Adjust path as needed
 
 const MeetingCardHeader = ({ meeting, onEditMeeting, onDeleteMeeting }) => {
-  const  user  = ""
+  const  user  = true
   const  isAdmin  = ''
   const canEdit = meeting.status !== "completed" && !meeting.is_completed;
   // Check if user is host by role, not just owner_id

@@ -43,6 +43,8 @@ const meetingSchema = new mongoose.Schema({
   }],
 
   agenda: [],
+  
+  pending: [],
 });
 
 module.exports = mongoose.model("Meetings", meetingSchema);

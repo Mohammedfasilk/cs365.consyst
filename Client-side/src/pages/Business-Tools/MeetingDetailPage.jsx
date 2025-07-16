@@ -12,6 +12,7 @@ const MeetingDetailPage = () => {
   // const { meeting, loading, refetch } = useMeetingDetailData(id || "");
   // const { startMeeting, closeMeeting, loading: statusLoading } = useMeetingStatus();
   const [meeting,setMeeting] = useState([])
+  const [emailLoading,setEmailLoading] = useState()
   // const {
   //   handleAddAgreement,
   //   handleUpdateAgreement,
@@ -43,30 +44,76 @@ const MeetingDetailPage = () => {
   useEffect(()=>{
       fetchMeetingsbyId();
   },[])
-  // const handleStartMeeting = async () => {
-  //   if (!meeting) return;
-  //   console.log('MeetingDetailPage - Starting meeting:', meeting.id);
-  //   try {
-  //     await startMeeting(meeting.id);
-  //     console.log('MeetingDetailPage - Meeting started, refreshing data');
-  //     await refetch();
-  //   } catch (error) {
-  //     console.error('MeetingDetailPage - Error starting meeting:', error);
-  //   }
-  // };
+  const handleStartMeeting = async () => {
+    if (!meeting) return;
+    console.log('MeetingDetailPage - Starting meeting:', meeting.id);
+    try {
+      await axios.post(`${import.meta.env.VITE_CS365_URI}/api/meeting/handle-status`,{
+        id:meeting?._id,
+        action:'start'
+      })
 
-  // const handleCloseMeeting = async () => {
-  //   if (!meeting) return;
-  //   console.log('MeetingDetailPage - Closing meeting:', meeting.id);
-  //   try {
-  //     await closeMeeting(meeting.id);
-  //     console.log('MeetingDetailPage - Meeting closed, refreshing data');
-  //     await refetch();
-  //   } catch (error) {
-  //     console.error('MeetingDetailPage - Error closing meeting:', error);
-  //   }
-  // };
+      // toast({
+      //         title: "Agreement Created",
+      //         description: "The agreement has been added.",
+      //         icon: <CircleCheckIcon className="mr-4" color="green" />,
+      //       });
+      
+      await fetchMeetingsbyId();
+    } catch (error) {
+      console.error('MeetingDetailPage - Error starting meeting:', error);
+    }
+  };
 
+  const handleCloseMeeting = async () => {
+    if (!meeting) return;
+    try {
+      await axios.post(`${import.meta.env.VITE_CS365_URI}/api/meeting/handle-status`,{
+        id:meeting?._id,
+        action:'close'
+      })
+
+      // toast({
+      //         title: "Agreement Created",
+      //         description: "The agreement has been added.",
+      //         icon: <CircleCheckIcon className="mr-4" color="green" />,
+      //       });
+      
+      await fetchMeetingsbyId();
+    } catch (error) {
+
+      console.error('MeetingDetailPage - Error closing meeting:', error);
+    }
+  };
+
+  const handleGeneratePDF = async () => {
+  if (!meeting?._id) return;
+
+  setEmailLoading(true);
+  try {
+    const response = await axios.post(
+      `${import.meta.env.VITE_CS365_URI}/api/meeting/generate-pdf`,
+      { meetingId: meeting._id },
+      { responseType: 'blob' }
+    );
+
+    const blob = new Blob([response.data], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const newWindow = window.open(url, '_blank');
+
+    if (newWindow) {
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+      toast.success('PDF report generated successfully');
+    } else {
+      toast.error('Unable to open PDF report. Please check your browser popup settings.');
+    }
+  } catch (error) {
+    console.error('Error generating PDF:', error);
+    toast.error('Failed to generate PDF report');
+  } finally {
+    setEmailLoading(false);
+  }
+};
   // if (loading) {
   //   return <MeetingDetailLoading />;
   // }
@@ -85,8 +132,8 @@ const MeetingDetailPage = () => {
           // ownerId={meeting.owner_id}
           attendees={meeting?.attendees}
           onBack={() => navigate("/business-tools/meeting-minutes")}
-          // onStartMeeting={handleStartMeeting}
-          // onCloseMeeting={handleCloseMeeting}
+          onStartMeeting={handleStartMeeting}
+          onCloseMeeting={handleCloseMeeting}
           // statusLoading={statusLoading}
         />
 
@@ -118,7 +165,7 @@ const MeetingDetailPage = () => {
             <MeetingDetailSidebar
               meeting={meeting}
               refetch={''}
-              handleGeneratePDF={''}
+              handleGeneratePDF={handleGeneratePDF}
               // emailLoading={emailLoading}
               // statusLoading={statusLoading}
             />

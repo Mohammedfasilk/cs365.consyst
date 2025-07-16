@@ -12,18 +12,18 @@ const PendingTopicsSection = ({ pendingTopics=[], meetingStatus, onMoveToAgenda 
           <div className="flex items-center gap-2">
             <AlertCircle className="w-5 h-5 text-orange-500" />
             Pending Topics
-            <Badge variant="outline">{pendingTopics.length} topics</Badge>
+            <Badge variant="outline">{pendingTopics?.length} topics</Badge>
           </div>
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          {pendingTopics?.map((topic) => (
-            <div key={topic._id} className="group flex items-center justify-between p-3 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors">
-              <span className="flex-1">{topic.topic}</span>
+          {pendingTopics?.map((topic,index) => (
+            <div key={index} className="group flex items-center justify-between p-3 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors">
+              <span className="flex-1">{topic}</span>
               {meetingStatus !== "completed" && onMoveToAgenda && (
                 <Button
-                  onClick={() => onMoveToAgenda(topic.id)}
+                  onClick={() => onMoveToAgenda(index)}
                   variant="outline"
                   size="sm"
                   className="ml-2 text-xs opacity-0 group-hover:opacity-100 transition-opacity"

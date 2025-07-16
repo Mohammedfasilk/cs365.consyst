@@ -32,7 +32,7 @@ const AgendaItemRow = ({
   const handleStartEdit = () => {
     if (!canEdit) return;
     setIsEditing(true);
-    setEditText(item.item);
+    setEditText(item);
   };
 
   const handleSaveEdit = () => {
@@ -70,9 +70,23 @@ const AgendaItemRow = ({
     }
   };
 
-  const handleMoveToPendingClick = (e) => {
+  const handleMoveToPendingClick = async (e) => {
     e.stopPropagation();
-    onMoveToPending(item.id);
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_CS365_URI}/api/meeting/handle-agenda`,
+        {
+          meetingId: meetingId,
+          action: "move",
+          index: index,
+        }
+      );
+      setIsDeleteDialogOpen(false);
+      onRefresh();
+    } catch (error) {
+      setIsDeleteDialogOpen(false);
+      console.error("Error deleting agenda item:", error);
+    }
   };
 
   return (

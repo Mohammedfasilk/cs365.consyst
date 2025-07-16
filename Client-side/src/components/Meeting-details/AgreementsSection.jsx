@@ -79,6 +79,8 @@ const {toast} = useToast();
         />
         <CardContent>
           <AgreementsList
+            meetingId={meetingId}
+            onRefresh={onRefresh}
             agreements={agreements}
             onEditAgreement={handleEditAgreement}
             onDeleteAgreement={handleDeleteAgreement}

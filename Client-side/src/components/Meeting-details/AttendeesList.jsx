@@ -4,6 +4,7 @@ import { Button } from "../UI/Button";
 import { Plus, Crown, Building2, Users } from "lucide-react";
 import AttendeeCard from "./AttendeeCard";
 import AttendeeListItem from "./AttendeeListItem";
+import AddAttendeeForm from "./AddAttendeeForm";
 // import AttendeeCard from "./AttendeeCard";
 // import AddAttendeeForm from "./AddAttendeeForm";
 
@@ -124,13 +125,13 @@ const AttendeesList = ({ meeting,attendees, meetingStatus, meetingId, meetingOwn
           )}
 
           {/* Add new attendee form */}
-          {/* {isAddingAttendee && (
+          {isAddingAttendee && (
             <AddAttendeeForm
               meetingId={meetingId}
               onSuccess={handleAddSuccess}
               onCancel={() => setIsAddingAttendee(false)}
             />
-          )} */}
+          )}
 
           {attendees?.length === 0 && (
             <p className="text-gray-500 text-sm">No attendees</p>

@@ -2,22 +2,26 @@ import React from "react";
 import AgreementItem from "./AgreementItem";
 
 const AgreementsList = ({ 
+  meetingId,
   agreements = [], 
   onEditAgreement, 
   onDeleteAgreement, 
   meetingStatus, 
-  agreementLoading 
+  agreementLoading,
+  onRefresh
 }) => {
   return (
     <div className="space-y-4">
       {agreements?.map((agreement) => (
         <AgreementItem
           key={agreement._id}
+          meetingId={meetingId}
           agreement={agreement}
           onEdit={onEditAgreement}
           onDelete={onDeleteAgreement}
           meetingStatus={meetingStatus}
           agreementLoading={agreementLoading}
+          onRefresh={onRefresh}
         />
       ))}
       {agreements?.length === 0 && (
