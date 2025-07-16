@@ -6,7 +6,7 @@ import signatureSheetReducer from './Slices/signatureSheetSlice';
 import selectedProject from './Slices/SelectedProject';
 import selectedSalesOrder from './Slices/orderBookingSlice';
 import costControlSheetReducer from './Slices/costControlsheet';
-import billingPlanSheetReducer from './Slices/billingPlanSlice';
+import billingPlanSheetReducer from './Slices/BillingPlanSlice';
 import scheduleSheetReducer from './Slices/scheduleSheetslice';
 import sessionReducer from './Slices/sessionSlice';
 
