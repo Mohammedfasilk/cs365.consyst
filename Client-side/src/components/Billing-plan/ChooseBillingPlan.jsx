@@ -11,7 +11,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "../UI/Popover";
 import { Check } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { setSelectedBillingPlan, setSelectedBillingPlanName } from "../../Redux/Slices/billingPlanSlice";
+import { setSelectedBillingPlan, setSelectedBillingPlanName } from "../../Redux/Slices/BillingPlanSlice";
 import { cn } from "../../lib/utils";
 
 export function ChooseBillingPlan() {
