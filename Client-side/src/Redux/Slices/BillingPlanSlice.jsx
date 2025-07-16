@@ -13,7 +13,7 @@
     initialState,
     reducers: {
         setSelectedBillingPlan: (state, action) => {
-        state.billingPlan = action.payload.plan;
+        state.billingPlan = action.payload;
         state.source = action.payload.source;
         },
         setSelectedBillingPlanName: (state, action) => {

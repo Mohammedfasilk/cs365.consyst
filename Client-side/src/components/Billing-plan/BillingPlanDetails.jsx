@@ -11,11 +11,12 @@ import {
   FormLabel,
   FormMessage,
 } from "../UI/Form";
-import { CalendarIcon, Plus } from "lucide-react";
+import { CalendarIcon, Cross, Plus, X } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "../../lib/utils";
 import { Popover, PopoverTrigger, PopoverContent } from "../UI/Popover";
 import { Calendar } from "../UI/Calender";
+import axios from "axios";
 
 const formSchema = z.object({
   currency: z.string().min(1, "Currency is required"),
@@ -31,24 +32,53 @@ const formSchema = z.object({
     .min(1, "At least one entry is required"),
 });
 
-const BillingPlanDetails = () => {
+const BillingPlanDetails = ({billingPlan}) => {
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      currency: "",
-      salesOrderValue: 0,
+      currency: billingPlan?.currency,
+      salesOrderValue: billingPlan?.salesOrderValue,
       entries: [],
     },
   });
 
   const { control, handleSubmit } = form;
-  const { fields, append } = useFieldArray({
+  const { fields, append,remove } = useFieldArray({
     control,
     name: "entries",
   });
 
-  const onSubmit = (values) => {
-    console.log("Submitted Values:", values);
+  const onSubmit = async (values) => {
+    const payload = {
+    ...billingPlan,
+    billing_plans: values.entries,
+  };
+          try {
+              const res = await axios.post(
+                  `${import.meta.env.VITE_CS365_URI}/api/billing-plan/create`,
+                  payload
+              );
+
+              console.log(res.data);
+              
+              // fetchData();
+
+              // toast({
+              //     title: "Billing Plan Saved",
+              //     description: "Billing plan has been successfully saved.",
+              //     icon: <CircleCheckIcon className="mr-4" color="green" />,
+              // });
+          } catch (error) {
+              // toast({
+              //     title: "Save Failed",
+              //     description: "There was an error saving the billing plan.",
+              //     variant: "destructive",
+              //     icon: <CircleXIcon className="mr-4" color="red" />,
+              // });
+              console.log(error);
+              
+          }
+      
   };
 
   return (
@@ -76,7 +106,7 @@ const BillingPlanDetails = () => {
                 <FormItem>
                   <FormLabel>Currency</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} readOnly />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -92,13 +122,8 @@ const BillingPlanDetails = () => {
                   <FormLabel>Sales Order Value</FormLabel>
                   <FormControl>
                     <Input
-                      type="number"
-                      inputMode="decimal"
-                      placeholder="Enter order value"
                       {...field}
-                      onChange={(e) =>
-                        field.onChange(parseFloat(e.target.value))
-                      }
+                      readOnly
                     />
                   </FormControl>
                   <FormMessage />
@@ -128,9 +153,10 @@ const BillingPlanDetails = () => {
             </div>
 
             {fields.map((item, index) => (
-              <div
+              <div className="flex border border-[var(--input)] shadow-sm p-4 rounded-lg mb-4 w-fit space-x-5 items-center">
+                <div
                 key={item.id}
-                className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4 border border-[var(--input)] shadow-sm p-4 rounded-lg"
+                className="grid grid-cols-1 md:grid-cols-3 gap-6  "
               >
                 {/* Date */}
                 <FormField
@@ -207,6 +233,11 @@ const BillingPlanDetails = () => {
                     </FormItem>
                   )}
                 />
+              </div>
+                  <div className="hover:text-red-500">
+                    <X
+                    onClick={() => remove(index)}/>
+                  </div>
               </div>
             ))}
           </div>

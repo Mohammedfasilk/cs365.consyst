@@ -36,6 +36,7 @@ function SalesDashboard() {
   const [isUsd, setIsUsd] = useState(false);
   const [usd, setUsd] = useState();
   const [rawTopOpportunities, setRawTopOpportunities] = useState([]);
+  const [rawFocusOpportunities, setRawFocusOpportunities] = useState([]);
   const [companySummaryData, setCompanySummaryData] = useState([]);
   const [countrySummaryData, setCountrySummaryData] = useState([]);
   const [monthlyOrderBookingData, setMonthlyOrderBookingData] = useState({
@@ -69,6 +70,25 @@ function SalesDashboard() {
     });
   }, [rawTopOpportunities, usd, settings]);
 
+  const displayedFocusOpportunities = useMemo(() => {
+    if (!usd) return rawFocusOpportunities;
+
+    return rawFocusOpportunities.map((item) => {
+      const isINR = item.currency === "INR";
+
+      if (isINR) {
+        const rate = settings?.usdToinr || 1;
+        return {
+          ...item,
+          opportunity_amount: item.opportunity_amount / rate,
+          currency: "USD",
+        };
+      }
+
+      return item;
+    });
+  }, [rawFocusOpportunities, usd, settings]);
+
   // Fetch data only after settings are loaded
   useEffect(() => {
     if (!settings || Object.keys(settings).length === 0) return;
@@ -80,6 +100,7 @@ function SalesDashboard() {
       try {
         const [
           topRes,
+          focRes,
           sumRes,
           countRes,
           orderRes,
@@ -89,6 +110,7 @@ function SalesDashboard() {
           countrySummaryRes,
         ] = await Promise.all([
           axios.get(`${base}/api/sales-pipeline/top-opportunities`),
+          axios.get(`${base}/api/sales-pipeline/focus-opportunities`),
           axios.get(`${base}/api/sales-pipeline/sum`),
           axios.get(`${base}/api/sales-pipeline/count`),
           axios.post(`${base}/api/sales-analysis`, { fyDate: settings.currentFyStartDate }),
@@ -103,6 +125,7 @@ function SalesDashboard() {
         ]);
 
         setRawTopOpportunities(topRes.data);
+        setRawFocusOpportunities(focRes.data);
         setSumFunnelData(sumRes.data);
         setCountFunnelData(countRes.data);
         setOrderBookingData(orderRes.data);
@@ -184,7 +207,7 @@ function SalesDashboard() {
           <div className="flex justify-center mb-12 mx-8 ml-20 mt-4">
             <Card className="flex-1 w-[768px] p-4 bg-white">
               <div className="flex justify-between items-center space-x-1">
-                <h1 className="m-2 mb-6">Top Opportunities</h1>
+                <h1 className="m-2 mb-6">Pipeline Details</h1>
                 <div className="flex items-center space-x-2">
                   <Switch
                     checked={!!usd}
@@ -196,6 +219,23 @@ function SalesDashboard() {
                 </div>
               </div>
               <OpportunityDataTable data={displayedTopOpportunities} columns={opportunityDataColumns} />
+            </Card>
+          </div>
+          <div className="flex justify-center mb-12 mx-8 ml-20 mt-4">
+            <Card className="flex-1 w-[768px] p-4 bg-white">
+              <div className="flex justify-between items-center space-x-1">
+                <h1 className="m-2 mb-6">Focus Opportunities</h1>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    checked={!!usd}
+                    onCheckedChange={(value) => {
+                      setUsd(value);
+                    }}
+                  />
+                  <span>USD</span>
+                </div>
+              </div>
+              <OpportunityDataTable data={displayedFocusOpportunities} columns={opportunityDataColumns} />
             </Card>
           </div>
         </TabsContent>

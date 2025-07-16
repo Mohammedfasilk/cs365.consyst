@@ -11,13 +11,13 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "../UI/Popover";
 import { Check } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-// import { setSelectedBillingPlan, setSelectedBillingPlanName } from "../../Redux/Slices/billingPlanSlice";
+import { setSelectedBillingPlan, setSelectedBillingPlanName } from "../../Redux/Slices/billingPlanSlice";
 import { cn } from "../../lib/utils";
 
 export function ChooseBillingPlan() {
   const dispatch = useDispatch();
-  const selectedBillingPlan = useSelector((state) => state.billingPlan);
-  const billingPlanName = useSelector((state) => state.billingPlanName);
+  const selectedBillingPlan = useSelector((state) => state.billingPlanSheet.billingPlan);
+  const billingPlanName = useSelector((state) => state.billingPlanSheet.billingPlanName);
 
   const [billingPlanList, setBillingPlanList] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -46,12 +46,11 @@ export function ChooseBillingPlan() {
     plan.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  console.log(billingPlanName)
   return (
     <Popover open={dropdownOpen} onOpenChange={setDropdownOpen}>
       <PopoverTrigger asChild>
         <div className="text-left text-2xl text-gray-400 cursor-pointer border-b-2 border-transparent hover:border-gray-200">
-          { billingPlanName|| "Choose Sales Order"}
+          { billingPlanName || "Choose Sales Order"}
         </div>
       </PopoverTrigger>
       <PopoverContent className="w-[760px] p-0 max-h-[400px] overflow-y-auto">
@@ -68,8 +67,8 @@ export function ChooseBillingPlan() {
                   key={plan.id}
                   value={plan.name}
                   onSelect={() => {
-                    // dispatch(setSelectedBillingPlan({ plan, source: "dropdown" }));
-                    // dispatch(setSelectedBillingPlanName(plan.name));
+                    // dispatch(setSelectedBillingPlan(plan));
+                    dispatch(setSelectedBillingPlanName(plan.name));                                        
                     setDropdownOpen(false);
                   }}
                 >

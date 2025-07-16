@@ -6,6 +6,7 @@ import signatureSheetReducer from './Slices/signatureSheetSlice';
 import selectedProject from './Slices/SelectedProject';
 import selectedSalesOrder from './Slices/orderBookingSlice';
 import costControlSheetReducer from './Slices/costControlsheet';
+import billingPlanSheetReducer from './Slices/billingPlanSlice';
 import scheduleSheetReducer from './Slices/scheduleSheetslice';
 import sessionReducer from './Slices/sessionSlice';
 
@@ -28,6 +29,9 @@ const store = configureStore({
 
     //Cost Control
     costControlSheet: costControlSheetReducer,
+
+    //finance
+    billingPlanSheet: billingPlanSheetReducer,
 
     //Schedule
     scheduleSheet: scheduleSheetReducer,

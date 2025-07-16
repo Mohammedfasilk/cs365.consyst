@@ -45,7 +45,7 @@ import {
     setIsOpen,
     setIsSaved,
     clearSelectedBillingPlan,
-} from "../../Redux/Slices/BillingPlanSlice";
+} from "../../Redux/Slices/billingPlanSlice";
 import { ChooseBillingPlan } from "./ChooseBillingPlan";
 import { fetchSettings } from "../../Redux/Slices/settingsSlice";
 import {
@@ -65,9 +65,10 @@ const BillingPlanSheet = ({ fetchData }) => {
     const isOpen = useSelector((state) => state.billingPlan?.isOpen);
     const isSaved = useSelector((state) => state.billingPlan?.isSaved);
     const source = useSelector((state) => state.billingPlan?.source);
-    const selectedBillingPlan = useSelector((state) => state.billingPlan?.billingPlan);
-    const billingPlanName = useSelector((state) => state.billingPlan?.billingPlanName);
-
+    const selectedBillingPlan = useSelector((state) => state.billingPlanSheet.billingPlan);
+    const billingPlanName = useSelector((state) => state.billingPlanSheet.billingPlanName);
+    console.log(selectedBillingPlan);
+    
     const settings = useSelector((state) => state.settings.settings);
     const usdToInr = settings?.usdToinr;
 
@@ -125,54 +126,29 @@ const BillingPlanSheet = ({ fetchData }) => {
     });
 
     useEffect(() => {
-        async function fetchSalesOrderDetails() {
-            if (source === "dropdown" && selectedSalesOrderName) {
-                try {
-                    const res = await axios.get(
-                        `${import.meta.env.VITE_CS365_URI}/api/orders`,
-                        { name: selectedSalesOrderName }
-                    );
-                    const data = res.data;
-                    dispatch(setIsSaved(true));
+        async function fetchBillingPlan() {
+            try {
+        const res = await axios.post(
+          `${import.meta.env.VITE_CS365_URI}/api/billing-plan/sales-order`,
+          { salesOrderName: billingPlanName }
+        );
+        const data = res.data;
 
-                    const currency = data.currency || "";
-                    const salesValue = parseFloat(data.net_total) || 0;
-
-                    let usdValue;
-                    if (currency === "INR") {
-                        usdValue = salesValue / (usdToInr || 1);
-                    } else {
-                        usdValue = salesValue;
-                    }
-
-                    form.reset({
-                        salesOrderDate: data.transaction_date
-                            ? new Date(data.transaction_date)
-                            : null,
-                        customerName: data.customer || "",
-                        currency: currency,
-                        salesOrderValue: salesValue,
-                        company: data.company || "",
-                        adjustment: 0,
-                        adjustedSalesValue: salesValue,
-                        adjustedSalesValueUsd: usdValue,
-                        category: "",
-                        subCategory: "",
-                    });
-                } catch (err) {
-                    console.error("fetch failed : ", err);
-                }
-            }
+        dispatch(setSelectedBillingPlan(data))
+        
+      } catch (error) {
+        console.error("Error fetching  projects:", error);
+      }
         }
-        fetchSalesOrderDetails();
-    }, [selectedSalesOrderName, usdToInr]);
+        fetchBillingPlan();
+    }, [billingPlanName]);
 
     useEffect(() => {
-        if (!selectedSalesOrder) return;
+        if (!selectedBillingPlan) return;
 
-        const currency = selectedSalesOrder.currency || "";
+        const currency = selectedBillingPlan.currency || "";
         const adjustedValue =
-            parseFloat(selectedSalesOrder.adjustedSalesValue) || 0;
+            parseFloat(selectedBillingPlan.adjustedSalesValue) || 0;
 
         let usdValue;
         if (currency === "INR") {
@@ -182,23 +158,23 @@ const BillingPlanSheet = ({ fetchData }) => {
         }
 
         form.reset({
-            salesOrderDate: selectedSalesOrder.salesOrderDate
-                ? new Date(selectedSalesOrder.salesOrderDate)
+            salesOrderDate: selectedBillingPlan.salesOrderDate
+                ? new Date(selectedBillingPlan.salesOrderDate)
                 : null,
-            customerName: selectedSalesOrder.customerName || "",
+            customerName: selectedBillingPlan.customerName || "",
             currency: currency,
             salesOrderValue:
-                parseFloat(selectedSalesOrder.salesOrderValue) || 0,
-            company: selectedSalesOrder.company || "",
-            adjustment: parseFloat(selectedSalesOrder.adjustment) || 0,
-            adjustedSalesValue: selectedSalesOrder.adjustedSalesValue || 0,
+                parseFloat(selectedBillingPlan.salesOrderValue) || 0,
+            company: selectedBillingPlan.company || "",
+            adjustment: parseFloat(selectedBillingPlan.adjustment) || 0,
+            adjustedSalesValue: selectedBillingPlan.adjustedSalesValue || 0,
             adjustedSalesValueUsd:
-                selectedSalesOrder.adjustedSalesValueUsd || 0,
-            country: selectedSalesOrder.country || "",
-            category: selectedSalesOrder.category || "",
-            subCategory: selectedSalesOrder.subCategory || "",
+                selectedBillingPlan.adjustedSalesValueUsd || 0,
+            country: selectedBillingPlan.country || "",
+            category: selectedBillingPlan.category || "",
+            subCategory: selectedBillingPlan.subCategory || "",
         });
-    }, [selectedSalesOrder, usdToInr]);
+    }, [selectedBillingPlan, usdToInr]);
 
     async function onSubmit(values) {
         try {
@@ -221,7 +197,7 @@ const BillingPlanSheet = ({ fetchData }) => {
 
             const dataToSave = {
                 ...values,
-                salesOrderName: selectedSalesOrderName,
+                salesOrderName: billingPlanName,
                 adjustedSalesValueLocal: inrValue.toFixed(2) || 0,
             };
 
@@ -246,7 +222,7 @@ const BillingPlanSheet = ({ fetchData }) => {
         }
     }
 
-    const handleSheetClose = (value) => {
+    const handleSheetClose = (value) => {        
         if (!value) {
             form.reset();
             dispatch(setSelectedBillingPlanName(""));
@@ -511,7 +487,7 @@ const BillingPlanSheet = ({ fetchData }) => {
                             </Form>
                         </TabsContent>
                         <TabsContent value="billing-plan">
-                            <BillingPlanDetails billingPlanName={billingPlanName} />
+                            <BillingPlanDetails billingPlanName={billingPlanName} billingPlan={selectedBillingPlan}  />
                         </TabsContent>
                     </Tabs>
                 </SheetHeader>

@@ -17,13 +17,38 @@ exports.TopOpportunity = async (req, res) => {
     // Access the actual opportunity list from response.data.data
     const opportunities = response.data.data;
 
-
     res.status(200).json(opportunities);
   } catch (error) {
     console.error("Error fetching opportunities:", error.message);
     res.status(500).json({
       success: false,
       message: "Failed to retrieve sales pipeline data.",
+      error: error.message,
+    });
+  }
+};
+exports.FocusOpportunity = async (req, res) => {
+  try {
+
+    const today = new Date().toISOString().slice(0, 10);
+    const response = await axios.get(
+      `${process.env.ERPNEXT_BASE_URL}/api/resource/Opportunity?fields=["title","sales_stage","opportunity_amount","customer_name","country","currency"]&filters=[["sales_stage","in",["Prospecting","Qualification","Proposal/Price Quote","Negotiation/Review"]],["close_date",">=","${today}"],["custom_key_opportunity","=","1"]]&limit=5000`,
+      {
+        headers: {
+          Authorization: `token ${process.env.ERPNEXT_API_KEY}:${process.env.ERPNEXT_API_SECRET}`
+        }
+      }
+    );
+
+    // Access the actual opportunity list from response.data.data
+    const opportunities = response.data.data;
+
+    res.status(200).json(opportunities);
+  } catch (error) {
+    console.error("Error fetching focus opportunities:", error.message);
+    res.status(500).json({
+      success: false,
+      message: "Failed to retrieve focus opportunity data.",
       error: error.message,
     });
   }
