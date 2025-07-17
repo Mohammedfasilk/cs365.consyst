@@ -25,33 +25,41 @@ import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import { useSessionRole } from "../../Hooks/useSessionRole";
 
 // Billing Actions Component
-const Actions = ({ row, onDelete,planId }) => {
+const Actions = ({ row, onDelete, planId }) => {
   const { toast } = useToast();
   const sessionUser = useSessionUser();
   const planName = row.getValue("billingPlanName");
   const clientName = row.getValue("clientName");
   const status = row.getValue("status");
 
-  const [confirmDialog, setConfirmDialog] = useState({ open: false, action: null });
+  const [confirmDialog, setConfirmDialog] = useState({
+    open: false,
+    action: null,
+  });
   const [alertOpen, setAlertOpen] = useState(false);
 
   const handleStatusUpdate = async (newStatus) => {
     try {
-      await axios.post(`${import.meta.env.VITE_CS365_URI}/api/billing/save`, {
-        billingPlanName: planName,
-        clientName,
-        status: newStatus,
-      });
+      await axios.post(
+        `${import.meta.env.VITE_CS365_URI}/api/billing-plan/status`,
+        {
+          salesId: row.getValue('salesOrderName'),
+          planId: planId,
+          status: newStatus,
+        }
+      );
 
-      await axios.post(`${import.meta.env.VITE_CS365_URI}/api/activity`, {
-        field: "billing_plan",
-        data: {
-          username: sessionUser,
-          date: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
-          activity: `Billing Plan "${planName}" status updated to ${newStatus}`,
-          type: `Status ${newStatus}`,
-        },
-      });
+      // await axios.post(`${import.meta.env.VITE_CS365_URI}/api/activity`, {
+      //   field: "billing_plan",
+      //   data: {
+      //     username: sessionUser,
+      //     date: new Date().toLocaleString("en-IN", {
+      //       timeZone: "Asia/Kolkata",
+      //     }),
+      //     activity: `Billing Plan "${planName}" status updated to ${newStatus}`,
+      //     type: `Status ${newStatus}`,
+      //   },
+      // });
 
       onDelete();
     } catch (error) {
@@ -61,10 +69,13 @@ const Actions = ({ row, onDelete,planId }) => {
 
   const handleDelete = async () => {
     try {
-      await axios.post(`${import.meta.env.VITE_CS365_URI}/api/billing-plan/delete`, {
-        salesId:row.getValue("salesOrderName"),
-        planId:planId,
-      });
+      await axios.post(
+        `${import.meta.env.VITE_CS365_URI}/api/billing-plan/delete`,
+        {
+          salesId: row.getValue("salesOrderName"),
+          planId: planId,
+        }
+      );
 
       // await axios.post(`${import.meta.env.VITE_CS365_URI}/api/activity`, {
       //   field: "billing_plan",
@@ -99,13 +110,19 @@ const Actions = ({ row, onDelete,planId }) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           {status === "draft" && (
-            <DropdownMenuItem onClick={() => setConfirmDialog({ open: true, action: "approve" })}>
+            <DropdownMenuItem
+              onClick={() =>
+                setConfirmDialog({ open: true, action: "approved" })
+              }
+            >
               Approve
             </DropdownMenuItem>
           )}
           {status === "approved" && (
-            <DropdownMenuItem onClick={() => setConfirmDialog({ open: true, action: "draft" })}>
-              Move to Draft
+            <DropdownMenuItem
+              onClick={() => setConfirmDialog({ open: true, action: "draft" })}
+            >
+              Release
             </DropdownMenuItem>
           )}
           <DropdownMenuItem onClick={() => setAlertOpen(true)}>
@@ -115,12 +132,16 @@ const Actions = ({ row, onDelete,planId }) => {
       </DropdownMenu>
 
       {/* Confirm Dialog */}
-      <AlertDialog open={confirmDialog.open} onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })}>
+      <AlertDialog
+        open={confirmDialog.open}
+        onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will update the status of <b>{planName}</b> to <b>{confirmDialog.action}</b>.
+              This will update the status of <b>{planName}</b> to{" "}
+              <b>{confirmDialog.action}</b>.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -143,7 +164,8 @@ const Actions = ({ row, onDelete,planId }) => {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete this Billing Plan?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action is irreversible. The billing plan <b>{planName}</b> will be deleted permanently.
+              This action is irreversible. The billing plan <b>{planName}</b>{" "}
+              will be deleted permanently.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

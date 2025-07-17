@@ -135,7 +135,6 @@ export default function DataTable({ columns, data, loading }) {
                         if (cell.column.id !== "actions") {
                           const billingPlanName = row.getValue("salesOrderName");
                           if (billingPlanName) {
-                            // dispatch(setSelectedBillingPlan({ plan: row.original, source: "table" }));
                             dispatch(setSelectedBillingPlanName(billingPlanName));
                             dispatch(setIsOpen(true));
                             dispatch(setIsSaved(true));

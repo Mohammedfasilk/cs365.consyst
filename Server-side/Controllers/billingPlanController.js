@@ -150,3 +150,36 @@ exports.deleteBillingPlan = async (req, res) => {
     res.status(500).json({ error: "Failed to delete billing plan entry." });
   }
 };
+
+exports.updateBillingPlanStatus = async (req, res) => {
+  try {
+    const { salesId, planId, status } = req.body;
+
+    if (!salesId || !planId || !status) {
+      return res.status(400).json({ error: "Missing salesId, planId, or status." });
+    }
+
+    const updatedDoc = await BillingPlan.findOneAndUpdate(
+      { salesOrderName: salesId, "billing_plans._id": planId },
+      {
+        $set: {
+          "billing_plans.$.status": status,
+        },
+      },
+      { new: true }
+    );
+
+    if (!updatedDoc) {
+      return res.status(404).json({ error: "Billing plan or entry not found." });
+    }
+
+    res.status(200).json({
+      message: "Billing plan status updated.",
+      updated: updatedDoc,
+    });
+
+  } catch (error) {
+    console.error("Update Billing Plan Status Error:", error);
+    res.status(500).json({ error: "Failed to update billing plan status." });
+  }
+};

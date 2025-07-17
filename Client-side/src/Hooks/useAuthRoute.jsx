@@ -1,16 +1,18 @@
-
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useMsal, useIsAuthenticated } from "@azure/msal-react";
+import { InteractionStatus } from "@azure/msal-browser";
 
 export const useAuthRedirect = () => {
+  const isAuthenticated = useIsAuthenticated();
   const navigate = useNavigate();
+  const { inProgress } = useMsal();
 
   useEffect(() => {
-    const user = true;
-
-    if (!user) {
-      navigate('/');
+      if (inProgress === InteractionStatus.None) {        
+      if (!isAuthenticated) {
+        navigate("/");
+      }
     }
-  }, [navigate]);
+  }, [isAuthenticated, inProgress, navigate]);
 };
-
