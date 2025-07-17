@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   BriefcaseBusiness,
@@ -8,6 +8,9 @@ import {
   SignatureIcon,
 } from "lucide-react";
 import { SettingsSheet } from "../Settings/settings-sheet";
+import { useSessionRole } from "../../Hooks/useSessionRole";
+import axios from "axios";
+import { useMsal } from "@azure/msal-react";
 // import { ModeToggle } from "@/components/ModeToggle"; // Assuming it's the same or converted to React
 // import { SettingsSheet } from "@/components/settings/settings-sheet"; // Assuming it's the same or converted to React
 // import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"; // Assuming it's the same or converted to React
@@ -16,9 +19,31 @@ import { SettingsSheet } from "../Settings/settings-sheet";
 // const simulatedSession = { user: { roles: ["admin"] } }; // Example of session object, replace with real session management
 
 export default function Sidebar() {
+  const { accounts } = useMsal();
+  const currentEmail = accounts[0]?.username;
   const [isHovered, setIsHovered] = useState(false);
-  const Currentuser = JSON.parse(sessionStorage.getItem("user"));
-  
+    const [userRole, setUserRoles] = useState([]);
+
+ useEffect(() => {
+  const fetchUser = async () => {
+    if (!currentEmail) return;
+
+    try {
+      const res = await axios.post(
+        `${import.meta.env.VITE_CS365_URI}/api/user/session-user`,
+        { email: currentEmail },
+      );
+
+      const userData = res.data;
+      setUserRoles(userData.roles || []);
+    } catch (error) {
+      console.error("Failed to fetch user:", error);
+      setUserRoles([]);
+    }
+  };
+
+  fetchUser();
+}, [currentEmail]);
   const menuItems = [
     {
       icon: <ChartNoAxesCombined className="h-5 w-5" />,
@@ -52,7 +77,6 @@ export default function Sidebar() {
     },
   ];
 
-const userRole = Currentuser?.roles
 const allowedMenuItems = [
    {
       icon: <BriefcaseBusiness className="h-5 w-5" />,
@@ -150,7 +174,7 @@ menuItems.forEach((item) => {
               <ModeToggle/>
             </div>
             <p>Toggle Mode</p> */}
-        {Currentuser?.roles.includes("admin") ? (
+        {userRole.includes("admin") ? (
           <div>
             <SettingsSheet />
           </div>

@@ -229,7 +229,7 @@ export const columns = (fetchData) => {
       </Badge>
     ),
   },]
-  if (role.includes("admin")) {
+  if (role?.includes("admin")) {
     baseColumns.push({
       id: "actions",
       enableHiding: false,

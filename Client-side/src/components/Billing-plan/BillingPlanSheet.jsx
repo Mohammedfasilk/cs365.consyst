@@ -4,34 +4,29 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import axios from "axios";
 import {
-    Sheet,
-    SheetContent,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger,
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
 } from "../UI/Sheet";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../UI/Tabs";
 import {
-    Tabs,
-    TabsContent,
-    TabsList,
-    TabsTrigger,
-} from "../UI/Tabs";
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from "../UI/Form";
 import { Input } from "../UI/Input";
 import { Button } from "../UI/Button";
 import {
-    CalendarIcon,
-    CircleCheckIcon,
-    CircleXIcon,
-    Plus,
-    SquareChartGantt,
+  CalendarIcon,
+  CircleCheckIcon,
+  CircleXIcon,
+  Plus,
+  SquareChartGantt,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "../UI/Popover";
 import { Calendar } from "../UI/Calender";
@@ -40,460 +35,473 @@ import { format } from "date-fns";
 import { useDispatch, useSelector } from "react-redux";
 import { useToast } from "../../Hooks/use-toast";
 import {
-    setSelectedBillingPlan,
-    setSelectedBillingPlanName,
-    setIsOpen,
-    setIsSaved,
-    clearSelectedBillingPlan,
+  setSelectedBillingPlan,
+  setSelectedBillingPlanName,
+  setIsOpen,
+  setIsSaved,
+  clearSelectedBillingPlan,
 } from "../../Redux/Slices/BillingPlanSlice";
 import { ChooseBillingPlan } from "./ChooseBillingPlan";
 import { fetchSettings } from "../../Redux/Slices/settingsSlice";
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "../UI/Select";
 import BillingPlanDetails from "./BillingPlanDetails";
 
-const BillingPlanSheet = ({ fetchData }) => {
-    const dispatch = useDispatch();
-    const { toast } = useToast();
+const BillingPlanSheet = ({ refresh }) => {
+  const dispatch = useDispatch();
+  const { toast } = useToast();
 
-    const [tabValue, setTabValue] = useState("billing-details");
-    const isOpen = useSelector((state) => state.billingPlan?.isOpen);
-    const isSaved = useSelector((state) => state.billingPlan?.isSaved);
-    const source = useSelector((state) => state.billingPlan?.source);
-    const selectedBillingPlan = useSelector((state) => state.billingPlanSheet.billingPlan);
-    const billingPlanName = useSelector((state) => state.billingPlanSheet.billingPlanName);
-    console.log(selectedBillingPlan);
-    
-    const settings = useSelector((state) => state.settings.settings);
-    const usdToInr = settings?.usdToinr;
+  const [tabValue, setTabValue] = useState("billing-details");
+  const isOpen = useSelector((state) => state.billingPlan?.isOpen);
+  const isSaved = useSelector((state) => state.billingPlan?.isSaved);
+  const source = useSelector((state) => state.billingPlan?.source);
+  const selectedBillingPlan = useSelector(
+    (state) => state.billingPlanSheet.billingPlan
+  );
+  const billingPlanName = useSelector(
+    (state) => state.billingPlanSheet.billingPlanName
+  );
 
-    useEffect(() => {
-        if (!settings || Object.keys(settings).length === 0) {
-            dispatch(fetchSettings());
-        }
-    }, [dispatch, settings]);
+  const settings = useSelector((state) => state.settings.settings);
+  const usdToInr = settings?.usdToinr;
 
-    const formSchema = z.object({
-        salesOrderDate: z.date(),
-        customerName: z.string(),
-        currency: z.string(),
-        salesOrderValue: z.number(),
-        company: z.string(),
-        adjustment: z.preprocess(
-            (val) => {
-                if (val === "" || val === undefined || val === null) return 0;
-                if (typeof val === "string" && /^-?\d*(\.\d*)?$/.test(val))
-                    return parseFloat(val);
-                return val;
-            },
-            z
-                .number()
-                .refine(
-                    (val) => typeof val === "number" && !isNaN(val),
-                    {
-                        message:
-                            "Adjustment must be a number (can be negative/positive/decimal)",
-                    }
-                )
-        ),
-        adjustedSalesValue: z.number(),
-        adjustedSalesValueUsd: z.number(),
-        country: z.string().min(1, { message: "Country is required" }),
-        category: z.string().min(1, { message: "Category is required" }),
-        subCategory: z.string().min(1, { message: "Sub Category is required" }),
-    });
+  useEffect(() => {
+    if (!settings || Object.keys(settings).length === 0) {
+      dispatch(fetchSettings());
+    }
+  }, [dispatch, settings]);
 
-    const form = useForm({
-        resolver: zodResolver(formSchema),
-        defaultValues: {
-            salesOrderDate: null,
-            customerName: "",
-            currency: "",
-            salesOrderValue: 0,
-            company: "",
-            adjustment: 0,
-            adjustedSalesValue: 0,
-            adjustedSalesValueUsd: 0,
-            country: "",
-            category: "",
-            subCategory: "",
-        },
-    });
+  const formSchema = z.object({
+    salesOrderDate: z.date(),
+    customerName: z.string(),
+    currency: z.string(),
+    salesOrderValue: z.number(),
+    company: z.string(),
+    adjustment: z.preprocess(
+      (val) => {
+        if (val === "" || val === undefined || val === null) return 0;
+        if (typeof val === "string" && /^-?\d*(\.\d*)?$/.test(val))
+          return parseFloat(val);
+        return val;
+      },
+      z.number().refine((val) => typeof val === "number" && !isNaN(val), {
+        message:
+          "Adjustment must be a number (can be negative/positive/decimal)",
+      })
+    ),
+    adjustedSalesValue: z.number(),
+    adjustedSalesValueUsd: z.number(),
+    country: z.string().min(1, { message: "Country is required" }),
+    category: z.string().min(1, { message: "Category is required" }),
+    subCategory: z.string().min(1, { message: "Sub Category is required" }),
+  });
 
-    useEffect(() => {
-        async function fetchBillingPlan() {
-            try {
+  const form = useForm({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      salesOrderDate: null,
+      customerName: "",
+      currency: "",
+      salesOrderValue: 0,
+      company: "",
+      adjustment: 0,
+      adjustedSalesValue: 0,
+      adjustedSalesValueUsd: 0,
+      country: "",
+      category: "",
+      subCategory: "",
+    },
+  });
+
+  useEffect(() => {
+    async function fetchBillingPlan() {
+      try {
         const res = await axios.post(
           `${import.meta.env.VITE_CS365_URI}/api/billing-plan/sales-order`,
           { salesOrderName: billingPlanName }
         );
         const data = res.data;
 
-        dispatch(setSelectedBillingPlan(data))
-        
+        dispatch(setSelectedBillingPlan(data));
       } catch (error) {
         console.error("Error fetching  projects:", error);
       }
-        }
-        fetchBillingPlan();
-    }, [billingPlanName]);
+    }
+    fetchBillingPlan();
+  }, [billingPlanName]);
 
-    useEffect(() => {
-        if (!selectedBillingPlan) return;
+  useEffect(() => {
+    if (!selectedBillingPlan) return;
 
-        const currency = selectedBillingPlan.currency || "";
-        const adjustedValue =
-            parseFloat(selectedBillingPlan.adjustedSalesValue) || 0;
+    const currency = selectedBillingPlan.currency || "";
+    const adjustedValue =
+      parseFloat(selectedBillingPlan.adjustedSalesValue) || 0;
 
-        let usdValue;
-        if (currency === "INR") {
-            usdValue = adjustedValue / (usdToInr || 1);
-        } else {
-            usdValue = adjustedValue;
-        }
-
-        form.reset({
-            salesOrderDate: selectedBillingPlan.salesOrderDate
-                ? new Date(selectedBillingPlan.salesOrderDate)
-                : null,
-            customerName: selectedBillingPlan.customerName || "",
-            currency: currency,
-            salesOrderValue:
-                parseFloat(selectedBillingPlan.salesOrderValue) || 0,
-            company: selectedBillingPlan.company || "",
-            adjustment: parseFloat(selectedBillingPlan.adjustment) || 0,
-            adjustedSalesValue: selectedBillingPlan.adjustedSalesValue || 0,
-            adjustedSalesValueUsd:
-                selectedBillingPlan.adjustedSalesValueUsd || 0,
-            country: selectedBillingPlan.country || "",
-            category: selectedBillingPlan.category || "",
-            subCategory: selectedBillingPlan.subCategory || "",
-        });
-    }, [selectedBillingPlan, usdToInr]);
-
-    async function onSubmit(values) {
-        try {
-            const currency = values.currency;
-            const adjustedValue = parseFloat(values.adjustedSalesValue) || 0;
-            const company = values.company;
-
-            let usdValue, inrValue;
-            if (currency === "INR") {
-                inrValue = adjustedValue;
-                usdValue = adjustedValue / (usdToInr || 1);
-            } else {
-                usdValue = adjustedValue;
-                if (company === "CONSYST Middle East FZ-LLC") {
-                    inrValue = adjustedValue * (settings?.usdToaed || 1);
-                } else {
-                    inrValue = adjustedValue * (usdToInr || 1);
-                }
-            }
-
-            const dataToSave = {
-                ...values,
-                salesOrderName: billingPlanName,
-                adjustedSalesValueLocal: inrValue.toFixed(2) || 0,
-            };
-
-            await axios.post(
-                `${import.meta.env.VITE_CS365_URI}/api/billing/save-billing-plan`,
-                dataToSave
-            );
-            fetchData();
-            dispatch(setIsSaved(true));
-            toast({
-                title: "Billing Plan Saved",
-                description: "Billing plan has been successfully saved.",
-                icon: <CircleCheckIcon className="mr-4" color="green" />,
-            });
-        } catch (error) {
-            toast({
-                title: "Save Failed",
-                description: "There was an error saving the billing plan.",
-                variant: "destructive",
-                icon: <CircleXIcon className="mr-4" color="red" />,
-            });
-        }
+    let usdValue;
+    if (currency === "INR") {
+      usdValue = adjustedValue / (usdToInr || 1);
+    } else {
+      usdValue = adjustedValue;
     }
 
-    const handleSheetClose = (value) => {        
-        if (!value) {
-            form.reset();
-            dispatch(setSelectedBillingPlanName(""));
-            dispatch(clearSelectedBillingPlan());
-            dispatch(setIsSaved(false));
-            setTabValue("billing-details");
+    form.reset({
+      salesOrderDate: selectedBillingPlan.salesOrderDate
+        ? new Date(selectedBillingPlan.salesOrderDate)
+        : null,
+      customerName: selectedBillingPlan.customerName || "",
+      currency: currency,
+      salesOrderValue: parseFloat(selectedBillingPlan.salesOrderValue) || 0,
+      company: selectedBillingPlan.company || "",
+      adjustment: parseFloat(selectedBillingPlan.adjustment) || 0,
+      adjustedSalesValue: selectedBillingPlan.adjustedSalesValue || 0,
+      adjustedSalesValueUsd: selectedBillingPlan.adjustedSalesValueUsd || 0,
+      country: selectedBillingPlan.country || "",
+      category: selectedBillingPlan.category || "",
+      subCategory: selectedBillingPlan.subCategory || "",
+    });
+  }, [selectedBillingPlan, usdToInr]);
+
+  async function onSubmit(values) {
+    try {
+      const currency = values.currency;
+      const adjustedValue = parseFloat(values.adjustedSalesValue) || 0;
+      const company = values.company;
+
+      let usdValue, inrValue;
+      if (currency === "INR") {
+        inrValue = adjustedValue;
+        usdValue = adjustedValue / (usdToInr || 1);
+      } else {
+        usdValue = adjustedValue;
+        if (company === "CONSYST Middle East FZ-LLC") {
+          inrValue = adjustedValue * (settings?.usdToaed || 1);
+        } else {
+          inrValue = adjustedValue * (usdToInr || 1);
         }
-        dispatch(setIsOpen(value));
-    };
+      }
 
-    return (
-        <Sheet open={isOpen} onOpenChange={handleSheetClose}>
-            <SheetTrigger asChild>
-                <Button className="bg-[var(--csred)] hover:bg-[var(--csred)]/90">
-                    <Plus className="mr-2 h-4 w-4" /> Add Billing Plan
-                </Button>
-            </SheetTrigger>
-            <SheetContent className="min-w-[800px] overflow-auto">
-                <SheetHeader>
-                    <SheetTitle className="text-2xl font-bold">Billing Plan</SheetTitle>
-                    <ChooseBillingPlan />
-                    <Tabs value={tabValue} onValueChange={setTabValue}>
-                        <TabsList>
-                            <TabsTrigger value="billing-details">
-                                <SquareChartGantt className="mr-2 h-4 w-4" /> Sales Order Details
-                            </TabsTrigger>
-                            <TabsTrigger value="billing-plan">
-                                <SquareChartGantt className="mr-2 h-4 w-4" /> Billing plan
-                            </TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="billing-details">
-                            <Form {...form}>
-                                <form onSubmit={form.handleSubmit(onSubmit)}>
-                                    <div className="flex justify-between">
-                                        <h1>Sales Order Info</h1>
-                                        <Button
-                                            className="bg-[var(--csblue)] hover:bg-[var(--csblue)]/90 px-8"
-                                            type="submit"
-                                        >
-                                            Save
-                                        </Button>
-                                    </div>
-                                    <div className="mt-4 grid w-full grid-cols-[1fr_2fr_1fr] gap-6">
-                                        {/* All form fields — same as OrderBookingSheet */}
+      const dataToSave = {
+        ...values,
+        salesOrderName: billingPlanName,
+        adjustedSalesValueLocal: inrValue.toFixed(2) || 0,
+      };
 
-                                        {/* Sales Order Date */}
-                                        <FormField
-                                            control={form.control}
-                                            name="salesOrderDate"
-                                            render={({ field }) => (
-                                                <FormItem className="pointer-events-none">
-                                                    <FormLabel>Sales Order Date</FormLabel>
-                                                    <FormControl>
-                                                        <Popover>
-                                                            <PopoverTrigger asChild>
-                                                                <Button
-                                                                    variant="outline"
-                                                                    className={cn(
-                                                                        "w-[240px] pl-3 text-left font-normal",
-                                                                        !field.value &&
-                                                                        "text-[var(--muted-foreground)]"
-                                                                    )}
-                                                                >
-                                                                    {field.value &&
-                                                                        !isNaN(new Date(field.value)) ? (
-                                                                        format(new Date(field.value), "PPP")
-                                                                    ) : (
-                                                                        <span className="text-[var(--muted-foreground)]">
-                                                                            Pick a date
-                                                                        </span>
-                                                                    )}
-                                                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                                                </Button>
-                                                            </PopoverTrigger>
-                                                            <PopoverContent className="w-auto p-0" align="start">
-                                                                <Calendar
-                                                                    mode="single"
-                                                                    selected={field.value}
-                                                                    onSelect={field.onChange}
-                                                                    initialFocus
-                                                                />
-                                                            </PopoverContent>
-                                                        </Popover>
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        {/* Customer Name */}
-                                        <FormField
-                                            control={form.control}
-                                            name="customerName"
-                                            render={({ field }) => (
-                                                <FormItem className="pointer-events-none">
-                                                    <FormLabel>Customer Name</FormLabel>
-                                                    <FormControl>
-                                                        <Input placeholder="ACME Inc." {...field} />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        <div></div>
+      await axios.post(
+        `${import.meta.env.VITE_CS365_URI}/api/billing/save-billing-plan`,
+        dataToSave
+      );
+      dispatch(setIsSaved(true));
+      toast({
+        title: "Billing Plan Saved",
+        description: "Billing plan has been successfully saved.",
+        icon: <CircleCheckIcon className="mr-4" color="green" />,
+      });
+    } catch (error) {
+      toast({
+        title: "Save Failed",
+        description: "There was an error saving the billing plan.",
+        variant: "destructive",
+        icon: <CircleXIcon className="mr-4" color="red" />,
+      });
+    }
+  }
 
-                                        {/* Currency */}
-                                        <FormField
-                                            control={form.control}
-                                            name="currency"
-                                            render={({ field }) => (
-                                                <FormItem className="pointer-events-none">
-                                                    <FormLabel>Currency</FormLabel>
-                                                    <FormControl>
-                                                        <Input {...field} />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
+  const handleSheetClose = (value) => {
+    if (!value) {
+      form.reset({
+        salesOrderDate: null,
+        customerName: "",
+        currency: "",
+        salesOrderValue: 0,
+        company: "",
+        adjustment: 0,
+        adjustedSalesValue: 0,
+        adjustedSalesValueUsd: 0,
+        country: "",
+        category: "",
+        subCategory: "",
+      });
+      dispatch(setSelectedBillingPlanName(""));
+      dispatch(clearSelectedBillingPlan());
+      dispatch(setIsSaved(false));
+      setTabValue("billing-details");
+    }
+    dispatch(setIsOpen(value));
+  };
 
-                                        {/* Sales Order Value */}
-                                        <FormField
-                                            control={form.control}
-                                            name="salesOrderValue"
-                                            render={({ field }) => (
-                                                <FormItem className="pointer-events-none">
-                                                    <FormLabel>Sales Order Value</FormLabel>
-                                                    <FormControl>
-                                                        <Input type="number" {...field} />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        <div></div>
+  return (
+    <Sheet open={isOpen} onOpenChange={handleSheetClose}>
+      <SheetTrigger asChild>
+        <Button className="bg-[var(--csred)] hover:bg-[var(--csred)]/90">
+          <Plus className="mr-2 h-4 w-4" /> Add Billing Plan
+        </Button>
+      </SheetTrigger>
+      <SheetContent className="min-w-[800px] overflow-auto">
+        <SheetHeader>
+          <SheetTitle className="text-2xl font-bold">Billing Plan</SheetTitle>
+          <ChooseBillingPlan />
+          <Tabs value={tabValue} onValueChange={setTabValue}>
+            <TabsList>
+              <TabsTrigger value="billing-details">
+                <SquareChartGantt className="mr-2 h-4 w-4" /> Sales Order
+                Details
+              </TabsTrigger>
+              <TabsTrigger value="billing-plan">
+                <SquareChartGantt className="mr-2 h-4 w-4" /> Billing plan
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="billing-details">
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)}>
+                  <div className="flex justify-between">
+                    <h1>Sales Order Info</h1>
+                    {/* <Button
+                      className="bg-[var(--csblue)] hover:bg-[var(--csblue)]/90 px-8"
+                      type="submit"
+                    >
+                      Save
+                    </Button> */}
+                  </div>
+                  <div className="mt-4 grid w-full grid-cols-[1fr_2fr_1fr] gap-6">
+                    {/* All form fields — same as OrderBookingSheet */}
 
-                                        {/* Company */}
-                                        <FormField
-                                            control={form.control}
-                                            name="company"
-                                            render={({ field }) => (
-                                                <FormItem className="pointer-events-none col-span-2">
-                                                    <FormLabel>Company</FormLabel>
-                                                    <FormControl>
-                                                        <Input placeholder="ACME Inc." {...field} />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        <div></div>
+                    {/* Sales Order Date */}
+                    <FormField
+                      control={form.control}
+                      name="salesOrderDate"
+                      render={({ field }) => (
+                        <FormItem className="pointer-events-none">
+                          <FormLabel>Sales Order Date</FormLabel>
+                          <FormControl>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  className={cn(
+                                    "w-[240px] pl-3 text-left font-normal",
+                                    !field.value &&
+                                      "text-[var(--muted-foreground)]"
+                                  )}
+                                >
+                                  {field.value &&
+                                  !isNaN(new Date(field.value)) ? (
+                                    format(new Date(field.value), "PPP")
+                                  ) : (
+                                    <span className="text-[var(--muted-foreground)]">
+                                      Pick a date
+                                    </span>
+                                  )}
+                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent
+                                className="w-auto p-0"
+                                align="start"
+                              >
+                                <Calendar
+                                  mode="single"
+                                  selected={field.value}
+                                  onSelect={field.onChange}
+                                  initialFocus
+                                />
+                              </PopoverContent>
+                            </Popover>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    {/* Customer Name */}
+                    <FormField
+                      control={form.control}
+                      name="customerName"
+                      render={({ field }) => (
+                        <FormItem className="pointer-events-none">
+                          <FormLabel>Customer Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="ACME Inc." {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div></div>
 
-                                        {/* Adjustment */}
-                                        <FormField
-                                            control={form.control}
-                                            name="adjustment"
-                                            render={({ field }) => (
-                                                <FormItem className="pointer-events-none">
-                                                    <FormLabel>Adjustment</FormLabel>
-                                                    <FormControl>
-                                                        <Input
-                                                            inputMode="decimal"
-                                                            value={field.value}
-                                                            onChange={(e) => {
-                                                                const val = e.target.value;
-                                                                if (
-                                                                    val === "" ||
-                                                                    val === "-" ||
-                                                                    /^-?\d*(\.\d*)?$/.test(val)
-                                                                ) {
-                                                                    field.onChange(val);
-                                                                    const num = parseFloat(val) || 0;
-                                                                    const salesOrderValue =
-                                                                        parseFloat(
-                                                                            form.getValues("salesOrderValue")
-                                                                        ) || 0;
-                                                                    const currency = form.getValues("currency");
+                    {/* Currency */}
+                    <FormField
+                      control={form.control}
+                      name="currency"
+                      render={({ field }) => (
+                        <FormItem className="pointer-events-none">
+                          <FormLabel>Currency</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                                                                    const adjustedValue = salesOrderValue + num;
-                                                                    form.setValue(
-                                                                        "adjustedSalesValue",
-                                                                        adjustedValue
-                                                                    );
+                    {/* Sales Order Value */}
+                    <FormField
+                      control={form.control}
+                      name="salesOrderValue"
+                      render={({ field }) => (
+                        <FormItem className="pointer-events-none">
+                          <FormLabel>Sales Order Value</FormLabel>
+                          <FormControl>
+                            <Input type="number" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div></div>
 
-                                                                    let usdValue;
-                                                                    if (currency === "INR") {
-                                                                        usdValue =
-                                                                            adjustedValue / (usdToInr || 1);
-                                                                    } else {
-                                                                        usdValue = adjustedValue;
-                                                                    }
-                                                                    form.setValue(
-                                                                        "adjustedSalesValueUsd",
-                                                                        usdValue
-                                                                    );
-                                                                }
-                                                            }}
-                                                        />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
+                    {/* Company */}
+                    <FormField
+                      control={form.control}
+                      name="company"
+                      render={({ field }) => (
+                        <FormItem className="pointer-events-none col-span-2">
+                          <FormLabel>Company</FormLabel>
+                          <FormControl>
+                            <Input placeholder="ACME Inc." {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div></div>
 
-                                        {/* Adjusted Sales Value */}
-                                        <FormField
-                                            control={form.control}
-                                            name="adjustedSalesValue"
-                                            render={({ field }) => (
-                                                <FormItem className="pointer-events-none">
-                                                    <FormLabel>Adjusted Sales Value</FormLabel>
-                                                    <FormControl>
-                                                        <Input {...field} />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        <div></div>
+                    {/* Adjustment */}
+                    <FormField
+                      control={form.control}
+                      name="adjustment"
+                      render={({ field }) => (
+                        <FormItem className="pointer-events-none">
+                          <FormLabel>Adjustment</FormLabel>
+                          <FormControl>
+                            <Input
+                              inputMode="decimal"
+                              value={field.value}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                if (
+                                  val === "" ||
+                                  val === "-" ||
+                                  /^-?\d*(\.\d*)?$/.test(val)
+                                ) {
+                                  field.onChange(val);
+                                  const num = parseFloat(val) || 0;
+                                  const salesOrderValue =
+                                    parseFloat(
+                                      form.getValues("salesOrderValue")
+                                    ) || 0;
+                                  const currency = form.getValues("currency");
 
-                                        {/* Adjusted Sales Value (USD) */}
-                                        <FormField
-                                            control={form.control}
-                                            name="adjustedSalesValueUsd"
-                                            render={({ field }) => (
-                                                <FormItem className="pointer-events-none">
-                                                    <FormLabel>Adjusted Sales Value (USD)</FormLabel>
-                                                    <FormControl>
-                                                        <Input
-                                                            value={
-                                                                !isNaN(field.value)
-                                                                    ? field.value.toLocaleString(undefined, {
-                                                                        minimumFractionDigits: 2,
-                                                                        maximumFractionDigits: 2,
-                                                                    })
-                                                                    : 0
-                                                            }
-                                                            readOnly
-                                                        />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
+                                  const adjustedValue = salesOrderValue + num;
+                                  form.setValue(
+                                    "adjustedSalesValue",
+                                    adjustedValue
+                                  );
 
-                                        {/* Country */}
-                                        <FormField
-                                            control={form.control}
-                                            name="country"
-                                            render={({ field }) => (
-                                                <FormItem className="pointer-events-none">
-                                                    <FormLabel>Country</FormLabel>
-                                                    <FormControl>
-                                                        <Input {...field} />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        <div></div>
-                                    </div>
-                                </form>
-                            </Form>
-                        </TabsContent>
-                        <TabsContent value="billing-plan">
-                            <BillingPlanDetails billingPlanName={billingPlanName} billingPlan={selectedBillingPlan}  />
-                        </TabsContent>
-                    </Tabs>
-                </SheetHeader>
-            </SheetContent>
-        </Sheet>
-    );
+                                  let usdValue;
+                                  if (currency === "INR") {
+                                    usdValue = adjustedValue / (usdToInr || 1);
+                                  } else {
+                                    usdValue = adjustedValue;
+                                  }
+                                  form.setValue(
+                                    "adjustedSalesValueUsd",
+                                    usdValue
+                                  );
+                                }
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Adjusted Sales Value */}
+                    <FormField
+                      control={form.control}
+                      name="adjustedSalesValue"
+                      render={({ field }) => (
+                        <FormItem className="pointer-events-none">
+                          <FormLabel>Adjusted Sales Value</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div></div>
+
+                    {/* Adjusted Sales Value (USD) */}
+                    <FormField
+                      control={form.control}
+                      name="adjustedSalesValueUsd"
+                      render={({ field }) => (
+                        <FormItem className="pointer-events-none">
+                          <FormLabel>Adjusted Sales Value (USD)</FormLabel>
+                          <FormControl>
+                            <Input
+                              value={
+                                !isNaN(field.value)
+                                  ? field.value.toLocaleString(undefined, {
+                                      minimumFractionDigits: 2,
+                                      maximumFractionDigits: 2,
+                                    })
+                                  : 0
+                              }
+                              readOnly
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Country */}
+                    <FormField
+                      control={form.control}
+                      name="country"
+                      render={({ field }) => (
+                        <FormItem className="pointer-events-none">
+                          <FormLabel>Country</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div></div>
+                  </div>
+                </form>
+              </Form>
+            </TabsContent>
+            <TabsContent value="billing-plan">
+              <BillingPlanDetails
+                billingPlanName={billingPlanName}
+                billingPlan={selectedBillingPlan}
+                refresh={refresh}
+              />
+            </TabsContent>
+          </Tabs>
+        </SheetHeader>
+      </SheetContent>
+    </Sheet>
+  );
 };
 
 export default BillingPlanSheet;

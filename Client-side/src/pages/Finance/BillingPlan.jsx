@@ -14,20 +14,30 @@ function BillingPlan() {
       const [loading, setLoading] = useState(false);
       const [data, setData] = useState([]);
     
-      const fetchData = async () => {
-        try {
-          setLoading(true);
-          const res = await axios.get(`${import.meta.env.VITE_CS365_URI}/api`);
-          setData(res.data);
-          console.log("Fetched Billing Plan:", res.data);
-          
-        } catch (error) {
-          console.error("Error fetching Billig plan:", error);
-        } finally {
-          setLoading(false);
-        }
-      };
-    
+     const fetchData = async () => {
+  try {
+    setLoading(true);
+    const res = await axios.get(`${import.meta.env.VITE_CS365_URI}/api/billing-plan/list`);
+
+    // Flatten billing_plans
+    const flatData = res.data.flatMap(entry =>
+      entry.billing_plans.map(plan => ({
+        ...plan,
+        salesOrderName: entry.salesOrderName,
+        status: plan.status ?? entry.status,
+        clientName: entry.clientName,
+        billingPlanName: plan.description, // if this is the name
+      }))
+    );
+
+    setData(flatData);
+    console.log("Flattened Billing Plan:", flatData);
+  } catch (error) {
+    console.error("Error fetching Billing plan:", error);
+  } finally {
+    setLoading(false);
+  }
+};
       useEffect(() => {
         fetchData();
       }, []);
@@ -37,7 +47,7 @@ function BillingPlan() {
       <div className="mb-16">
         <h1 className="text-2xl font-bold">Billing Plan</h1>
         <div className="flex justify-end">
-          <BillingPlanSheet/>
+          <BillingPlanSheet refresh={fetchData}/>
         </div>
       </div>
       <Separator className="mb-4" />

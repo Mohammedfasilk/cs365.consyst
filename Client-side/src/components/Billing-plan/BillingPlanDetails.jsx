@@ -11,12 +11,13 @@ import {
   FormLabel,
   FormMessage,
 } from "../UI/Form";
-import { CalendarIcon, Cross, Plus, X } from "lucide-react";
+import { CalendarIcon, CircleCheckIcon, CircleXIcon, Cross, Plus, X } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "../../lib/utils";
 import { Popover, PopoverTrigger, PopoverContent } from "../UI/Popover";
 import { Calendar } from "../UI/Calender";
 import axios from "axios";
+import { useToast } from "../../Hooks/use-toast";
 
 const formSchema = z.object({
   currency: z.string().min(1, "Currency is required"),
@@ -32,53 +33,56 @@ const formSchema = z.object({
     .min(1, "At least one entry is required"),
 });
 
-const BillingPlanDetails = ({billingPlan}) => {
+const BillingPlanDetails = ({ billingPlan,refresh }) => {
+
+  const {toast} = useToast();
+
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      currency: billingPlan?.currency,
-      salesOrderValue: billingPlan?.salesOrderValue,
-      entries: [],
+      currency: billingPlan?.currency || "",
+      salesOrderValue: billingPlan?.salesOrderValue || 0,
+      entries:
+        billingPlan?.billing_plans?.map((plan) => ({
+          date: new Date(plan.date),
+          description: plan.description,
+          amount: plan.amount,
+        })) || [],
     },
   });
 
   const { control, handleSubmit } = form;
-  const { fields, append,remove } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control,
     name: "entries",
   });
 
   const onSubmit = async (values) => {
     const payload = {
-    ...billingPlan,
-    billing_plans: values.entries,
-  };
-          try {
-              const res = await axios.post(
-                  `${import.meta.env.VITE_CS365_URI}/api/billing-plan/create`,
-                  payload
-              );
+      ...billingPlan,
+      billing_plans: values.entries,
+    };
+    try {
+      const res = await axios.post(
+        `${import.meta.env.VITE_CS365_URI}/api/billing-plan/create`,
+        payload
+      );
 
-              console.log(res.data);
-              
-              // fetchData();
-
-              // toast({
-              //     title: "Billing Plan Saved",
-              //     description: "Billing plan has been successfully saved.",
-              //     icon: <CircleCheckIcon className="mr-4" color="green" />,
-              // });
-          } catch (error) {
-              // toast({
-              //     title: "Save Failed",
-              //     description: "There was an error saving the billing plan.",
-              //     variant: "destructive",
-              //     icon: <CircleXIcon className="mr-4" color="red" />,
-              // });
-              console.log(error);
-              
-          }
-      
+      refresh()
+      toast({
+          title: "Billing Plan Saved",
+          description: "Billing plan has been successfully saved.",
+          icon: <CircleCheckIcon className="mr-4" color="green" />,
+      });
+    } catch (error) {
+      toast({
+          title: "Save Failed",
+          description: "There was an error saving the billing plan.",
+          variant: "destructive",
+          icon: <CircleXIcon className="mr-4" color="red" />,
+      });
+      console.log(error);
+    }
   };
 
   return (
@@ -121,10 +125,7 @@ const BillingPlanDetails = ({billingPlan}) => {
                 <FormItem>
                   <FormLabel>Sales Order Value</FormLabel>
                   <FormControl>
-                    <Input
-                      {...field}
-                      readOnly
-                    />
+                    <Input {...field} readOnly />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -144,6 +145,7 @@ const BillingPlanDetails = ({billingPlan}) => {
                     date: new Date(),
                     description: "",
                     amount: 0,
+                    isNew: true, // flag to mark as new
                   })
                 }
                 className="flex items-center gap-1"
@@ -155,89 +157,93 @@ const BillingPlanDetails = ({billingPlan}) => {
             {fields.map((item, index) => (
               <div className="flex border border-[var(--input)] shadow-sm p-4 rounded-lg mb-4 w-fit space-x-5 items-center">
                 <div
-                key={item.id}
-                className="grid grid-cols-1 md:grid-cols-3 gap-6  "
-              >
-                {/* Date */}
-                <FormField
-                  control={form.control}
-                  name={`entries.${index}.date`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Date</FormLabel>
-                      <FormControl>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              className={cn(
-                                "w-full text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                              )}
+                  key={item.id}
+                  className="grid grid-cols-1 md:grid-cols-3 gap-6  "
+                >
+                  {/* Date */}
+                  <FormField
+                    control={form.control}
+                    name={`entries.${index}.date`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Date</FormLabel>
+                        <FormControl>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                className={cn(
+                                  "w-full text-left font-normal",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                              >
+                                {field.value
+                                  ? format(field.value, "PPP")
+                                  : "Pick a date"}
+                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent
+                              className="w-auto p-0"
+                              align="start"
                             >
-                              {field.value
-                                ? format(field.value, "PPP")
-                                : "Pick a date"}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={field.value}
-                              onSelect={field.onChange}
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                              <Calendar
+                                mode="single"
+                                selected={field.value}
+                                onSelect={field.onChange}
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                {/* Description */}
-                <FormField
-                  control={form.control}
-                  name={`entries.${index}.description`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter description" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  {/* Description */}
+                  <FormField
+                    control={form.control}
+                    name={`entries.${index}.description`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter description" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                {/* Amount */}
-                <FormField
-                  control={form.control}
-                  name={`entries.${index}.amount`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Amount</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          inputMode="decimal"
-                          placeholder="Enter amount"
-                          {...field}
-                          onChange={(e) =>
-                            field.onChange(parseFloat(e.target.value))
-                          }
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-                  <div className="hover:text-red-500">
-                    <X
-                    onClick={() => remove(index)}/>
-                  </div>
+                  {/* Amount */}
+                  <FormField
+                    control={form.control}
+                    name={`entries.${index}.amount`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Amount</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            inputMode="decimal"
+                            placeholder="Enter amount"
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(parseFloat(e.target.value))
+                            }
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                {item.isNew && (
+                <div className="hover:text-red-500">
+                  <X onClick={() => remove(index)} />
+                </div>)
+}
               </div>
             ))}
           </div>

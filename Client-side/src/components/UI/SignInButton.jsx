@@ -48,7 +48,7 @@ function SignInButton() {
 
     if (userExist.success) {
       const date = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
-      sessionStorage.setItem("user", JSON.stringify(userExist.user));
+      // sessionStorage.setItem("user", JSON.stringify(userExist.user));
       dispatch(setSessionUser(userExist.user.name))
       dispatch(setSessionRole(userExist.user.roles))
       setLoading(false);

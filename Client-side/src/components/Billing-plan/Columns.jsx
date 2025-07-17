@@ -22,9 +22,10 @@ import axios from "axios";
 import { useSessionUser } from "../../Hooks/useSessionUser";
 import { useToast } from "../../Hooks/use-toast";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
+import { useSessionRole } from "../../Hooks/useSessionRole";
 
 // Billing Actions Component
-const BillingActions = ({ row, onDelete }) => {
+const Actions = ({ row, onDelete,planId }) => {
   const { toast } = useToast();
   const sessionUser = useSessionUser();
   const planName = row.getValue("billingPlanName");
@@ -60,20 +61,20 @@ const BillingActions = ({ row, onDelete }) => {
 
   const handleDelete = async () => {
     try {
-      await axios.post(`${import.meta.env.VITE_CS365_URI}/api/billing/delete`, {
-        billingPlanName: planName,
-        clientName,
+      await axios.post(`${import.meta.env.VITE_CS365_URI}/api/billing-plan/delete`, {
+        salesId:row.getValue("salesOrderName"),
+        planId:planId,
       });
 
-      await axios.post(`${import.meta.env.VITE_CS365_URI}/api/activity`, {
-        field: "billing_plan",
-        data: {
-          username: sessionUser,
-          date: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
-          activity: `The billing plan "${planName}" has been deleted`,
-          type: "Delete",
-        },
-      });
+      // await axios.post(`${import.meta.env.VITE_CS365_URI}/api/activity`, {
+      //   field: "billing_plan",
+      //   data: {
+      //     username: sessionUser,
+      //     date: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
+      //     activity: `The billing plan "${planName}" has been deleted`,
+      //     type: "Delete",
+      //   },
+      // });
 
       onDelete();
 
@@ -160,50 +161,62 @@ const BillingActions = ({ row, onDelete }) => {
   );
 };
 
-export const columns = (fetchData) => [
-  {
-    accessorKey: "billingPlanName",
-    header: "Billing Plan",
-  },
-  {
-    accessorKey: "clientName",
-    header: "Client",
-  },
-  {
-    accessorKey: "planValue",
-    header: "Amount",
-    cell: ({ row }) => {
-      const value = row.getValue("planValue");
-      const currency = row.original?.currency;
-      const symbols = { INR: "₹", USD: "$" };
-      const currencySymbol = symbols[currency] || "";
+export const columns = (fetchData) => {
+  const role = useSessionRole();
 
-      return (
-        <div>
-          {currencySymbol}{" "}
-          {typeof value === "number"
-            ? value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-            : "—"}
-        </div>
-      );
+  const baseColumns = [
+    {
+      accessorKey: "salesOrderName",
+      header: "Sales Order",
     },
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => (
-      <Badge
-        variant="secondary"
-        className={`bg-gray-200 ${row.getValue("status") === "approved" ? "bg-blue-200" : ""}`}
-      >
-        {row.getValue("status")}
-      </Badge>
-    ),
-  },
-  {
-    id: "actions",
-    header: "Actions",
-    enableHiding: false,
-    cell: ({ row }) => <BillingActions row={row} onDelete={fetchData} />,
-  },
-];
+    {
+      header: "Date",
+      accessorKey: "date",
+      cell: ({ row }) =>
+        new Date(row.getValue("date")).toLocaleDateString("en-IN", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        }),
+    },
+    {
+      accessorKey: "description",
+      header: "Description",
+    },
+    {
+      accessorKey: "amount",
+      header: "Amount",
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => (
+        <Badge
+          variant="secondary"
+          className={`bg-gray-200 ${
+            row.getValue("status") === "approved" ? "bg-blue-200" : ""
+          }`}
+        >
+          {row.getValue("status")}
+        </Badge>
+      ),
+    },
+  ];
+
+  if (role?.includes("admin")) {
+    baseColumns.push({
+      id: "actions",
+      header: "Actions",
+      enableHiding: false,
+      cell: ({ row }) => (
+        <Actions
+          row={row}
+          planId={row.original._id} // ✅ safely access _id without needing a column
+          onDelete={fetchData}
+        />
+      ),
+    });
+  }
+
+  return baseColumns;
+};

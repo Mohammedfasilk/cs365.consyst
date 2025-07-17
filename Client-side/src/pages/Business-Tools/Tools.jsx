@@ -29,6 +29,7 @@ const AppIconButton = ({ title, icon, path, className }) => (
 
 export default  function Tools() {
   useAuthRedirect();
+  
   return (
     <div className="w-full h-screen flex flex-col justify-center items-center bg-[var(--csgray)]">
       <div className="flex justify-center ml-24 gap-16">

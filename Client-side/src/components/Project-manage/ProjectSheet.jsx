@@ -61,7 +61,6 @@ const ProjectSheet = ({ fetchData }) => {
   const dispatch = useDispatch();
   const sessionUser = useSessionUser();
 
-
   const selectedProject = useSelector((state) => state.selectedProject.project);
   const {settings} = useSelector((state) => state.settings);
 

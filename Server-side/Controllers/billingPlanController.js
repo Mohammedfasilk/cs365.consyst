@@ -25,8 +25,7 @@ exports.createOrUpdateBillingPlan = async (req, res) => {
       return res.status(400).json({ error: "salesOrderName is required." });
     }
 
-    console.log("BillingPlan typeof:", typeof BillingPlan);
-console.log("BillingPlan content:", BillingPlan);
+
     const plan = await BillingPlan.findOneAndUpdate(
       { salesOrderName },                      
       {
@@ -81,19 +80,16 @@ exports.fetchOrderBillingPlan = async (req, res) => {
     }
 
     // Step 1: Try finding from BillingPlan
-    const collections = await mongoose.connection.db.listCollections().toArray();
-    const collectionExists = collections.some(
-      (col) => col.name === 'BillingPlan'
-    );
 
-    if (collectionExists) {
+
+
       const BillingPlan = require("../Models/BillingPlanModel");
       const billingPlan = await BillingPlan.findOne({ salesOrderName });
 
       if (billingPlan) {
         return res.status(200).json(billingPlan );
       }
-    }
+
 
     // Step 2: If not found, try from OrderBooking
     const salesOrder = await OrderBooking.findOne({ salesOrderName });
@@ -129,11 +125,28 @@ exports.updateBillingPlan = async (req, res) => {
 // Delete a billing plan
 exports.deleteBillingPlan = async (req, res) => {
   try {
-    const { id } = req.params;
-    await BillingPlan.findByIdAndDelete(id);
-    res.json({ message: "Billing plan deleted." });
+    const { salesId, planId } = req.body;
+
+    if (!salesId|| !planId) {
+      return res.status(400).json({ error: "Invalid sales Order or Plan ID." });
+    }
+    console.log(req.body);
+    
+    const updatedPlan = await BillingPlan.findOneAndUpdate(
+      {salesOrderName:salesId},
+      {
+        $pull: { billing_plans: { _id: planId } },
+      },
+      { new: true }
+    );
+
+    if (!updatedPlan) {
+      return res.status(404).json({ error: "Billing plan not found." });
+    }
+
+    res.json({ message: "Billing plan deleted.", updated: updatedPlan });
   } catch (error) {
-    console.error("Delete Billing Plan Error:", error);
-    res.status(500).json({ error: "Failed to delete billing plan." });
+    console.error("Delete  Billing Plan Error:", error);
+    res.status(500).json({ error: "Failed to delete billing plan entry." });
   }
 };

@@ -63,7 +63,6 @@ const userRoles = [
   { value: "finance-user", label: "Finance User" },
   { value: "finance-manager", label: "Finance Manager" },
   { value: "general-manager", label: "General Manager" },
-  { value: "software-developer", label: "Software Developer" },
 ];
 
 export function SettingsSheet() {

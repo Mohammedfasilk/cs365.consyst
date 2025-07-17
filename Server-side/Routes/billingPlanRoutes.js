@@ -7,6 +7,6 @@ router.post("/sales-order", billingPlanController.fetchOrderBillingPlan);
 router.get("/list", billingPlanController.getBillingPlans);
 // router.get("/:salesOrderName", billingPlanController.getBillingPlanByOrder);
 router.put("/update/:id", billingPlanController.updateBillingPlan);
-router.delete("/delete/:id", billingPlanController.deleteBillingPlan);
+router.post("/delete", billingPlanController.deleteBillingPlan);
 
 module.exports = router;

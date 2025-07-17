@@ -277,7 +277,7 @@ export const columns = (fetchData) => {
     },
   ];
 
-  if (role.includes("admin")) {
+  if (role?.includes("admin")) {
     baseColumns.push({
       id: "actions",
       enableHiding: false,
