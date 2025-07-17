@@ -57,14 +57,14 @@ const BillingPlanSheet = ({ refresh }) => {
   const { toast } = useToast();
 
   const [tabValue, setTabValue] = useState("billing-details");
-  const isOpen = useSelector((state) => state.billingPlan?.isOpen);
-  const isSaved = useSelector((state) => state.billingPlan?.isSaved);
-  const source = useSelector((state) => state.billingPlan?.source);
+  const isOpen = useSelector((state) => state.billingPlanSheet?.isOpen);
+//   const isSaved = useSelector((state) => state.billingPlanSheet?.isSaved);
+//   const source = useSelector((state) => state.billingPlanSheet?.source);
   const selectedBillingPlan = useSelector(
     (state) => state.billingPlanSheet.billingPlan
   );
   const billingPlanName = useSelector(
-    (state) => state.billingPlanSheet.billingPlanName
+    (state) => state.billingPlanSheet?.billingPlanName
   );
 
   const settings = useSelector((state) => state.settings.settings);

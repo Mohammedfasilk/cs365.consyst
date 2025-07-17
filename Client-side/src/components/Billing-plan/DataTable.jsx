@@ -39,8 +39,8 @@ export default function DataTable({ columns, data, loading }) {
   const [columnVisibility, setColumnVisibility] = useState({});
   const [rowSelection, setRowSelection] = useState({});
   const dispatch = useDispatch();
-  const selectedBillingPlan = useSelector((state) => state.billingPlan);
-  const selectedBillingPlanName = useSelector((state) => state.billingPlanName);
+  // const selectedBillingPlan = useSelector((state) => state.billingPlan);
+  // const selectedBillingPlanName = useSelector((state) => state.billingPlanName);
 
   const table = useReactTable({
     data: data ?? [],
@@ -133,9 +133,9 @@ export default function DataTable({ columns, data, loading }) {
                       key={cell.id}
                       onClick={() => {
                         if (cell.column.id !== "actions") {
-                          const billingPlanName = row.getValue("billingPlanName");
+                          const billingPlanName = row.getValue("salesOrderName");
                           if (billingPlanName) {
-                            dispatch(setSelectedBillingPlan({ plan: row.original, source: "table" }));
+                            // dispatch(setSelectedBillingPlan({ plan: row.original, source: "table" }));
                             dispatch(setSelectedBillingPlanName(billingPlanName));
                             dispatch(setIsOpen(true));
                             dispatch(setIsSaved(true));
