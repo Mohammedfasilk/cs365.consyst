@@ -155,10 +155,10 @@ const BillingPlanDetails = ({ billingPlan,refresh }) => {
             </div>
 
             {fields.map((item, index) => (
-              <div className="flex border border-[var(--input)] shadow-sm p-4 rounded-lg mb-4 w-fit space-x-5 items-center">
+              <div className="flex border border-[var(--input)] w-[85%] shadow-sm p-4 rounded-lg mb-4 space-x-5 items-center">
                 <div
                   key={item.id}
-                  className="grid grid-cols-1 md:grid-cols-3 gap-6  "
+                  className="grid grid-cols-1 md:grid-cols-3 gap-6 "
                 >
                   {/* Date */}
                   <FormField
