@@ -4,10 +4,11 @@ const settingsSchema = new mongoose.Schema({
     currentFyStartDate: String,
     usdToinr: Number,
     usdToaed: Number,
-    cmefTarget: Number,   //AED
-    ctiplTarget: Number,  //INR
-    cdiplTarget: Number,  //INR
+    // cmefTarget: Number,   //AED
+    // ctiplTarget: Number,  //INR
+    // cdiplTarget: Number,  //INR
     groupTarget: Number,  //USD
+    billingTarget: Number,  //USD
 
 }, { timestamps: true })
 

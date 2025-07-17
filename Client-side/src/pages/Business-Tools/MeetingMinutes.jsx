@@ -14,12 +14,14 @@ function MeetingMinutes() {
   const {accounts} = useMsal()
   const [filteredMeetings,setFilteredMeetings] = useState([])
   const [roleFilters,setRoleFilters] = useState([])
+  const [showCompleted,setShowCompleted] = useState()
+  const [searchQuery, setSearchQuery] = useState('');
 
   const [meetingDialog,setMeetingDialog] = useState(false)
   const filteredQuery = {
     host:accounts[0]?.name,
     attendee:accounts[0]?.username,
-    search:'',
+    search:searchQuery,
   }
 
   const fetchMeetings = async () => {
@@ -36,22 +38,28 @@ function MeetingMinutes() {
         return;
       }
 
-     const filtered = meetings.filter((meeting) => {
+  const filtered = meetings.filter((meeting) => {
   const email = accounts[0]?.username;
 
   const isHost =
     roleFilters.includes("host") &&
-    meeting.attendees.some(
-      (a) => a.email === email && a.role === "host"
-    );
+    meeting.attendees.some((a) => a.email === email && a.role === "host");
 
   const isAttendee =
     roleFilters.includes("participant") &&
-    meeting.attendees.some(
-      (a) => a.email === email && a.role !== "host"
-    );
+    meeting.attendees.some((a) => a.email === email && a.role !== "host");
 
-  return isHost || isAttendee;
+  const matchesRole = isHost || isAttendee;
+  const matchesStatus = showCompleted
+    ? meeting.status === "completed"
+    : meeting.status !== "completed";
+
+  const matchesSearch = searchQuery
+    ? meeting.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      meeting.description?.toLowerCase().includes(searchQuery.toLowerCase())
+    : true;
+
+  return matchesRole && matchesStatus && matchesSearch;
 });
       setFilteredMeetings(filtered);
 
@@ -63,7 +71,7 @@ function MeetingMinutes() {
 
   useEffect(() => {
   fetchMeetings();
-}, [roleFilters]);
+}, [roleFilters,showCompleted,searchQuery]);
 
   // Placeholder functions for now
   const handleEditMeeting = (meeting) => {
@@ -98,12 +106,12 @@ function MeetingMinutes() {
         </div>
 
         <SearchAndFilterSection
-          // searchQuery={searchQuery}
-          // onSearchChange={setSearchQuery}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
           roleFilters={roleFilters}
           onRoleFiltersChange={setRoleFilters}
-          // showCompleted={showCompleted}
-          // onShowCompletedChange={setShowCompleted}
+          showCompleted={showCompleted}
+          onShowCompletedChange={setShowCompleted}
         />
 
         {filteredMeetings.length === 0 ? (

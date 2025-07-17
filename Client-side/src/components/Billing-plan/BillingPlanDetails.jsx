@@ -33,7 +33,7 @@ const formSchema = z.object({
     .min(1, "At least one entry is required"),
 });
 
-const BillingPlanDetails = ({ billingPlan,refresh }) => {
+const BillingPlanDetails = ({ billingPlan, refresh ,refreshPlan }) => {
 
   const {toast} = useToast();
 
@@ -58,16 +58,47 @@ const BillingPlanDetails = ({ billingPlan,refresh }) => {
   });
 
   const onSubmit = async (values) => {
+   const exchangeRate = 10;
+
+  const updatedBillingPlans = values.entries.map((plan, index) => {
+    const original = billingPlan.billing_plans?.[index];
+
+    const base = {
+      ...plan,
+      date: new Date(plan.date),
+    };
+
+    if (!original) {
+      // New entry
+      return {
+        ...base,
+        amount_in_usd: +(plan.amount * exchangeRate).toFixed(2),
+      };
+    }
+
+    const hasChanged =
+      plan.amount !== original.amount ||
+      plan.description !== original.description ||
+      new Date(plan.date).getTime() !== new Date(original.date).getTime();
+
+    return {
+      ...base,
+      amount_in_usd: hasChanged
+        ? +(plan.amount * exchangeRate).toFixed(2)
+        : original.amount_in_usd ?? +(plan.amount * exchangeRate).toFixed(2),
+    };
+  });
+
     const payload = {
       ...billingPlan,
-      billing_plans: values.entries,
+      billing_plans: updatedBillingPlans,
     };
     try {
       const res = await axios.post(
         `${import.meta.env.VITE_CS365_URI}/api/billing-plan/create`,
         payload
       );
-
+      refreshPlan();
       refresh()
       toast({
           title: "Billing Plan Saved",
@@ -166,7 +197,7 @@ const BillingPlanDetails = ({ billingPlan,refresh }) => {
                     name={`entries.${index}.date`}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Date</FormLabel>
+                        <FormLabel>Planned Bill Date</FormLabel>
                         <FormControl>
                           <Popover>
                             <PopoverTrigger asChild>

@@ -33,20 +33,36 @@ exports.createMeeting = async (req, res) => {
 
 exports.getMeetings = async (req, res) => {
   try {
-    const { attendee } = req.body;
+    const { attendee, search } = req.body;
 
     if (!attendee) {
-      return res.status(400).json({ error: "Please provide a host name or attendee email." });
+      return res.status(400).json({ error: "Attendee email is required." });
     }
 
-    const filter = [];
-    if (attendee) filter.push({ "attendees.email": attendee }); // 👈 fixed line
+    // Build base query: attendee match
+    const baseQuery = { "attendees.email": attendee };
 
-    const meetings = await Meeting.find({ $or: filter });
+    // Optional search filtering
+    if (search && search.trim() !== "") {
+      const searchRegex = new RegExp(search.trim(), "i");
+      const searchConditions = {
+        $or: [
+          { title: { $regex: searchRegex } },
+          { description: { $regex: searchRegex } },
+          { location: { $regex: searchRegex } }, // optional field
+        ],
+      };
 
-    if (meetings.length === 0) {
-      return res.status(404).json({ message: "No meetings found for the given host or attendee." });
+      // Combine attendee + search
+      const meetings = await Meeting.find({
+        $and: [baseQuery, searchConditions],
+      });
+
+      return res.status(200).json(meetings);
     }
+
+    // No search, only filter by attendee
+    const meetings = await Meeting.find(baseQuery);
 
     res.status(200).json(meetings);
   } catch (error) {

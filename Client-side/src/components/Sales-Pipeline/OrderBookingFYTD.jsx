@@ -46,7 +46,7 @@ const options = {
   labels: ["Average Results"],
 };
 
-const OrderBookingFYTD = ({ company, usdValue, localValue, isGroup }) => {
+const OrderBookingFYTD = ({ company, usdValue, localValue, isGroup , isBill }) => {
   const dispatch = useDispatch();
   const { settings } = useSelector((state) => state.settings);
   const [displayValue, setDisplayValue] = useState(usdValue);
@@ -78,7 +78,7 @@ const OrderBookingFYTD = ({ company, usdValue, localValue, isGroup }) => {
           break;
         case "Consyst Group":
           // Always use USD value and group target for Consyst Group
-          percent = (usdValue / settings?.groupTarget || 0) * 100;
+          isBill ? percent = (usdValue / settings?.billingTarget || 0) * 100 : percent = (usdValue / settings?.groupTarget || 0) * 100;
           break;
         default:
           percent = 0;
@@ -125,7 +125,7 @@ const OrderBookingFYTD = ({ company, usdValue, localValue, isGroup }) => {
     "CONSYST Middle East FZ-LLC",
   ];
 
-  const isSimpleCard = !isGroup && hideChartCompanies.includes(company);
+  const isSimpleCard = !isGroup 
 
   return (
     <Card className="bg-white rounded-lg shadow p-4 flex flex-col items-center justify-center h-full w-full">
@@ -133,8 +133,8 @@ const OrderBookingFYTD = ({ company, usdValue, localValue, isGroup }) => {
         <div>
           <p className="mb-1 text-sm font-semibold text-gray-700">
             {isGroup
-              ? "Consolidated Order Booking - This FY"
-              : "Order Booking - This FY"}
+              ? isBill ?  "Consolidated Billing - This FY":"Consolidated Order Booking - This FY"
+              : isBill ? "Billing - This FY" : "Order Booking - This FY"}
           </p>
           <p className="mb-4 text-xs text-gray-500">{company}</p>
         </div>

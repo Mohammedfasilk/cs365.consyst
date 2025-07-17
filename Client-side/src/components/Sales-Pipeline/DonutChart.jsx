@@ -1,7 +1,7 @@
 import React from "react";
 import ReactApexChart from "react-apexcharts";
 
-export default function DonutChart({ countrySummaryData = [] }) {
+export default function DonutChart({ countrySummaryData = [] ,isBill }) {
   const countryLabels = countrySummaryData.map((c) => c.country);
   const countryValues = countrySummaryData.map((c) => c.total);
 
@@ -15,7 +15,7 @@ export default function DonutChart({ countrySummaryData = [] }) {
     <div className="w-full h-full">
       <div className="bg-white rounded-lg shadow p-4 flex flex-col items-center justify-center h-full w-full">
         <span className="mb-2 text-sm font-semibold text-gray-700">
-          Order Booking by Country (Total)
+         {isBill ? 'Billing by Country (Total)' : ' Order Booking by Country (Total)'}
         </span>
         <div className="w-full h-[250px] flex items-center justify-center">
           {countryValues.length === 0 || countryValues.every((val) => val === 0) ? (
@@ -42,35 +42,56 @@ export default function DonutChart({ countrySummaryData = [] }) {
             />
           ) : (
             <ReactApexChart
-              options={{
-                chart: { type: "donut" },
-                labels: countryLabels,
-                colors: countryColors.slice(0, countryLabels.length),
-                legend: { show: false },
-                dataLabels: { enabled: false },
-                tooltip: {
-                  y: {
-                    formatter: (val) =>
-                      val.toLocaleString("en-US", {
-                        style: "currency",
-                        currency: "USD",
-                        minimumFractionDigits: 2,
-                      }),
-                  },
-                },
-                plotOptions: {
-                  donut: {
-                    labels: {
-                      show: false
-                    }
-                  }
-                }
-              }}
-              series={countryValues}
-              type="donut"
-              height="100%"
-              width="100%"
-            />
+  options={{
+    chart: { type: "donut" },
+    labels: countryLabels,
+    colors: countryColors.slice(0, countryLabels.length),
+    legend: { show: false },
+    dataLabels: { enabled: false },
+    tooltip: {
+      y: {
+        formatter: (val) =>
+          val.toLocaleString("en-US", {
+            style: "currency",
+            currency: "USD",
+            minimumFractionDigits: 2,
+          }),
+      },
+    },
+    plotOptions: {
+      pie: {
+        donut: {
+          labels: {
+            show: true,
+            name: {
+              show: true,
+            },
+            value: {
+              show: true,
+              formatter: function (val) {
+                return `${parseFloat(val).toLocaleString()} USD`;
+              },
+            },
+            total: {
+              show: true,
+              formatter: function (w) {
+                const total = w.globals.seriesTotals.reduce((a, b) => a + b, 0);
+                const hovered = w.globals.series[w.globals.seriesIndex];
+                if (!hovered || total === 0) return "0%";
+                const percentage = ((hovered / total) * 100).toFixed(1);
+                return `${percentage}%`;
+              },
+            },
+          },
+        },
+      },
+    },
+  }}
+  series={countryValues}
+  type="donut"
+  height="100%"
+  width="100%"
+/>
           )}
         </div>
       </div>

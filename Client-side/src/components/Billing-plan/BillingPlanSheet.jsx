@@ -118,7 +118,7 @@ const BillingPlanSheet = ({ refresh }) => {
     },
   });
 
-  useEffect(() => {
+
     async function fetchBillingPlan() {
       try {
         const res = await axios.post(
@@ -132,6 +132,8 @@ const BillingPlanSheet = ({ refresh }) => {
         console.error("Error fetching  projects:", error);
       }
     }
+
+  useEffect(() => {
     fetchBillingPlan();
   }, [billingPlanName]);
 
@@ -495,6 +497,7 @@ const BillingPlanSheet = ({ refresh }) => {
                 billingPlanName={billingPlanName}
                 billingPlan={selectedBillingPlan}
                 refresh={refresh}
+                refreshPlan={fetchBillingPlan}
               />
             </TabsContent>
           </Tabs>

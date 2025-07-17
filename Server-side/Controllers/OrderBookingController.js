@@ -82,50 +82,51 @@ exports.getOrders = async (req, res) => {
 
 // get all order summary
 exports.getOrderSummary = async (req, res) => {
-    try {
-        const orders = await OrderBooking.find({});
+  try {
+    const orders = await OrderBooking.find({ Status: 'approved' }); // ✅ Only approved
 
-        const grouped = {};
-        let totals = {};
+    const grouped = {};
+    let totals = {};
 
-        for (const order of orders) {
-            const category = order.category === "Product/Platform" ? "Product/Service" : order.category;
-            const subCategory = order.subCategory;
-            const value = order.adjustedSalesValueUsd || 0; // Changed from adjustedSalesValue to usdValue
+    for (const order of orders) {
+      const category = order.category === "Product/Platform" ? "Product/Service" : order.category;
+      const subCategory = order.subCategory;
+      const value = order.adjustedSalesValueUsd || 0;
 
-            if (!grouped[category]) {
-                grouped[category] = {};
-                totals[category] = 0;
-            }
+      if (!grouped[category]) {
+        grouped[category] = {};
+        totals[category] = 0;
+      }
 
-            grouped[category][subCategory] = (grouped[category][subCategory] || 0) + value;
-            totals[category] += value;
-        }
-
-        const result = Object.entries(grouped).map(([category, subs]) => {
-            const categoryTotal = totals[category];
-            const subData = Object.entries(subs).map(([subCategory, total]) => ({
-                subCategory,
-                total,
-                percentage: +((total / categoryTotal) * 100).toFixed(2),
-            }));
-            return {
-                category,
-                total: categoryTotal,
-                subCategories: subData,
-            };
-        });
-
-        res.json(result);
-    } catch (err) {
-        res.status(500).json({ error: 'Failed to summarize order bookings' });
+      grouped[category][subCategory] = (grouped[category][subCategory] || 0) + value;
+      totals[category] += value;
     }
+
+    const result = Object.entries(grouped).map(([category, subs]) => {
+      const categoryTotal = totals[category];
+      const subData = Object.entries(subs).map(([subCategory, total]) => ({
+        subCategory,
+        total,
+        percentage: +((total / categoryTotal) * 100).toFixed(2),
+      }));
+      return {
+        category,
+        total: categoryTotal,
+        subCategories: subData,
+      };
+    });
+
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to summarize order bookings' });
+  }
 };
+
 
 // get order summary by company
 exports.getOrderSummaryByCompany = async (req, res) => {
     try {
-        const orders = await OrderBooking.find({});
+        const orders = await OrderBooking.find({ Status: 'approved' });
         
         const companyData = {
             "CONSYST Digital Industries Pvt. Ltd": {
@@ -200,7 +201,7 @@ exports.getOrderSummaryByCompany = async (req, res) => {
 // Get order bookings summarized by country
 exports.getCountryOrderSummary = async (req, res) => {
   try {
-    const orders = await OrderBooking.find({});
+    const orders = await OrderBooking.find({ Status: 'approved' });
 
     const countryTotals = {};
 

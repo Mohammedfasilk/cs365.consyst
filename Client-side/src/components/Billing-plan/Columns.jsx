@@ -192,7 +192,7 @@ export const columns = (fetchData) => {
       header: "Sales Order",
     },
     {
-      header: "Date",
+      header: "Planned Bill Date",
       accessorKey: "date",
       cell: ({ row }) =>
         new Date(row.getValue("date")).toLocaleDateString("en-IN", {

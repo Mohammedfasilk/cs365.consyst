@@ -1,5 +1,4 @@
 import {
-
   getCoreRowModel,
   useReactTable,
   getFilteredRowModel,
@@ -27,10 +26,11 @@ import {
 } from "../UI/Dropdown-menu";
 
 import { Button } from '../UI/Button'
-import {Input} from "../UI/Input"
+import { Input } from "../UI/Input"
 import { ChevronDownIcon } from "lucide-react";
 import { useState } from "react";
 
+// Only used if isDetail is true
 const salesStages = [
   { id: "Prospecting" },
   { id: "Qualification" },
@@ -38,11 +38,11 @@ const salesStages = [
   { id: "Negotiation/Review" },
 ];
 
-export function OpportunityDataTable({ columns, data }) {
+export function OpportunityDataTable({ columns, data, isDetail }) {
   const [sorting, setSorting] = useState([]);
-  const [columnFilters, setColumnFilters] = useState([
-    { id: "sales_stage", value: "Negotiation/Review" },
-  ]);
+  const [columnFilters, setColumnFilters] = useState(
+    isDetail ? [{ id: "sales_stage", value: "Negotiation/Review" }] : []
+  );
   const [columnVisibility, setColumnVisibility] = useState({});
   const [rowSelection, setRowSelection] = useState({});
   const [position, setPosition] = useState("Negotiation/Review");
@@ -79,32 +79,34 @@ export function OpportunityDataTable({ columns, data }) {
       <div className="flex items-center justify-between py-4">
         <Input
           placeholder="Filter opportunity..."
-          value={(table.getColumn("title")?.getFilterValue() ?? "")}
+          value={table.getColumn("title")?.getFilterValue() ?? ""}
           onChange={(event) =>
             table.getColumn("title")?.setFilterValue(event.target.value)
           }
-          className="max-w-sm border rounded-md p-1 px-2 border-gray-300 "
+          className="max-w-sm border rounded-md p-1 px-2 border-gray-300"
         />
-        <div className="space-x-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="ml-auto">
-                Stage <ChevronDownIcon className="ml-2 h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuRadioGroup
-                value={position}
-                onValueChange={handleStageChange}
-              >
-                {salesStages.map((stage) => (
-                  <DropdownMenuRadioItem key={stage.id} value={stage.id}>
-                    {stage.id}
-                  </DropdownMenuRadioItem>
-                ))}
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
+        <div className="space-x-2 flex">
+          {isDetail && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="ml-auto">
+                  Stage <ChevronDownIcon className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuRadioGroup
+                  value={position}
+                  onValueChange={handleStageChange}
+                >
+                  {salesStages.map((stage) => (
+                    <DropdownMenuRadioItem key={stage.id} value={stage.id}>
+                      {stage.id}
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -137,45 +139,45 @@ export function OpportunityDataTable({ columns, data }) {
 
       <div className="rounded-md border border-gray-300">
         <Table>
-  <TableHeader>
-    {table.getHeaderGroups().map((headerGroup) => (
-      <TableRow key={headerGroup.id}>
-        {headerGroup.headers.map((header) => (
-          <TableHead key={header.id}>
-            {header.isPlaceholder
-              ? null
-              : flexRender(
-                  header.column.columnDef.header,
-                  header.getContext()
-                )}
-          </TableHead>
-        ))}
-      </TableRow>
-    ))}
-  </TableHeader>
-  <TableBody>
-    {table.getRowModel().rows?.length ? (
-      table.getRowModel().rows.map((row) => (
-        <TableRow
-          key={row.id}
-          data-state={row.getIsSelected() && "selected"}
-        >
-          {row.getVisibleCells().map((cell) => (
-            <TableCell key={cell.id}>
-              {flexRender(cell.column.columnDef.cell, cell.getContext())}
-            </TableCell>
-          ))}
-        </TableRow>
-      ))
-    ) : (
-      <TableRow>
-        <TableCell colSpan={columns.length} className="h-24 text-center">
-          No results.
-        </TableCell>
-      </TableRow>
-    )}
-  </TableBody>
-</Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </div>
 
       <div className="flex items-center justify-end space-x-2 py-4">

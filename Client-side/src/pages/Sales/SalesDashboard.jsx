@@ -218,7 +218,7 @@ function SalesDashboard() {
                   <span>USD</span>
                 </div>
               </div>
-              <OpportunityDataTable data={displayedTopOpportunities} columns={opportunityDataColumns} />
+              <OpportunityDataTable data={displayedTopOpportunities} columns={opportunityDataColumns} isDetail />
             </Card>
           </div>
           <div className="flex justify-center mb-12 mx-8 ml-20 mt-4">

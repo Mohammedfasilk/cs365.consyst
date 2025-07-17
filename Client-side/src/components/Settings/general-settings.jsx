@@ -62,11 +62,12 @@ export default function GeneralSettings() {
 
   const onSubmit = async (values) => {
   try {
-    const { groupTarget, currentFyStartDate, ...rest } = values;
+    const { groupTarget,billingTarget, currentFyStartDate, ...rest } = values;
 
     const payload = {
       ...rest,
       groupTarget,
+      billingTarget,
       currentFyStartDate: currentFyStartDate
         ? dayjs(currentFyStartDate).format("YYYY-MM-DD")
         : null,
@@ -79,20 +80,20 @@ export default function GeneralSettings() {
       description: "Settings have been successfully saved.",
       icon: <CircleCheckIcon className="mr-4" color="green" />,
     });
-    const actData = {
-                    field: "settings",
-                    data: {
-                      username: sessionUser,
-                      date: new Date().toLocaleString("en-IN", {
-                        timeZone: "Asia/Kolkata",
-                      }),
-                      activity: `Updated global settings`,
-                    },
-                  };
-                  const act = await axios.post(
-                    `${import.meta.env.VITE_CS365_URI}/api/activity`,
-                    actData
-                  );
+    // const actData = {
+    //                 field: "settings",
+    //                 data: {
+    //                   username: sessionUser,
+    //                   date: new Date().toLocaleString("en-IN", {
+    //                     timeZone: "Asia/Kolkata",
+    //                   }),
+    //                   activity: `Updated global settings`,
+    //                 },
+    //               };
+    //               const act = await axios.post(
+    //                 `${import.meta.env.VITE_CS365_URI}/api/activity`,
+    //                 actData
+    //               );
   } catch (error) {
     toast({
       title: "Save Failed",
@@ -111,13 +112,14 @@ export default function GeneralSettings() {
           { cache: "no-store" }
         );
         const data = response.data;
-        form.setValue("cdiplTarget", data.cdiplTarget || "");
+        // form.setValue("cdiplTarget", data.cdiplTarget || "");
         form.setValue("currentFyStartDate", new Date(data.currentFyStartDate));
         form.setValue("usdToinr", data.usdToinr || "");
         form.setValue("usdToaed", data.usdToaed || "");
-        form.setValue("cmefTarget", data.cmefTarget || "");
-        form.setValue("ctiplTarget", data.ctiplTarget || "");
-        form.setValue("groupTarget", data.groupTarget || "");
+        // form.setValue("cmefTarget", data.cmefTarget || "");
+        // form.setValue("ctiplTarget", data.ctiplTarget || "");
+        form.setValue("groupTarget", data.groupTarget || 0);
+        form.setValue("billingTarget", data.billingTarget || 0);
       } catch (error) {
         console.error("Failed to fetch settings", error);
       }
@@ -214,7 +216,7 @@ export default function GeneralSettings() {
           ))}
         </div>
 
-        <h1>Sales Targets (Current FY)</h1>
+        <h1>Sales Target (Current FY)</h1>
         <div className="grid w-full grid-cols-[1fr_1fr_1fr] gap-6 mt-4 mb-8">
           <FormField
             control={form.control}
@@ -222,6 +224,22 @@ export default function GeneralSettings() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Group Target (USD)</FormLabel>
+                <FormControl>
+                  <Input className="text-right shadow" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        <h1>Billing Target (Current FY)</h1>
+        <div className="grid w-full grid-cols-[1fr_1fr_1fr] gap-6 mt-4 mb-8">
+          <FormField
+            control={form.control}
+            name="billingTarget"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Billing Target (USD)</FormLabel>
                 <FormControl>
                   <Input className="text-right shadow" {...field} />
                 </FormControl>
