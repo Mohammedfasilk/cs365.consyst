@@ -317,8 +317,8 @@ function ProjectDashboard() {
             {progress.length == 0 ? null : (
             <section>
               <section className="flex w-full justify-evenly space-x-5">
-              <Card className="w-full">
-                <CardHeader className="text-lg font-bold py-5 pb-3 flex-row justify-between items-center">
+              <Card className="w-full flex flex-col justify-between">
+                <CardHeader className="text-lg font-bold py-5 pb-3 flex-row justify-between items">
                   <div>Project Progress</div>{" "}
                   <div>
                     <TrendingUp className="text-blue-600" />
@@ -335,7 +335,7 @@ function ProjectDashboard() {
                   </div>
                 </CardContent>
               </Card>
-              <Card className="w-full">
+              <Card className="w-full flex flex-col justify-between">
                 <CardHeader className="text-lg font-bold py-5 pb-3 flex-row justify-between items-center">
                   <div>Project Days</div>
                   <div>
@@ -359,7 +359,7 @@ function ProjectDashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="w-full">
+              <Card className="w-full flex flex-col justify-between">
                 <CardHeader className="text-lg font-bold py-5 pb-3 flex-row justify-between items-center">
                   <div>Milestones Delivered</div>
                   <div>
@@ -377,7 +377,7 @@ function ProjectDashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="w-full">
+              <Card className="w-full flex flex-col justify-between">
                 <CardHeader className="text-lg font-bold py-5 pb-3 flex-row justify-between items-center">
                   <div>At Risk</div>
                   <div>
@@ -390,7 +390,7 @@ function ProjectDashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="w-full">
+              <Card className="w-full flex flex-col justify-between">
                 <CardHeader className="text-lg font-bold py-5 pb-3 flex-row justify-between items-center">
                   <div>On Track</div>
                   <div>
@@ -406,7 +406,7 @@ function ProjectDashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="w-full">
+              <Card className="w-full flex flex-col justify-between">
                 <CardHeader className="text-lg font-bold py-5 pb-3 flex-row justify-between items-center">
                   <div>Watch List</div>
                   <div>
