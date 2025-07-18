@@ -91,9 +91,9 @@ exports.getBillingByCountry = async (req, res) => {
 
     const countryData = {};
 
-    // Loop through each bill
     for (const bill of bills) {
       const country = bill.country || "Unknown";
+      const isMiddleEast = bill.company?.toLowerCase().includes("middle east");
 
       if (!countryData[country]) {
         countryData[country] = {
@@ -101,23 +101,23 @@ exports.getBillingByCountry = async (req, res) => {
         };
       }
 
-      // Sum only approved billing plans
       if (Array.isArray(bill.billing_plans)) {
         const approvedPlans = bill.billing_plans.filter(
           (plan) => plan.status === "approved"
         );
-        const total = approvedPlans.reduce(
-          (sum, plan) => sum + (plan.amount || 0),
-          0
-        );
+
+        const total = approvedPlans.reduce((sum, plan) => {
+          const value = isMiddleEast ? plan.amount : plan.amount_in_usd;
+          return sum + (value || 0);
+        }, 0);
+
         countryData[country].billingPlansTotal += total;
       }
     }
 
-    // Format the result
     const result = Object.entries(countryData).map(([country, data]) => ({
       country,
-      total: data.billingPlansTotal,
+      total: +data.billingPlansTotal.toFixed(2),
     }));
 
     res.json(result);

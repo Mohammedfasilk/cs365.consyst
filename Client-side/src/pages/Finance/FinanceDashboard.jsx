@@ -184,7 +184,7 @@ function SalesDashboard() {
                     <CardContent className="h-full flex items-center justify-center">
                       <div className="p-5">
                         <p className="text-center font-medium text-xl text-[var(--csblue)]">
-                          {isChecked ? formatToShorthand(tobeBilled?.totalBilledFuture) : formatToShorthand(tobeBilled?.totalBilledThisFY)}
+                         USD {isChecked ? formatToShorthand(tobeBilled?.totalBilledFuture) : formatToShorthand(tobeBilled?.totalBilledThisFY)}
                         </p>
                       </div>
                     </CardContent>
