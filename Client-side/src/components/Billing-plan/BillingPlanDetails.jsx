@@ -11,13 +11,23 @@ import {
   FormLabel,
   FormMessage,
 } from "../UI/Form";
-import { CalendarIcon, CircleCheckIcon, CircleXIcon, Cross, Plus, X } from "lucide-react";
+import {
+  CalendarIcon,
+  CircleCheckIcon,
+  CircleXIcon,
+  Cross,
+  Plus,
+  X,
+} from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "../../lib/utils";
 import { Popover, PopoverTrigger, PopoverContent } from "../UI/Popover";
 import { Calendar } from "../UI/Calender";
 import axios from "axios";
 import { useToast } from "../../Hooks/use-toast";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchSettings } from "../../Redux/Slices/settingsSlice";
 
 const formSchema = z.object({
   currency: z.string().min(1, "Currency is required"),
@@ -28,14 +38,22 @@ const formSchema = z.object({
         date: z.date({ required_error: "Date is required" }),
         description: z.string().min(1, "Description is required"),
         amount: z.number().min(0.01, "Amount must be positive"),
+        invoiced: z.boolean().optional(), // <-- added field
       })
     )
     .min(1, "At least one entry is required"),
 });
 
-const BillingPlanDetails = ({ billingPlan, refresh ,refreshPlan }) => {
+const BillingPlanDetails = ({ billingPlan, refresh, refreshPlan }) => {
+  const dispatch = useDispatch();
+  const { settings } = useSelector((state) => state.settings);
+  const { toast } = useToast();
 
-  const {toast} = useToast();
+  useEffect(() => {
+    if (!settings || Object.keys(settings).length === 0) {
+      dispatch(fetchSettings());
+    }
+  }, [dispatch, settings]);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -47,6 +65,7 @@ const BillingPlanDetails = ({ billingPlan, refresh ,refreshPlan }) => {
           date: new Date(plan.date),
           description: plan.description,
           amount: plan.amount,
+          invoiced: plan.invoiced ?? false, // <-- default invoiced status
         })) || [],
     },
   });
@@ -58,36 +77,48 @@ const BillingPlanDetails = ({ billingPlan, refresh ,refreshPlan }) => {
   });
 
   const onSubmit = async (values) => {
-   const exchangeRate = 10;
+    let exchangeRate = 0;
 
-  const updatedBillingPlans = values.entries.map((plan, index) => {
-    const original = billingPlan.billing_plans?.[index];
-
-    const base = {
-      ...plan,
-      date: new Date(plan.date),
-    };
-
-    if (!original) {
-      // New entry
-      return {
-        ...base,
-        amount_in_usd: +(plan.amount * exchangeRate).toFixed(2),
-      };
+    if (billingPlan?.company === "CONSYST Middle East FZ-LLC") {
+      exchangeRate = settings?.usdToaed;
+    } else {
+      exchangeRate = settings?.usdToinr;
     }
 
-    const hasChanged =
-      plan.amount !== original.amount ||
-      plan.description !== original.description ||
-      new Date(plan.date).getTime() !== new Date(original.date).getTime();
+    const updatedBillingPlans = values.entries.map((plan, index) => {
+  const original = billingPlan.billing_plans?.[index];
 
+  const base = {
+    ...plan,
+    date: new Date(plan.date),
+    invoiced: plan.invoiced ?? false,
+  };
+
+  // If this is a new entry (no original at same index)
+  if (!original) {
     return {
       ...base,
-      amount_in_usd: hasChanged
-        ? +(plan.amount * exchangeRate).toFixed(2)
-        : original.amount_in_usd ?? +(plan.amount * exchangeRate).toFixed(2),
+      amount_in_usd: +(plan.amount * exchangeRate).toFixed(2),
+      status: "draft", // New entries are always draft
     };
-  });
+  }
+
+  const amountChanged = plan.amount !== original.amount;
+  const dateChanged = new Date(plan.date).toISOString() !== new Date(original.date).toISOString();
+  const descriptionChanged = plan.description !== original.description;
+  const invoicedChanged = plan.invoiced !== original.invoiced;
+
+  const hasChanged = amountChanged || dateChanged || descriptionChanged || invoicedChanged;
+
+  return {
+    ...base,
+    amount_in_usd: amountChanged
+      ? +(plan.amount * exchangeRate).toFixed(2)
+      : original.amount_in_usd ?? +(plan.amount * exchangeRate).toFixed(2),
+    status: hasChanged ? "draft" : original.status,
+  };
+});
+
 
     const payload = {
       ...billingPlan,
@@ -99,18 +130,18 @@ const BillingPlanDetails = ({ billingPlan, refresh ,refreshPlan }) => {
         payload
       );
       refreshPlan();
-      refresh()
+      refresh();
       toast({
-          title: "Billing Plan Saved",
-          description: "Billing plan has been successfully saved.",
-          icon: <CircleCheckIcon className="mr-4" color="green" />,
+        title: "Billing Plan Saved",
+        description: "Billing plan has been successfully saved.",
+        icon: <CircleCheckIcon className="mr-4" color="green" />,
       });
     } catch (error) {
       toast({
-          title: "Save Failed",
-          description: "There was an error saving the billing plan.",
-          variant: "destructive",
-          icon: <CircleXIcon className="mr-4" color="red" />,
+        title: "Save Failed",
+        description: "There was an error saving the billing plan.",
+        variant: "destructive",
+        icon: <CircleXIcon className="mr-4" color="red" />,
       });
       console.log(error);
     }
@@ -186,10 +217,10 @@ const BillingPlanDetails = ({ billingPlan, refresh ,refreshPlan }) => {
             </div>
 
             {fields.map((item, index) => (
-              <div className="flex border border-[var(--input)] w-[85%] shadow-sm p-4 rounded-lg mb-4 space-x-5 items-center">
+              <div className="flex border border-[var(--input)] w-full shadow-sm p-4 rounded-lg mb-4 space-x-5 items-center">
                 <div
                   key={item.id}
-                  className="grid grid-cols-1 md:grid-cols-3 gap-6 "
+                  className="grid grid-cols-1 md:grid-cols-4 gap-6 "
                 >
                   {/* Date */}
                   <FormField
@@ -269,12 +300,29 @@ const BillingPlanDetails = ({ billingPlan, refresh ,refreshPlan }) => {
                       </FormItem>
                     )}
                   />
+                  <FormField
+                    control={form.control}
+                    name={`entries.${index}.invoiced`}
+                    render={({ field }) => (
+                      <FormItem className="flex space-x-2 items-center">
+                        <FormControl>
+                          <input
+                            type="checkbox"
+                            checked={field.value}
+                            onChange={(e) => field.onChange(e.target.checked)}
+                            className="form-checkbox h-4 w-4 mt-2 text-blue-600"
+                          />
+                        </FormControl>
+                        <FormLabel>Invoiced</FormLabel>
+                      </FormItem>
+                    )}
+                  />
                 </div>
                 {item.isNew && (
-                <div className="hover:text-red-500">
-                  <X onClick={() => remove(index)} />
-                </div>)
-}
+                  <div className="hover:text-red-500">
+                    <X onClick={() => remove(index)} />
+                  </div>
+                )}
               </div>
             ))}
           </div>

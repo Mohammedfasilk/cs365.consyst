@@ -87,8 +87,13 @@ useEffect(() => {
                 return acc;
             }, []);
 
-            const monthlyTarget = targetValue / 12;
-            const targets = fyMonths.map((_, index) => monthlyTarget * (index + 1));
+             const quarterlyTarget = targetValue / 4;
+        const targets = fyMonths.map((_, index) => {
+          if (index < 3) return quarterlyTarget * 1; 
+          if (index < 6) return quarterlyTarget * 2; 
+          if (index < 9) return quarterlyTarget * 3; 
+          return quarterlyTarget * 4; 
+        });
             const months = fyMonths.map(m => m.label);
 
             setChartData({ months, values, targets });

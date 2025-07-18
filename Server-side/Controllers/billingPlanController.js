@@ -4,6 +4,14 @@ const OrderBooking = require("../Models/OrderBookingModel");
 
 // Create a new billing plan
 // controllers/billingPlanController.js
+exports.getOrders = async (req, res) => {
+    try {
+        const orders = await OrderBooking.find({Status:'approved'});
+        res.status(200).json(orders);
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to get Order Bookings' });
+    }
+};
 
 exports.createOrUpdateBillingPlan = async (req, res) => {
   try {

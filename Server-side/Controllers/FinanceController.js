@@ -2,13 +2,15 @@ const BillingPlan = require("../Models/BillingPlanModel");
 
 exports.getBillingByCompany = async (req, res) => {
   try {
-    const orders = await BillingPlan.find();
-
     const companies = [
-      "CONSYST Digital Industries Pvt. Ltd",
-      "CONSYST Technologies (India) Pvt. Ltd.",
       "CONSYST Middle East FZ-LLC",
+      "CONSYST Technologies (India) Pvt. Ltd.",
+      "CONSYST Digital Industries Pvt. Ltd",
     ];
+
+    const orders = await BillingPlan.find({
+      company: { $in: companies },
+    });
 
     const companyData = {};
 
@@ -20,9 +22,9 @@ exports.getBillingByCompany = async (req, res) => {
       };
     });
 
-    // Loop through orders
+    // Aggregate per-company totals
     for (const order of orders) {
-      const company = order.company;
+      const company = (order.company || "").trim();
       if (!companyData[company]) continue;
 
       if (Array.isArray(order.billing_plans)) {
@@ -30,36 +32,49 @@ exports.getBillingByCompany = async (req, res) => {
           (plan) => plan.status === "approved"
         );
 
-        const total = approvedPlans.reduce(
-          (sum, plan) => sum + (plan.amount || 0),
-          0
-        );
-        const totalUSD = approvedPlans.reduce(
-          (sum, plan) => sum + (plan.amount_in_usd || 0),
-          0
-        );
+        let total = 0;
+        let totalUSD = 0;
+
+        for (const plan of approvedPlans) {
+          total += plan.amount || 0;
+          totalUSD += plan.amount_in_usd || 0;
+        }
 
         companyData[company].billingPlansTotal += total;
         companyData[company].billingPlansTotalUSD += totalUSD;
       }
     }
 
-    // Aggregate Consyst Group totals
-    companyData["Consyst Group"].billingPlansTotal = companies.reduce(
-      (sum, c) => sum + companyData[c].billingPlansTotal,
-      0
-    );
-    companyData["Consyst Group"].billingPlansTotalUSD = companies.reduce(
-      (sum, c) => sum + companyData[c].billingPlansTotalUSD,
-      0
-    );
+    // Aggregate "Consyst Group"
+    for (const company of companies) {
+      companyData["Consyst Group"].billingPlansTotal +=
+        companyData[company].billingPlansTotal;
 
-    // Prepare final output
-    const result = [...companies, "Consyst Group"].map((company) => ({
-      company,
-      billingPlansTotal: companyData[company].billingPlansTotal,
-      billingPlansTotalUSD: companyData[company].billingPlansTotalUSD,
-    }));
+      companyData["Consyst Group"].billingPlansTotalUSD +=
+        company === "CONSYST Middle East FZ-LLC"
+          ? companyData[company].billingPlansTotal // use amount instead of USD
+          : companyData[company].billingPlansTotalUSD;
+    }
+
+    // Prepare final output with swapped values for Middle East
+    const result = [...companies, "Consyst Group"].map((company) => {
+      let billingPlansTotal = companyData[company].billingPlansTotal;
+      let billingPlansTotalUSD = companyData[company].billingPlansTotalUSD;
+
+      if (company === "CONSYST Middle East FZ-LLC") {
+        // Swap values for this company only
+        [billingPlansTotal, billingPlansTotalUSD] = [
+          billingPlansTotalUSD,
+          billingPlansTotal,
+        ];
+      }
+
+      return {
+        company,
+        billingPlansTotal,
+        billingPlansTotalUSD,
+      };
+    });
 
     res.json(result);
   } catch (err) {
@@ -69,9 +84,6 @@ exports.getBillingByCompany = async (req, res) => {
       .json({ error: "Failed to summarize billing plans by company" });
   }
 };
-
-
-
 
 exports.getBillingByCountry = async (req, res) => {
   try {
@@ -85,14 +97,19 @@ exports.getBillingByCountry = async (req, res) => {
 
       if (!countryData[country]) {
         countryData[country] = {
-          billingPlansTotal: 0
+          billingPlansTotal: 0,
         };
       }
 
       // Sum only approved billing plans
       if (Array.isArray(bill.billing_plans)) {
-        const approvedPlans = bill.billing_plans.filter(plan => plan.status === 'approved');
-        const total = approvedPlans.reduce((sum, plan) => sum + (plan.amount || 0), 0);
+        const approvedPlans = bill.billing_plans.filter(
+          (plan) => plan.status === "approved"
+        );
+        const total = approvedPlans.reduce(
+          (sum, plan) => sum + (plan.amount || 0),
+          0
+        );
         countryData[country].billingPlansTotal += total;
       }
     }
@@ -100,12 +117,300 @@ exports.getBillingByCountry = async (req, res) => {
     // Format the result
     const result = Object.entries(countryData).map(([country, data]) => ({
       country,
-      total: data.billingPlansTotal
+      total: data.billingPlansTotal,
     }));
 
     res.json(result);
   } catch (err) {
     console.error("Error in getBillingByCountry:", err);
-    res.status(500).json({ error: 'Failed to summarize billing plans by country' });
+    res
+      .status(500)
+      .json({ error: "Failed to summarize billing plans by country" });
   }
 };
+
+exports.getMonthlyBillingSummary = async (req, res) => {
+  try {
+    // 1. Read financial year from body or fallback to current FY
+    const { financialYear } = req.body;
+
+    let fyStart;
+    if (financialYear) {
+      fyStart = new Date(financialYear);
+      if (isNaN(fyStart)) {
+        return res
+          .status(400)
+          .json({ error: "Invalid financialYear date format" });
+      }
+    } else {
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth(); // 0 = Jan
+      const fyStartYear = currentMonth >= 3 ? currentYear : currentYear - 1;
+      fyStart = new Date(fyStartYear, 3, 1); // April 1
+    }
+
+    const fyStartYear = fyStart.getFullYear();
+    const fyEnd = new Date(fyStartYear + 1, 2, 31, 23, 59, 59); // March 31 next year
+
+    const orders = await BillingPlan.find();
+
+    // Month labels
+    const monthNames = [
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+      "Jan",
+      "Feb",
+      "Mar",
+    ];
+
+    // 2. Initialize monthly totals
+    const monthlyUSD = {};
+    const monthKeys = [];
+    for (let i = 0; i < 12; i++) {
+      const date = new Date(fyStart.getFullYear(), 3 + i, 1); // April is month 3
+      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+        2,
+        "0"
+      )}`;
+      monthKeys.push(key);
+      monthlyUSD[key] = 0;
+    }
+
+    // 3. Process all orders
+    for (const order of orders) {
+      const company = (order.company || "").trim();
+      if (!Array.isArray(order.billing_plans)) continue;
+
+      for (const plan of order.billing_plans) {
+        const planDate = new Date(plan.date);
+        if (
+          plan.status === "approved" &&
+          !isNaN(planDate) &&
+          planDate >= fyStart &&
+          planDate <= fyEnd
+        ) {
+          const key = `${planDate.getFullYear()}-${String(
+            planDate.getMonth() + 1
+          ).padStart(2, "0")}`;
+          const amountUSD =
+            company === "CONSYST Middle East FZ-LLC"
+              ? plan.amount || 0
+              : plan.amount_in_usd || 0;
+
+          if (monthlyUSD[key] !== undefined) {
+            monthlyUSD[key] += amountUSD;
+          }
+        }
+      }
+    }
+
+    // 4. Build cumulative result with month names
+    const result = [];
+    let cumulativeTotal = 0;
+
+    for (let i = 0; i < 12; i++) {
+      const key = monthKeys[i];
+      const date = new Date(fyStart.getFullYear(), 3 + i, 1); // April is month 3
+      const label = `${monthNames[i]} ${String(date.getFullYear()).slice(-2)}`;
+      cumulativeTotal += monthlyUSD[key];
+
+      result.push({
+        month: label,
+        billingPlansTotalUSD: cumulativeTotal,
+      });
+    }
+
+    res.json(result);
+  } catch (err) {
+    console.error("Error in getMonthlyBillingSummary:", err);
+    res
+      .status(500)
+      .json({ error: "Failed to summarize monthly billing plans in USD" });
+  }
+};
+
+const { startOfMonth, endOfMonth, addMonths, format } = require("date-fns");
+
+
+exports.getMonthlyBilledSummary = async (req, res) => {
+  try {
+    const { financialYear } = req.body;
+
+    if (!financialYear) {
+      return res.status(400).json({ error: "financialYear is required" });
+    }
+
+    const fyStart = new Date(financialYear);
+    const monthlyData = [];
+
+    const billing = await BillingPlan.find({
+      "billing_plans.0": { $exists: true },
+    });
+
+    for (let i = 0; i < 12; i++) {
+      const monthStart = startOfMonth(addMonths(fyStart, i));
+      const monthEnd = endOfMonth(monthStart);
+
+      let billed = 0;
+      let nonBilled = 0;
+
+      for (const so of billing) {
+        const isMiddleEast =
+          so.company?.toLowerCase().includes("middle east");
+
+        for (const plan of so.billing_plans || []) {
+          const planDate = new Date(plan.date);
+
+          if (
+            planDate >= monthStart &&
+            planDate <= monthEnd &&
+            plan.status === "approved"
+          ) {
+            const value = isMiddleEast ? plan.amount : plan.amount_in_usd;
+
+            if (plan.invoiced) {
+              billed += value || 0;
+            } else {
+              nonBilled += value || 0;
+            }
+          }
+        }
+      }
+
+      monthlyData.push({
+        month: format(monthStart, "MMM yy"), // e.g., "Jul 25"
+        billed: +billed.toFixed(2),
+        nonBilled: +nonBilled.toFixed(2),
+      });
+    }
+
+    return res.json(monthlyData);
+  } catch (error) {
+    console.error("Error in monthly billing summary:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const { startOfQuarter, endOfQuarter, addQuarters } = require("date-fns");
+
+exports.getQuarterlyBilledSummary = async (req, res) => {
+  try {
+    const { financialYear } = req.body;
+
+    if (!financialYear) {
+      return res.status(400).json({ error: "financialYear is required" });
+    }
+
+    const fyStart = new Date(financialYear);
+    const quarterlyData = [];
+
+    // Fetch all billing plans with at least one billing plan entry
+    const billing = await BillingPlan.find({
+      "billing_plans.0": { $exists: true },
+    });
+
+    // Iterate over 4 quarters
+    for (let i = 0; i < 4; i++) {
+      const quarterStart = startOfQuarter(addQuarters(fyStart, i));
+      const quarterEnd = endOfQuarter(quarterStart);
+
+      let billed = 0;
+      let nonBilled = 0;
+
+      for (const so of billing) {
+        const isMiddleEast =
+          so.company?.toLowerCase().includes("middle east");
+
+        for (const plan of so.billing_plans || []) {
+          const planDate = new Date(plan.date);
+
+          if (
+            planDate >= quarterStart &&
+            planDate <= quarterEnd &&
+            plan.status === "approved"
+          ) {
+            const value = isMiddleEast ? plan.amount : plan.amount_in_usd;
+
+            if (plan.invoiced) {
+              billed += value || 0;
+            } else {
+              nonBilled += value || 0;
+            }
+          }
+        }
+      }
+
+      quarterlyData.push({
+        quarter: `Q${i + 1} ${format(quarterStart, "yy")}`, // e.g., Q1 25
+        billed: +billed.toFixed(2),
+        nonBilled: +nonBilled.toFixed(2),
+      });
+    }
+
+    return res.json(quarterlyData);
+  } catch (error) {
+    console.error("Error in quarterly billing summary:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
+
+const { startOfYear, endOfYear, addYears, isAfter, isBefore } = require("date-fns");
+
+
+exports.getToBeBilledSummary = async (req, res) => {
+  try {
+    const { financialYear } = req.body;
+
+    if (!financialYear) {
+      return res.status(400).json({ error: "financialYear is required" });
+    }
+
+    const fyStart = startOfYear(new Date(financialYear));
+    const fyEnd = endOfYear(fyStart);
+    const nextFyStart = addYears(fyStart, 1);
+
+    let totalCurrentFY = 0;
+    let totalFuture = 0;
+
+    const billing = await BillingPlan.find({
+      "billing_plans.0": { $exists: true }
+    });
+
+    for (const so of billing) {
+      const isMiddleEast = so.company?.toLowerCase().includes("middle east");
+
+      for (const plan of so.billing_plans || []) {
+        const planDate = new Date(plan.date);
+        const value = isMiddleEast ? plan.amount : plan.amount_in_usd;
+
+        if (plan.status === "approved") {
+          if (isAfter(planDate, fyEnd)) {
+            totalFuture += value || 0;
+          } else if ((planDate >= fyStart) && (planDate <= fyEnd)) {
+            totalCurrentFY += value || 0;
+          }
+        }
+      }
+    }
+
+    return res.json({
+      financialYear: `${fyStart.getFullYear()}-${fyEnd.getFullYear()}`,
+      totalBilledThisFY: +totalCurrentFY.toFixed(2),
+      totalBilledFuture: +totalFuture.toFixed(2),
+    });
+  } catch (error) {
+    console.error("Error in getToBeBilledSummary:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+

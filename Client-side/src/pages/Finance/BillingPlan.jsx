@@ -24,6 +24,7 @@ function BillingPlan() {
       entry.billing_plans.map(plan => ({
         ...plan,
         salesOrderName: entry.salesOrderName,
+        currency: entry.currency,
         status: plan.status ?? entry.status,
         clientName: entry.clientName,
         billingPlanName: plan.description, // if this is the name

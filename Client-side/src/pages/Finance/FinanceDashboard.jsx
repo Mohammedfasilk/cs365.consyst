@@ -7,7 +7,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "../../components/UI/Tabs";
-import { Card } from "../../components/UI/Card";
+import { Card, CardContent, CardTitle } from "../../components/UI/Card";
 import { CurrentOpportunityPipeline } from "../../components/Sales-Pipeline/CurrentOpportunityPipeLine";
 import OrderBookingFYTD from "../../components/Sales-Pipeline/OrderBookingFYTD";
 import { OpportunityDataTable } from "../../components/Sales-Pipeline/OpportunityDataTable";
@@ -22,28 +22,24 @@ import MonthlyOrderBookingChart from "../../components/Sales-Pipeline/MonthlyOrd
 import OrderBookingPerformance from "../../components/Sales-Pipeline/OrderBookingPerformance";
 import { CardHeader } from "@mui/material";
 import DonutChart from "../../components/Sales-Pipeline/DonutChart";
-import { BillingByPeriodGraph } from "../../components/Finance-dashboard/BillingByPeriodGraph";
+import MonthlyBillingChart from "../../components/Finance-dashboard/MonthlyBillingChart";
+import BillingByPeriodChart from "../../components/Finance-dashboard/BillingByPeriodChart.jsx.jsx";
+import { Label } from "../../components/UI/Label.jsx";
 
 function SalesDashboard() {
   useAuthRedirect();
   const dispatch = useDispatch();
+
   const { settings } = useSelector((state) => state.settings);
 
-  const [loading, setLoading] = useState(false);
-  const [sumFunnelData, setSumFunnelData] = useState([]);
-  const [countFunnelData, setCountFunnelData] = useState([]);
+  const [loading, setLoading] = useState();
+  const [isChecked ,setIsChecked] = useState(false);
   const [billingData, setBillingData] = useState([]);
-  const [orderSummaryData, setOrderSummaryData] = useState([]);
-  const [isUsd, setIsUsd] = useState(false);
-  const [usd, setUsd] = useState();
-  const [rawTopOpportunities, setRawTopOpportunities] = useState([]);
-  const [rawFocusOpportunities, setRawFocusOpportunities] = useState([]);
   const [companySummaryData, setCompanySummaryData] = useState([]);
   const [countrySummaryData, setCountrySummaryData] = useState([]);
-  const [monthlyOrderBookingData, setMonthlyOrderBookingData] = useState({
-    dateList: [],
-    valueList: [],
-  });
+  const [monthlyBillingData, setMonthlyBillingData] = useState([]);
+  const [quarterlyBillingData, setQuarterlyBillingData] = useState([]);
+  const [tobeBilled, setTobeBilled] = useState();
 
   // Fetch settings if not already available
   useEffect(() => {
@@ -52,43 +48,12 @@ function SalesDashboard() {
     }
   }, [dispatch, settings]);
 
-  const displayedTopOpportunities = useMemo(() => {
-    if (!usd) return rawTopOpportunities;
-
-    return rawTopOpportunities.map((item) => {
-      const isINR = item.currency === "INR";
-
-      if (isINR) {
-        const rate = settings?.usdToinr || 1;
-        return {
-          ...item,
-          opportunity_amount: item.opportunity_amount / rate,
-          currency: "USD",
-        };
-      }
-
-      return item;
-    });
-  }, [rawTopOpportunities, usd, settings]);
-
-  const displayedFocusOpportunities = useMemo(() => {
-    if (!usd) return rawFocusOpportunities;
-
-    return rawFocusOpportunities.map((item) => {
-      const isINR = item.currency === "INR";
-
-      if (isINR) {
-        const rate = settings?.usdToinr || 1;
-        return {
-          ...item,
-          opportunity_amount: item.opportunity_amount / rate,
-          currency: "USD",
-        };
-      }
-
-      return item;
-    });
-  }, [rawFocusOpportunities, usd, settings]);
+  const formatToShorthand = (num) => {
+  if (num >= 1_000_000_000) return (num / 1_000_000_000).toFixed(2) + 'B';
+  if (num >= 1_000_000) return (num / 1_000_000).toFixed(2) + 'M';
+  if (num >= 1_000) return (num / 1_000).toFixed(2) + 'K';
+  return num?.toString();
+};
 
   // Fetch data only after settings are loaded
   useEffect(() => {
@@ -99,28 +64,26 @@ function SalesDashboard() {
       const base = import.meta.env.VITE_CS365_URI;
 
       try {
-        const [
-          billRes,
-          countrySummaryRes,
-          // focRes,
-          // sumRes,
-          // countRes,
-          // orderRes,
-          // monthlyRes,
-          // summaryRes,
-          // companySummaryRes,
-          
-        ] = await Promise.all([
-          axios.get(`${base}/api/finance/summary-by-company`),
-          axios.get(`${base}/api/finance/summary-by-country`),
-        ]);
+        const [billRes, countrySummaryRes, monthlyRes, quarterlyRes, toBeRes] =
+          await Promise.all([
+            axios.get(`${base}/api/finance/summary-by-company`),
+            axios.get(`${base}/api/finance/summary-by-country`),
+            axios.post(`${base}/api/finance/monthly-billed-summary`, {
+              financialYear: settings?.currentFyStartDate,
+            }),
+            axios.post(`${base}/api/finance/quarterly-billed-summary`, {
+              financialYear: settings?.currentFyStartDate,
+            }),
+            axios.post(`${base}/api/finance/to-be-billed`, {
+              financialYear: settings?.currentFyStartDate,
+            }),
+          ]);
 
         setBillingData(billRes.data);
         setCountrySummaryData(countrySummaryRes.data);
-        // setMonthlyOrderBookingData(monthlyRes.data);
-        // setOrderSummaryData(summaryRes.data);
-        // setCompanySummaryData(companySummaryRes.data);
-        
+        setMonthlyBillingData(monthlyRes.data);
+        setQuarterlyBillingData(quarterlyRes.data);
+        setTobeBilled(toBeRes.data);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -133,7 +96,7 @@ function SalesDashboard() {
 
   // Get USD value for a specific company
   const getCompanyUsdValue = (companyName) => {
-    const company = companySummaryData.find(c => c.company === companyName);
+    const company = companySummaryData.find((c) => c.company === companyName);
     return company ? company.total : 0;
   };
   // Calculate USD group value from company summary data
@@ -142,12 +105,12 @@ function SalesDashboard() {
   }, [companySummaryData]);
 
   if (loading) {
-    return <div className="flex items-center justify-center h-screen text-lg font-semibold"><ScaleLoading size={60} /></div>;
+    return (
+      <div className="flex items-center justify-center h-screen text-lg font-semibold">
+        <ScaleLoading size={60} />
+      </div>
+    );
   }
-
-  const handleUSDConvertion = (checked) => {
-    setIsUsd(checked);
-  };
 
   return (
     <div>
@@ -162,71 +125,91 @@ function SalesDashboard() {
           </TabsTrigger>
         </TabsList>
 
-        
-
         <TabsContent value="billing" className="bg-[var(--csgray)]">
           <div className="mx-8 ml-20 mb-2 flex flex-col md:flex-row gap-2">
             <div className="flex flex-col gap-2 md:w-1/4 w-full">
-              {(billingData.filter(c => c.company !== "Consyst Group"))?.map((data) => {
-                return (
-                  <OrderBookingFYTD
-                    key={data.company}
-                    company={data.company}
-                    usdValue={data?.billingPlansTotalUSD || 0}
-                    localValue={data?.billingPlansTotal || 0}
-                    isBill
-                  />
-                );
-              })}
+              {billingData
+                .filter((c) => c.company !== "Consyst Group")
+                ?.map((data) => {
+                  return (
+                    <OrderBookingFYTD
+                      key={data.company}
+                      company={data.company}
+                      usdValue={data?.billingPlansTotalUSD || 0}
+                      localValue={data?.billingPlansTotal || 0}
+                      isBill
+                    />
+                  );
+                })}
             </div>
 
-            <div className="flex-1 flex flex-col md:flex-row gap-2 justify-center">
+            <div className="flex-1 flex md:flex-row gap-2 justify-center">
               <div className="md:w-[30%] w-full flex flex-col gap-2">
-                <div className="h-[250px]"> {/* Fixed height for OrderBookingFYTD */}
+                <div className="h-[250px]">
+                  {" "}
+                  {/* Fixed height for OrderBookingFYTD */}
                   <OrderBookingFYTD
                     key="group"
                     company="Consyst Group"
-                    usdValue={billingData.find(c => c.company === "Consyst Group")?.billingPlansTotalUSD || 0}
+                    usdValue={
+                      billingData.find((c) => c.company === "Consyst Group")
+                        ?.billingPlansTotalUSD || 0
+                    }
                     // localValue={billingData.filter(c => c.company === "Consyst Group")?.billingPlansTotal || 0}
                     isGroup={true}
                     isBill
                   />
                 </div>
 
-                <div className="h-[250px]"> {/* Same fixed height for DonutChart */}
-                  <DonutChart
-                  isBill
-                   countrySummaryData={countrySummaryData} 
-                   />
+                <div className="h-[250px]">
+                  {" "}
+                  {/* Same fixed height for DonutChart */}
+                  <DonutChart isBill countrySummaryData={countrySummaryData} />
+                </div>
+                <div className="h-[150px]">
+                  {" "}
+                  {/* Same fixed height for DonutChart */}
+                  <Card className="h-full bg-white p-5">
+                    <CardTitle className="text-sm  flex justify-between">
+                      <h1>To Be Billed - This FY</h1>
+
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          onCheckedChange={(val)=>setIsChecked(val)}
+                          checked={isChecked}
+                        />
+                        <Label>Next FY</Label>
+                      </div>
+                    </CardTitle>
+                    <CardContent className="h-full flex items-center justify-center">
+                      <div className="p-5">
+                        <p className="text-center font-medium text-xl text-[var(--csblue)]">
+                          {isChecked ? formatToShorthand(tobeBilled?.totalBilledFuture) : formatToShorthand(tobeBilled?.totalBilledThisFY)}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
               </div>
 
               <div className="md:w-[70%] w-full">
-                <Card className="h-full p-4 bg-white">
-                  <p className="text-sm font-semibold text-gray-700 mb-5 text-center">Monthly Billing Trends</p>
-                  <div className="h-[300px]">
-                    <MonthlyOrderBookingChart
-                     data={[]}
-                      />
+                <Card className="h-full p-4 flex flex-col justify-center bg-white">
+                  <p className="text-sm font-semibold text-gray-700 mb-5 text-center">
+                    Monthly Billing Trends
+                  </p>
+                  <div className="">
+                    <MonthlyBillingChart />
                   </div>
                 </Card>
               </div>
             </div>
-
           </div>
-          {/* <div className="mx-8 ml-20 flex justify-center">
-            <OrderBookingPerformance
-              orderBookingData={orderBookingData}
-              groupValue={orderBookingGroupedValueUSD}
-              orderSummaryData={orderSummaryData}
-              companySummaryData={companySummaryData}
-            />
-          </div> */}
+
           <div className="flex justify-center mx-8 ml-20 mb-12">
-            {/* <BillingByPeriodGraph
-              // values={monthlyOrderBookingData.valueList}
-              // dates={monthlyOrderBookingData.dateList}
-            /> */}
+            <BillingByPeriodChart
+              monthlydData={monthlyBillingData}
+              quarterlyData={quarterlyBillingData}
+            />
           </div>
         </TabsContent>
       </Tabs>

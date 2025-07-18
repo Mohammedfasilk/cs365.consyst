@@ -27,7 +27,7 @@ export function ChooseBillingPlan() {
     const fetchBillingPlans = async () => {
       try {
         const res = await axios.get(
-          `${import.meta.env.VITE_CS365_URI}/api/orders`
+          `${import.meta.env.VITE_CS365_URI}/api/billing-plan/order-list`
         );
         const plans = res.data.map((item, index) => ({
           id: index, // You can use item._id if available

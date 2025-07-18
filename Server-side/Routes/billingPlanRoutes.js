@@ -8,5 +8,6 @@ router.get("/list", billingPlanController.getBillingPlans);
 router.put("/update/:id", billingPlanController.updateBillingPlan);
 router.post("/delete", billingPlanController.deleteBillingPlan);
 router.post("/status", billingPlanController.updateBillingPlanStatus);
+router.get("/order-list", billingPlanController.getOrders);
 
 module.exports = router;

@@ -71,9 +71,9 @@ export default function DataTable({ columns, data, loading }) {
       <div className="flex items-center py-4">
         <Input
           placeholder="Filter billing plan..."
-          value={table.getColumn("billingPlanName")?.getFilterValue() ?? ""}
+          value={table.getColumn("salesOrderName")?.getFilterValue() ?? ""}
           onChange={(event) =>
-            table.getColumn("billingPlanName")?.setFilterValue(event.target.value)
+            table.getColumn("salesOrderName")?.setFilterValue(event.target.value)
           }
           className="max-w-sm outline p-2 rounded"
         />

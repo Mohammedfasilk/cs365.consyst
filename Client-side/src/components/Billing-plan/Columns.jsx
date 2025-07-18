@@ -43,7 +43,7 @@ const Actions = ({ row, onDelete, planId }) => {
       await axios.post(
         `${import.meta.env.VITE_CS365_URI}/api/billing-plan/status`,
         {
-          salesId: row.getValue('salesOrderName'),
+          salesId: row.getValue("salesOrderName"),
           planId: planId,
           status: newStatus,
         }
@@ -208,6 +208,25 @@ export const columns = (fetchData) => {
     {
       accessorKey: "amount",
       header: "Amount",
+      cell: ({ row }) => {
+        const value = row.getValue("amount");
+        const currency = row.original?.currency;
+
+        if (typeof value !== "number") return null;
+
+        const symbols = { INR: "₹", USD: "$" };
+        const currencySymbol = symbols[currency] || "";
+
+        return (
+          <div>
+            {currencySymbol}{" "}
+            {value.toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
+          </div>
+        );
+      },
     },
     {
       accessorKey: "status",

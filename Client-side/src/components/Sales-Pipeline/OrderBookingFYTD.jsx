@@ -128,7 +128,7 @@ const OrderBookingFYTD = ({ company, usdValue, localValue, isGroup , isBill }) =
   const isSimpleCard = !isGroup 
 
   return (
-    <Card className="bg-white rounded-lg shadow p-4 flex flex-col items-center justify-center h-full w-full">
+    <Card className= {`bg-white rounded-lg shadow p-4 flex flex-col items-center ${isBill ? 'justify-evenly' : 'justify-center'}  h-full w-full`}>
       <div className="flex justify-between items-start w-full">
         <div>
           <p className="mb-1 text-sm font-semibold text-gray-700">
