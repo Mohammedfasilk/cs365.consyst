@@ -581,16 +581,56 @@ if (Array.isArray(project.timeline) && project.timeline.length > 0) {
   }
 }
 
+
+  const atRiskMilestones = [];
+  const onTrustMilestones = [];
+  const allMilestones = new Set();
+
+  const now = new Date();
+
+  for (const milestone of project.timeline) {
+    const name = milestone.milestone;
+    allMilestones.add(name);
+
+    const start = new Date(milestone.start_date);
+    const end = new Date(milestone.end_date);
+
+    const totalDuration = (end - start) / (1000 * 60 * 60 * 24); // in days
+    const elapsed = (now - start) / (1000 * 60 * 60 * 24); // in days
+
+    const elapsedPercent = Math.min((elapsed / totalDuration) * 100, 100);
+
+    const history = project?.milestone_history?.find((m) => m.milestone === name)?.history || [];
+    const latestProgress = history
+      .sort((a, b) => new Date(b.month) - new Date(a.month))[0]?.progress || 0;
+
+    if (latestProgress >= elapsedPercent) {
+      onTrustMilestones.push(name);
+    } else if (latestProgress < 80 && elapsedPercent >= 80) {
+      atRiskMilestones.push(name);
+    }
+  }
+
+  // Now build the watchlist
+  const watchlist = Array.from(allMilestones).filter(
+    (name) => !onTrustMilestones.includes(name) && !atRiskMilestones.includes(name)
+  );
+
+
     // ✅ Response
-    res.status(200).json({
-      project_name: project.project_name,
-      total_milestones: uniqueMilestoneNames.size,
-      milestone_delivered: seenMilestones.size,
-      project_progress: parseFloat(latestMonthActual.toFixed(2)),
-      milestone_history,
-      planned_days: totalProjectDays,
-      current_days: currentDays,
-    });
+ res.status(200).json({
+  project_name: project.project_name,
+  total_milestones: uniqueMilestoneNames.size,
+  milestone_delivered: seenMilestones.size,
+  project_progress: parseFloat(latestMonthActual.toFixed(2)),
+  milestone_history,
+  planned_days: totalProjectDays,
+  current_days: currentDays,
+  at_risk: atRiskMilestones?.length,
+  on_trust:onTrustMilestones?.length,
+  watch_list:watchlist?.length
+});
+
   } catch (error) {
     console.error("Error fetching project progress:", error.message);
     res.status(500).json({

@@ -32,7 +32,7 @@ function SalesDashboard() {
 
   const { settings } = useSelector((state) => state.settings);
 
-  const [loading, setLoading] = useState();
+  const [loading, setLoading] = useState(true);
   const [isChecked ,setIsChecked] = useState(false);
   const [billingData, setBillingData] = useState([]);
   const [companySummaryData, setCompanySummaryData] = useState([]);

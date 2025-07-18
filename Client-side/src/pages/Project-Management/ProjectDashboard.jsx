@@ -15,6 +15,7 @@ import {
   ChevronUp,
   CircleCheckBig,
   Clock,
+  Eye,
   Flag,
   Section,
   SquareChartGantt,
@@ -370,7 +371,7 @@ function ProjectDashboard() {
                     {projectProgress?.milestone_delivered || 0}
                   </span>
                   <p>
-                    of <b>{projectProgress.total_milestones}</b> total
+                    of <b>{projectProgress?.total_milestones || 0}</b> total
                     milestones
                   </p>
                 </CardContent>
@@ -384,11 +385,8 @@ function ProjectDashboard() {
                   </div>
                 </CardHeader>
                 <CardContent className="mt-0">
-                  <span className="font-black text-2xl text-red-500">0</span>
+                  <span className="font-black text-2xl text-red-500">{projectProgress?.at_risk || 0}</span>
                   <p>Required immediate attention</p>
-                  {/* <div className="w-full mt-3">
-                    <ProgressBar />
-                  </div> */}
                 </CardContent>
               </Card>
 
@@ -400,13 +398,31 @@ function ProjectDashboard() {
                   </div>
                 </CardHeader>
                 <CardContent className="mt-0">
-                  <span className="font-black text-2xl text-blue-500">0</span>
+                  <span className="font-black text-2xl text-blue-500">{projectProgress?.on_trust || 0}</span>
                   <p>Progressing as Planned</p>
                   {/* <div className="w-full mt-3">
                     <ProgressBar />
                   </div> */}
                 </CardContent>
               </Card>
+
+              <Card className="w-full">
+                <CardHeader className="text-lg font-bold py-5 pb-3 flex-row justify-between items-center">
+                  <div>Watch List</div>
+                  <div>
+                    <Eye className="text-amber-600" />
+                  </div>
+                </CardHeader>
+                <CardContent className="mt-0">
+                  <span className="font-black text-2xl text-amber-500">{projectProgress?.watch_list || 0}</span>
+                  <p>Progressing as Planned</p>
+                  {/* <div className="w-full mt-3">
+                    <ProgressBar />
+                  </div> */}
+                </CardContent>
+              </Card>
+
+
             </section>
             <div className="flex justify-center items-center w-full min-h-[60vh] mt-5">
               
