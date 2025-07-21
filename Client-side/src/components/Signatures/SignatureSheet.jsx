@@ -165,146 +165,146 @@ export const SignatureSheet = ({ onSuccess }) => {
   };
 
   return (
-    <Sheet
-      open={isOpen}
-      onOpenChange={(value) => {
-        if (!value) {
-          dispatch(setSelectedSignatureName(""));
-          toggleTriggerRender(false);
-          form.reset();
-        }
-        dispatch(setIsOpen(value));
-      }}
-    >
-      <SheetTrigger asChild>
-        <Button className="bg-[var(--csred)] hover:bg-[var(--csred)]/90">
-          <Plus className="mr-2 h-4 w-4" /> Add Signature
-        </Button>
-      </SheetTrigger>
+      <Sheet
+        open={isOpen}
+        onOpenChange={(value) => {
+          if (!value) {
+            dispatch(setSelectedSignatureName(""));
+            toggleTriggerRender(false);
+            form.reset();
+          }
+          dispatch(setIsOpen(value));
+        }}
+      >
+        <SheetTrigger asChild>
+          <Button className="bg-[var(--csred)] hover:bg-[var(--csred)]/90">
+            <Plus className="mr-2 h-4 w-4" /> Add Signature
+          </Button>
+        </SheetTrigger>
 
-      <SheetContent className="min-w-[800px] overflow-auto">
-        <SheetHeader>
-          <SheetTitle className="text-2xl font-bold">Signature</SheetTitle>
-          <div className="">
-            <Tabs defaultValue="project-details">
-              <TabsList>
-                <TabsTrigger value="project-details">
-                  <SquareChartGantt className="mr-2 h-4 w-4" /> Signature
-                  Details
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent value="project-details">
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)}>
-                    <div className="flex justify-between">
-                      <h1>Basic Information</h1>
-                      <Button className="bg-[var(--csblue)] hover:bg-[var(--csblue)]/90 px-8">
-                        Save
-                      </Button>
-                    </div>
+        <SheetContent className="min-w-[800px] overflow-auto">
+          <SheetHeader>
+            <SheetTitle className="text-2xl font-bold">Signature</SheetTitle>
+            <div className="">
+              <Tabs defaultValue="project-details">
+                <TabsList>
+                  <TabsTrigger value="project-details">
+                    <SquareChartGantt className="mr-2 h-4 w-4" /> Signature
+                    Details
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="project-details">
+                  <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)}>
+                      <div className="flex justify-between">
+                        <h1>Basic Information</h1>
+                        <Button className="bg-[var(--csblue)] hover:bg-[var(--csblue)]/90 px-8">
+                          Save
+                        </Button>
+                      </div>
 
-                    <div className="mt-4 grid w-full grid-cols-[1fr_2fr_1fr] gap-6">
-                      <FormField
-                        control={form.control}
-                        name="fullName"
-                        render={({ field }) => (
-                          <FormItem className="col-span-2">
-                            <FormLabel>Full Name</FormLabel>
-                            <FormControl>
-                              <Input placeholder="John Doe" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <div></div>
-                      <FormField
-                        control={form.control}
-                        name="designation"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Designation</FormLabel>
-                            <FormControl>
-                              <Input placeholder="CEO" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="phNumber"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>ph Number</FormLabel>
-                            <FormControl>
-                              <Input placeholder="123-456-7890" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <div></div>
-                      <FormField
-                        control={form.control}
-                        name="addresses"
-                        render={({ field }) => {
-                          const options = Array.isArray(addresses)
-                            ? addresses.map((a) => ({
-                                value: a.label,
-                                label: a.label,
-                              }))
-                            : [];
-                          return (
+                      <div className="mt-4 grid w-full grid-cols-[1fr_2fr_1fr] gap-6">
+                        <FormField
+                          control={form.control}
+                          name="fullName"
+                          render={({ field }) => (
                             <FormItem className="col-span-2">
-                              <FormLabel>Addresses</FormLabel>
+                              <FormLabel>Full Name</FormLabel>
                               <FormControl>
-                                <MultiSelect
-                                  key={resetKey}
-                                  options={options}
-                                  onValueChange={field.onChange}
-                                  defaultValue={field.value}
-                                  placeholder="Select addresses"
-                                  variant="destructive"
-                                  {...field}
-                                />
+                                <Input placeholder="John Doe" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
-                          );
-                        }}
-                      />
-                    </div>
-                  </form>
+                          )}
+                        />
+                        <div></div>
+                        <FormField
+                          control={form.control}
+                          name="designation"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Designation</FormLabel>
+                              <FormControl>
+                                <Input placeholder="CEO" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="phNumber"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>ph Number</FormLabel>
+                              <FormControl>
+                                <Input placeholder="123-456-7890" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <div></div>
+                        <FormField
+                          control={form.control}
+                          name="addresses"
+                          render={({ field }) => {
+                            const options = Array.isArray(addresses)
+                              ? addresses.map((a) => ({
+                                  value: a.label,
+                                  label: a.label,
+                                }))
+                              : [];
+                            return (
+                              <FormItem className="col-span-2">
+                                <FormLabel>Addresses</FormLabel>
+                                <FormControl>
+                                  <MultiSelect
+                                    key={resetKey}
+                                    options={options}
+                                    onValueChange={field.onChange}
+                                    defaultValue={field.value}
+                                    placeholder="Select addresses"
+                                    variant="destructive"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            );
+                          }}
+                        />
+                      </div>
+                    </form>
 
-                  <Button
-                    className="mt-4 bg-[var(--csblue)] hover:bg-[var(--csblue)]/90 px-8"
-                    size="sm"
-                    onClick={generateSignature}
-                  >
-                    Preview
-                  </Button>
+                    <Button
+                      className="mt-4 bg-[var(--csblue)] hover:bg-[var(--csblue)]/90 px-8"
+                      size="sm"
+                      onClick={generateSignature}
+                    >
+                      Preview
+                    </Button>
 
-                  <Separator className="mt-4 mb-4" />
+                    <Separator className="mt-4 mb-4" />
 
-                  {triggerRender && filteredAddresses.length !== 0 && (
-                    <div className="mt-4 gap-6">
-                      <EmailSignature
-                        name={formValues.fullName}
-                        designation={formValues.designation}
-                        addresses={filteredAddresses}
-                        phone={formValues.phNumber}
-                        disclaimer={legalDisclaimer}
-                        banner={bannerImage}
-                      />
-                    </div>
-                  )}
-                </Form>
-              </TabsContent>
-            </Tabs>
-          </div>
-        </SheetHeader>
-      </SheetContent>
-    </Sheet>
+                    {triggerRender && filteredAddresses.length !== 0 && (
+                      <div className="mt-4 gap-6">
+                        <EmailSignature
+                          name={formValues.fullName}
+                          designation={formValues.designation}
+                          addresses={filteredAddresses}
+                          phone={formValues.phNumber}
+                          disclaimer={legalDisclaimer}
+                          banner={bannerImage}
+                        />
+                      </div>
+                    )}
+                  </Form>
+                </TabsContent>
+              </Tabs>
+            </div>
+          </SheetHeader>
+        </SheetContent>
+      </Sheet>
   );
 };

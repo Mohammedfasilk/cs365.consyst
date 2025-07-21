@@ -25,6 +25,8 @@ const activity = require('./Routes/ActivityRoute')
 const meetings = require('./Routes/MeetingRoute')
 const billingPlan = require("./Routes/billingPlanRoutes");
 const finance = require("./Routes/FinanceRoute");
+const noticeRoutes = require('./Routes/NoticeRoute');
+
 
 //middlewares
 app.use(express.json())
@@ -51,6 +53,8 @@ app.use('/api/activity',activity);
 app.use('/api/meeting',meetings);
 app.use("/api/billing-plan", billingPlan);
 app.use("/api/finance", finance);
+app.use('/api/notices', noticeRoutes);
+app.use('/uploads', express.static('uploads'));
 
 
 const PORT = process.env.PORT || 3000;

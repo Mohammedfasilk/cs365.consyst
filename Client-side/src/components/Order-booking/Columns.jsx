@@ -23,6 +23,7 @@ import axios from "axios";
 import { useSessionUser } from "../../Hooks/useSessionUser";
 import { useToast } from "../../Hooks/use-toast";
 import { CircleCheckIcon } from "lucide-react";
+import { useSessionRole } from "../../Hooks/useSessionRole";
 
 const Actions = ({ row, onDelete }) => {
   const { toast } = useToast();
@@ -176,13 +177,16 @@ const Actions = ({ row, onDelete }) => {
   );
 };
 
-export const columns = (fetchData) => [
- 
-  {
+
+export const columns = (fetchData) => {
+  const role = useSessionRole();
+
+  const baseColumns = [
+    {
     accessorKey: "salesOrderName",
-    header: "Sales Order Title",
+    header: "Sales Order Name",
   },
-  {
+    {
     accessorKey: "customerName",
     header: "Customer",
   },
@@ -231,10 +235,17 @@ cell: ({ row }) => {
       </Badge>
     ),
   },
-  {
+    
+  ];
+
+  if (role?.includes("admin")) {
+    baseColumns.push({
     id: "actions",
     enableHiding: false,
     header: "Actions",
     cell: ({ row }) => <Actions row={row} onDelete={fetchData} />,
-  },
-];
+  },);
+  }
+
+  return baseColumns;
+};

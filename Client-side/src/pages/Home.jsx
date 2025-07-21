@@ -1,12 +1,16 @@
 // Home.jsx
 import React from "react";
 import {
-  Mail, Cpu, Users, BarChart4, Calendar, FileText,
+  Mail, Cpu, Users, BarChart4, Calendar, FileText,Signature,CalendarCheck,
   HardDrive, Landmark, HelpCircle, Shield,
-  Settings as SettingsIcon, ChevronRight, CheckCircle, AlertTriangle
+  Settings as SettingsIcon, ChevronRight, CheckCircle, AlertTriangle,
+  Pin
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuthRedirect } from "../Hooks/useAuthRoute";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/UI/Card";
+import HorizontalCard from "../components/UI/HorizontalCard";
+import VerticalCard from "../components/UI/VerticalCard";
 
 export default function Home() {
   useAuthRedirect();
@@ -19,27 +23,24 @@ export default function Home() {
 
 
   const items = [
-    { Icon: Mail, title: "Microsoft 365", subtitle: "Email & Office Suite", path: "/coming-soon", bg: "bg-blue-100", fg: "text-blue-600" },
-    { Icon: Cpu, title: "ERP System", subtitle: "Enterprise Resource Planning", path: "/coming-soon", bg: "bg-purple-100", fg: "text-purple-600" },
-    { Icon: Users, title: "CRM", subtitle: "Customer Relationship Management", path: "/coming-soon", bg: "bg-red-100", fg: "text-red-600" },
-    { Icon: BarChart4, title: "Analytics", subtitle: "Business Intelligence", path: "/dashboards/sales", bg: "bg-green-100", fg: "text-green-600" },
-    { Icon: Calendar, title: "Calendar", subtitle: "Schedule & Meetings", path: "/coming-soon", bg: "bg-orange-100", fg: "text-orange-600" },
-    { Icon: FileText, title: "Documents", subtitle: "Document Management", path: "/coming-soon", bg: "bg-indigo-100", fg: "text-indigo-600" },
-    { Icon: HardDrive, title: "Cloud Storage", subtitle: "File Storage & Sync", path: "/coming-soon", bg: "bg-teal-100", fg: "text-teal-600" },
-    { Icon: Landmark, title: "Accounting", subtitle: "Financial Management", path: "/banking/axis-bank", bg: "bg-blue-200", fg: "text-blue-800" },
-    { Icon: Users, title: "HR Portal", subtitle: "Human Resources", path: "/coming-soon", bg: "bg-pink-100", fg: "text-pink-600" },
-    { Icon: HelpCircle, title: "Support", subtitle: "Help & Support", path: "/coming-soon", bg: "bg-green-100", fg: "text-green-600" },
-    { Icon: Shield, title: "Security", subtitle: "Security & Compliance", path: "/coming-soon", bg: "bg-blue-100", fg: "text-blue-600" },
-    { Icon: SettingsIcon, title: "Settings", subtitle: "System Configuration", path: "/coming-soon", bg: "bg-gray-100", fg: "text-gray-600" },
+    { Icon: Mail, title: "Microsoft 365", subtitle: "Email & Office Suite", path: "https://m365.cloud.microsoft/", bg: "bg-blue-100", fg: "text-blue-600" },
+    { Icon: Cpu, title: "ERP Next", subtitle: "Enterprise Resource Planning", path: "https://erp.consyst.biz", bg: "bg-purple-100", fg: "text-purple-600" },
+    { Icon: CalendarCheck, title: "Meeting Room Booking", subtitle: "Meeting Room Booking System", path:"https://booking.mysmartspace.in/", bg: "bg-red-100", fg: "text-red-600" },
+    { Icon: Signature, title: "Email Signatures", subtitle: "Email Signature System", path: "/business-tools/email-signatures", bg: "bg-green-100", fg: "text-green-600" },
+    { Icon: Calendar, title: "Meeting Management", subtitle: "Schedule & Meetings", path: "/business-tools/meeting-minutes", bg: "bg-orange-100", fg: "text-orange-600" },
+    { Icon: Users, title: "Odoo HR", subtitle: "Human Resources", path: "https://consystgroup.odoo.com/web/login", bg: "bg-pink-100", fg: "text-pink-600" },
+    { Icon: Users, title: "Notice", subtitle: "create notice", path: "/business-tools/notice", bg: "bg-pink-100", fg: "text-pink-600" },
+
   ];
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 m-10">
+    <div className="max-w-[90%] mx-auto px-4 sm:px-6 py-8 m-10">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start mb-8 gap-6">
         <div className="flex-1">
           <h1 className="text-2xl md:text-4xl font-bold text-gray-800 mb-2">
-            Good morning, <span className="text-[var(--csblue)]">Team</span>
+            Welcome
+            {/* <span className="text-[var(--csblue)]">Team</span> */}
           </h1>
           <p className="text-gray-600 mb-6 max-w-2xl">
             Ready to make today productive? Access all your tools and insights here.
@@ -82,7 +83,7 @@ export default function Home() {
         <p className="text-gray-500 mb-10 text-center">
           Jump straight to your most used business tools and applications
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {items.map(({ Icon, title, subtitle, path, bg, fg }) => (
             <Link to={path} key={title} className="group">
               <div className="p-4 border border-gray-200 rounded-lg h-full hover:border-blue-400 hover:shadow-sm transition-colors bg-white">
@@ -97,6 +98,21 @@ export default function Home() {
             </Link>
           ))}
         </div>
+      </section>
+
+      <section>
+        <Card className="">
+          <CardHeader className="py-10">
+            <CardTitle className='flex items-center justify-center space-x-2'><Pin className="w-6 h-6 text-blue-500"/> <h1 className="text-2xl font-bold">Digital Notice Board</h1></CardTitle>
+            <CardDescription className="text-center text-gray-500">Stay updated with the latest company announcements, events, and important notices</CardDescription>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-4">
+            <HorizontalCard/>
+            <HorizontalCard/>
+            <HorizontalCard/>
+            <VerticalCard/>
+          </CardContent>
+        </Card>
       </section>
     </div>
   );

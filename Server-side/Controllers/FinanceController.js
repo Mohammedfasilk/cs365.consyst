@@ -37,7 +37,7 @@ exports.getBillingByCompany = async (req, res) => {
 
         for (const plan of approvedPlans) {
           total += plan.amount || 0;
-          totalUSD += plan.amount_in_usd || 0;
+          totalUSD += plan.converted_amount || 0;
         }
 
         companyData[company].billingPlansTotal += total;
@@ -46,28 +46,35 @@ exports.getBillingByCompany = async (req, res) => {
     }
 
     // Aggregate "Consyst Group"
-    for (const company of companies) {
-      companyData["Consyst Group"].billingPlansTotal +=
-        companyData[company].billingPlansTotal;
+   for (const company of companies) {
+  const isSwappedCompany =
+    company === "CONSYST Middle East FZ-LLC" ||
+    company === "CONSYST Digital Industries Pvt. Ltd";
 
-      companyData["Consyst Group"].billingPlansTotalUSD +=
-        company === "CONSYST Middle East FZ-LLC"
-          ? companyData[company].billingPlansTotal // use amount instead of USD
-          : companyData[company].billingPlansTotalUSD;
-    }
+  companyData["Consyst Group"].billingPlansTotal += isSwappedCompany
+    ? companyData[company].billingPlansTotalUSD // USD used as "amount"
+    : companyData[company].billingPlansTotal;
+
+  companyData["Consyst Group"].billingPlansTotalUSD += isSwappedCompany
+    ? companyData[company].billingPlansTotal // Local used as "converted"
+    : companyData[company].billingPlansTotalUSD;
+}
 
     // Prepare final output with swapped values for Middle East
     const result = [...companies, "Consyst Group"].map((company) => {
       let billingPlansTotal = companyData[company].billingPlansTotal;
       let billingPlansTotalUSD = companyData[company].billingPlansTotalUSD;
 
-      if (company === "CONSYST Middle East FZ-LLC") {
-        // Swap values for this company only
-        [billingPlansTotal, billingPlansTotalUSD] = [
-          billingPlansTotalUSD,
-          billingPlansTotal,
-        ];
-      }
+      if (
+  company === "CONSYST Middle East FZ-LLC" ||
+  company === "CONSYST Digital Industries Pvt. Ltd"
+) {
+  // Swap USD and local values for these companies
+  [billingPlansTotal, billingPlansTotalUSD] = [
+    billingPlansTotalUSD,
+    billingPlansTotal,
+  ];
+}
 
       return {
         company,
@@ -93,7 +100,11 @@ exports.getBillingByCountry = async (req, res) => {
 
     for (const bill of bills) {
       const country = bill.country || "Unknown";
-      const isMiddleEast = bill.company?.toLowerCase().includes("middle east");
+
+      // Swap logic for specific companies
+      const isSwappedCompany =
+        bill.company?.toLowerCase().includes("middle east") ||
+        bill.company === "CONSYST Digital Industries Pvt. Ltd";
 
       if (!countryData[country]) {
         countryData[country] = {
@@ -107,7 +118,7 @@ exports.getBillingByCountry = async (req, res) => {
         );
 
         const total = approvedPlans.reduce((sum, plan) => {
-          const value = isMiddleEast ? plan.amount : plan.amount_in_usd;
+          const value = isSwappedCompany ? plan.amount : plan.converted_amount;
           return sum + (value || 0);
         }, 0);
 
@@ -128,6 +139,7 @@ exports.getBillingByCountry = async (req, res) => {
       .json({ error: "Failed to summarize billing plans by country" });
   }
 };
+
 
 exports.getMonthlyBillingSummary = async (req, res) => {
   try {
@@ -157,18 +169,8 @@ exports.getMonthlyBillingSummary = async (req, res) => {
 
     // Month labels
     const monthNames = [
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-      "Jan",
-      "Feb",
-      "Mar",
+      "Apr", "May", "Jun", "Jul", "Aug", "Sep",
+      "Oct", "Nov", "Dec", "Jan", "Feb", "Mar"
     ];
 
     // 2. Initialize monthly totals
@@ -176,10 +178,7 @@ exports.getMonthlyBillingSummary = async (req, res) => {
     const monthKeys = [];
     for (let i = 0; i < 12; i++) {
       const date = new Date(fyStart.getFullYear(), 3 + i, 1); // April is month 3
-      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
-        2,
-        "0"
-      )}`;
+      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
       monthKeys.push(key);
       monthlyUSD[key] = 0;
     }
@@ -200,10 +199,15 @@ exports.getMonthlyBillingSummary = async (req, res) => {
           const key = `${planDate.getFullYear()}-${String(
             planDate.getMonth() + 1
           ).padStart(2, "0")}`;
-          const amountUSD =
-            company === "CONSYST Middle East FZ-LLC"
-              ? plan.amount || 0
-              : plan.amount_in_usd || 0;
+
+          // Use raw amount for these two companies
+          const useRawAmount =
+            company === "CONSYST Middle East FZ-LLC" ||
+            company === "CONSYST Digital Industries Pvt. Ltd";
+
+          const amountUSD = useRawAmount
+            ? plan.amount || 0
+            : plan.converted_amount || 0;
 
           if (monthlyUSD[key] !== undefined) {
             monthlyUSD[key] += amountUSD;
@@ -218,13 +222,13 @@ exports.getMonthlyBillingSummary = async (req, res) => {
 
     for (let i = 0; i < 12; i++) {
       const key = monthKeys[i];
-      const date = new Date(fyStart.getFullYear(), 3 + i, 1); // April is month 3
+      const date = new Date(fyStart.getFullYear(), 3 + i, 1);
       const label = `${monthNames[i]} ${String(date.getFullYear()).slice(-2)}`;
       cumulativeTotal += monthlyUSD[key];
 
       result.push({
         month: label,
-        billingPlansTotalUSD: cumulativeTotal,
+        billingPlansTotalUSD: +cumulativeTotal.toFixed(2),
       });
     }
 
@@ -237,8 +241,8 @@ exports.getMonthlyBillingSummary = async (req, res) => {
   }
 };
 
-const { startOfMonth, endOfMonth, addMonths, format } = require("date-fns");
 
+const { startOfMonth, endOfMonth, addMonths, format } = require("date-fns");
 
 exports.getMonthlyBilledSummary = async (req, res) => {
   try {
@@ -263,8 +267,10 @@ exports.getMonthlyBilledSummary = async (req, res) => {
       let nonBilled = 0;
 
       for (const so of billing) {
-        const isMiddleEast =
-          so.company?.toLowerCase().includes("middle east");
+        const company = (so.company || "").trim();
+        const useRawAmount =
+          company === "CONSYST Middle East FZ-LLC" ||
+          company === "CONSYST Digital Industries Pvt. Ltd";
 
         for (const plan of so.billing_plans || []) {
           const planDate = new Date(plan.date);
@@ -274,7 +280,7 @@ exports.getMonthlyBilledSummary = async (req, res) => {
             planDate <= monthEnd &&
             plan.status === "approved"
           ) {
-            const value = isMiddleEast ? plan.amount : plan.amount_in_usd;
+            const value = useRawAmount ? plan.amount : plan.converted_amount;
 
             if (plan.invoiced) {
               billed += value || 0;
@@ -326,8 +332,10 @@ exports.getQuarterlyBilledSummary = async (req, res) => {
       let nonBilled = 0;
 
       for (const so of billing) {
-        const isMiddleEast =
-          so.company?.toLowerCase().includes("middle east");
+        const company = (so.company || "").trim();
+        const useRawAmount =
+          company === "CONSYST Middle East FZ-LLC" ||
+          company === "CONSYST Digital Industries Pvt. Ltd";
 
         for (const plan of so.billing_plans || []) {
           const planDate = new Date(plan.date);
@@ -337,7 +345,7 @@ exports.getQuarterlyBilledSummary = async (req, res) => {
             planDate <= quarterEnd &&
             plan.status === "approved"
           ) {
-            const value = isMiddleEast ? plan.amount : plan.amount_in_usd;
+            const value = useRawAmount ? plan.amount : plan.converted_amount;
 
             if (plan.invoiced) {
               billed += value || 0;
@@ -364,6 +372,7 @@ exports.getQuarterlyBilledSummary = async (req, res) => {
 
 
 
+
 const { startOfYear, endOfYear, addYears, isAfter, isBefore } = require("date-fns");
 
 
@@ -377,7 +386,6 @@ exports.getToBeBilledSummary = async (req, res) => {
 
     const fyStart = startOfYear(new Date(financialYear));
     const fyEnd = endOfYear(fyStart);
-    const nextFyStart = addYears(fyStart, 1);
 
     let totalCurrentFY = 0;
     let totalFuture = 0;
@@ -387,16 +395,19 @@ exports.getToBeBilledSummary = async (req, res) => {
     });
 
     for (const so of billing) {
-      const isMiddleEast = so.company?.toLowerCase().includes("middle east");
+      const company = (so.company || "").trim();
+      const useRawAmount =
+        company === "CONSYST Middle East FZ-LLC" ||
+        company === "CONSYST Digital Industries Pvt. Ltd";
 
       for (const plan of so.billing_plans || []) {
         const planDate = new Date(plan.date);
-        const value = isMiddleEast ? plan.amount : plan.amount_in_usd;
+        const value = useRawAmount ? plan.amount : plan.converted_amount;
 
         if (plan.status === "approved") {
           if (isAfter(planDate, fyEnd)) {
             totalFuture += value || 0;
-          } else if ((planDate >= fyStart) && (planDate <= fyEnd)) {
+          } else if (planDate >= fyStart && planDate <= fyEnd) {
             totalCurrentFY += value || 0;
           }
         }
@@ -413,4 +424,3 @@ exports.getToBeBilledSummary = async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 };
-

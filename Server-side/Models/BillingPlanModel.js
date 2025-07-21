@@ -4,7 +4,7 @@ const entrySchema = new mongoose.Schema({
   date: { type: String, required: true },
   description: { type: String },
   amount: { type: Number, required: true, default: 0 },
-  amount_in_usd: { type: Number, required: true, default: 0 },
+  converted_amount: { type: Number, required: true, default: 0 },
   invoiced: { type: Boolean , default: false },
   status: { type: String, enum: ["draft", "approved"], default: "draft" },
 });

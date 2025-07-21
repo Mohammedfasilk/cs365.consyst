@@ -79,11 +79,18 @@ const BillingPlanDetails = ({ billingPlan, refresh, refreshPlan }) => {
   const onSubmit = async (values) => {
     let exchangeRate = 0;
 
-    if (billingPlan?.company === "CONSYST Middle East FZ-LLC") {
+    if (billingPlan?.company === "CONSYST Middle East FZ-LLC" && billingPlan?.currency === "USD") {
       exchangeRate = settings?.usdToaed;
+    }
+    else if (billingPlan?.company === "CONSYST Digital Industries Pvt. Ltd" && billingPlan?.currency === "USD") {
+      exchangeRate = settings?.usdToinr;
     } else {
       exchangeRate = settings?.usdToinr;
     }
+
+    const shouldDivide =
+    billingPlan?.company === "CONSYST Digital Industries Pvt. Ltd" &&
+    billingPlan?.currency === "USD";
 
     const updatedBillingPlans = values.entries.map((plan, index) => {
   const original = billingPlan.billing_plans?.[index];
@@ -98,7 +105,7 @@ const BillingPlanDetails = ({ billingPlan, refresh, refreshPlan }) => {
   if (!original) {
     return {
       ...base,
-      amount_in_usd: +(plan.amount * exchangeRate).toFixed(2),
+      converted_amount:shouldDivide ? (plan.amount * exchangeRate).toFixed(2) : (plan.amount / exchangeRate).toFixed(2),
       status: "draft", // New entries are always draft
     };
   }
@@ -112,9 +119,9 @@ const BillingPlanDetails = ({ billingPlan, refresh, refreshPlan }) => {
 
   return {
     ...base,
-    amount_in_usd: amountChanged
+    converted_amount: amountChanged
       ? +(plan.amount * exchangeRate).toFixed(2)
-      : original.amount_in_usd ?? +(plan.amount * exchangeRate).toFixed(2),
+      : original.converted_amount ?? +(plan.amount * exchangeRate).toFixed(2),
     status: hasChanged ? "draft" : original.status,
   };
 });
