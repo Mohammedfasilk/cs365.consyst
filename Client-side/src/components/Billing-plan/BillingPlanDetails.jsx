@@ -77,55 +77,71 @@ const BillingPlanDetails = ({ billingPlan, refresh, refreshPlan }) => {
   });
 
   const onSubmit = async (values) => {
-    let exchangeRate = 0;
+  const company = billingPlan?.company;
+  const currency = billingPlan?.currency;
 
-    if (billingPlan?.company === "CONSYST Middle East FZ-LLC" && billingPlan?.currency === "USD") {
-      exchangeRate = settings?.usdToaed;
-    }
-    else if (billingPlan?.company === "CONSYST Digital Industries Pvt. Ltd" && billingPlan?.currency === "USD") {
-      exchangeRate = settings?.usdToinr;
-    } else {
-      exchangeRate = settings?.usdToinr;
-    }
+  let exchangeRate = 1;
 
-    const shouldDivide =
-    billingPlan?.company === "CONSYST Digital Industries Pvt. Ltd" &&
-    billingPlan?.currency === "USD";
-
-    const updatedBillingPlans = values.entries.map((plan, index) => {
-  const original = billingPlan.billing_plans?.[index];
-
-  const base = {
-    ...plan,
-    date: new Date(plan.date),
-    invoiced: plan.invoiced ?? false,
-  };
-
-  // If this is a new entry (no original at same index)
-  if (!original) {
-    return {
-      ...base,
-      converted_amount:shouldDivide ? (plan.amount * exchangeRate).toFixed(2) : (plan.amount / exchangeRate).toFixed(2),
-      status: "draft", // New entries are always draft
-    };
+  if (company === "CONSYST Middle East FZ-LLC" && currency === "USD") {
+    exchangeRate = settings?.usdToaed;
+  } else if (company === "CONSYST Digital Industries Pvt. Ltd" && currency === "USD") {
+    exchangeRate = settings?.usdToinr;
+  } else {
+    exchangeRate = settings?.usdToinr;
   }
 
-  const amountChanged = plan.amount !== original.amount;
-  const dateChanged = new Date(plan.date).toISOString() !== new Date(original.date).toISOString();
-  const descriptionChanged = plan.description !== original.description;
-  const invoicedChanged = plan.invoiced !== original.invoiced;
+  const updatedBillingPlans = values.entries.map((plan, index) => {
+    const original = billingPlan.billing_plans?.[index];
 
-  const hasChanged = amountChanged || dateChanged || descriptionChanged || invoicedChanged;
+    const base = {
+      ...plan,
+      date: new Date(plan.date),
+      invoiced: plan.invoiced ?? false,
+    };
 
-  return {
-    ...base,
-    converted_amount: amountChanged
-      ? +(plan.amount * exchangeRate).toFixed(2)
-      : original.converted_amount ?? +(plan.amount * exchangeRate).toFixed(2),
-    status: hasChanged ? "draft" : original.status,
-  };
-});
+    let amount = plan.amount;
+    let convertedAmount = 0;
 
+    // Handle company-specific logic
+    if (company === "CONSYST Digital Industries Pvt. Ltd") {
+      if (currency === "USD") {
+        convertedAmount = +(amount * exchangeRate).toFixed(2); // USD → INR
+      } else if (currency === "INR") {
+        amount = +(amount / exchangeRate).toFixed(2); // convert INR → USD
+        convertedAmount = +(plan.amount).toFixed(2); // keep original INR as converted
+      }
+    } else if (company === "CONSYST Middle East FZ-LLC" && currency === "USD") {
+      convertedAmount = +(amount / exchangeRate).toFixed(2); // USD → AED
+    } else {
+      convertedAmount = +(amount / exchangeRate).toFixed(2); // default USD → INR
+    }
+
+    // New entry
+    if (!original) {
+      return {
+        ...base,
+        amount,
+        converted_amount: convertedAmount,
+        status: "draft",
+      };
+    }
+
+    // Check changes
+    const hasChanged =
+      plan.amount !== original.amount ||
+      new Date(plan.date).toISOString() !== new Date(original.date).toISOString() ||
+      plan.description !== original.description ||
+      plan.invoiced !== original.invoiced;
+
+    return {
+      ...base,
+      amount,
+      converted_amount: plan.amount !== original.amount
+        ? convertedAmount
+        : original.converted_amount ?? convertedAmount,
+      status: hasChanged ? "draft" : original.status,
+    };
+  });
 
     const payload = {
       ...billingPlan,
