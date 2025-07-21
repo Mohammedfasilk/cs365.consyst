@@ -58,16 +58,19 @@ const BillingPlanDetails = ({ billingPlan, refresh, refreshPlan }) => {
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      currency: billingPlan?.currency || "",
-      salesOrderValue: billingPlan?.salesOrderValue || 0,
-      entries:
-        billingPlan?.billing_plans?.map((plan) => ({
-          date: new Date(plan.date),
-          description: plan.description,
-          amount: plan.amount,
-          invoiced: plan.invoiced ?? false, // <-- default invoiced status
-        })) || [],
-    },
+  currency: billingPlan?.currency || "",
+  salesOrderValue: billingPlan?.salesOrderValue || 0,
+  entries:
+    billingPlan?.billing_plans?.map((plan) => ({
+      date: new Date(plan.date),
+      description: plan.description,
+      amount:
+        billingPlan.currency === "INR"
+          ? plan.converted_amount // show INR for INR
+          : plan.amount,          // show USD for USD
+      invoiced: plan.invoiced ?? false,
+    })) || [],
+},
   });
 
   const { control, handleSubmit } = form;
