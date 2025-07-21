@@ -33,7 +33,7 @@ function SalesDashboard() {
   const { settings } = useSelector((state) => state.settings);
 
   const [loading, setLoading] = useState(true);
-  const [isChecked ,setIsChecked] = useState(false);
+  const [isChecked, setIsChecked] = useState(false);
   const [billingData, setBillingData] = useState([]);
   const [companySummaryData, setCompanySummaryData] = useState([]);
   const [countrySummaryData, setCountrySummaryData] = useState([]);
@@ -49,11 +49,11 @@ function SalesDashboard() {
   }, [dispatch, settings]);
 
   const formatToShorthand = (num) => {
-  if (num >= 1_000_000_000) return (num / 1_000_000_000).toFixed(2) + 'B';
-  if (num >= 1_000_000) return (num / 1_000_000).toFixed(2) + 'M';
-  if (num >= 1_000) return (num / 1_000).toFixed(2) + 'K';
-  return num?.toString();
-};
+    if (num >= 1_000_000_000) return (num / 1_000_000_000).toFixed(2) + "B";
+    if (num >= 1_000_000) return (num / 1_000_000).toFixed(2) + "M";
+    if (num >= 1_000) return (num / 1_000).toFixed(2) + "K";
+    return num?.toString();
+  };
 
   // Fetch data only after settings are loaded
   useEffect(() => {
@@ -171,23 +171,48 @@ function SalesDashboard() {
                   {/* Same fixed height for DonutChart */}
                   <Card className="h-full bg-white p-5">
                     <CardTitle className="text-sm  flex justify-between">
-                      <h1>To Be Billed - This FY</h1>
+                      <h1>To Be Billed</h1>
 
                       <div className="flex items-center space-x-2">
                         <Switch
-                          onCheckedChange={(val)=>setIsChecked(val)}
+                          onCheckedChange={(val) => setIsChecked(val)}
                           checked={isChecked}
                         />
-                        <Label>Next FY</Label>
+                        <Label>Next FY's</Label>
                       </div>
                     </CardTitle>
-                    <CardContent className="h-full flex items-center justify-center">
-                      <div className="p-5">
-                        <p className="text-center font-medium text-xl text-[var(--csblue)]">
-                         USD {isChecked ? formatToShorthand(tobeBilled?.totalBilledFuture) : formatToShorthand(tobeBilled?.totalBilledThisFY)}
-                        </p>
-                      </div>
-                    </CardContent>
+                    <div className="relative w-full">
+                      <CardContent className="h-full flex items-center justify-center">
+                        {isChecked ? (
+                          tobeBilled?.futureFYs?.length > 0 ? (
+                            <div className="absolute top-full left-0 w-full z-10 bg-white border rounded-md shadow-md max-h-60 overflow-y-auto">
+                              {tobeBilled.futureFYs.map((fy) => (
+                                <div
+                                  key={fy.financialYear}
+                                  className="px-3 py-2 border-b last:border-b-0"
+                                >
+                                  <p className="text-xs text-gray-500">
+                                    {fy.financialYear}
+                                  </p>
+                                  <p className="font-medium text-[var(--csblue)]">
+                                    USD {formatToShorthand(fy.total)}
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-center font-medium text-gray-400">
+                              No data
+                            </p>
+                          )
+                        ) : (
+                          <p className="text-center font-medium text-xl text-[var(--csblue)]">
+                            USD{" "}
+                            {formatToShorthand(tobeBilled?.totalBilledThisFY)}
+                          </p>
+                        )}
+                      </CardContent>
+                    </div>
                   </Card>
                 </div>
               </div>

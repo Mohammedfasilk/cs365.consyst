@@ -384,14 +384,18 @@ exports.getToBeBilledSummary = async (req, res) => {
       return res.status(400).json({ error: "financialYear is required" });
     }
 
-    const fyStart = startOfYear(new Date(financialYear));
-    const fyEnd = endOfYear(fyStart);
+    const fyDate = new Date(financialYear);
+    const fyStart =
+      fyDate.getMonth() >= 3
+        ? new Date(fyDate.getFullYear(), 3, 1)
+        : new Date(fyDate.getFullYear() - 1, 3, 1);
+    const fyEnd = new Date(fyStart.getFullYear() + 1, 2, 31, 23, 59, 59);
 
-    let totalCurrentFY = 0;
-    let totalFuture = 0;
+    const currentFYLabel = `${fyStart.getFullYear()}-${fyStart.getFullYear() + 1}`;
+    const totalsByFY = {};
 
     const billing = await BillingPlan.find({
-      "billing_plans.0": { $exists: true }
+      "billing_plans.0": { $exists: true },
     });
 
     for (const so of billing) {
@@ -404,21 +408,36 @@ exports.getToBeBilledSummary = async (req, res) => {
         const planDate = new Date(plan.date);
         const value = useRawAmount ? plan.amount : plan.converted_amount;
 
-        if (plan.status === "approved") {
-          if (isAfter(planDate, fyEnd)) {
-            totalFuture += value || 0;
-          } else if (planDate >= fyStart && planDate <= fyEnd) {
-            totalCurrentFY += value || 0;
-          }
+        if (plan.status === "approved" && !isNaN(planDate)) {
+          const fyStartYear =
+            planDate.getMonth() >= 3
+              ? planDate.getFullYear()
+              : planDate.getFullYear() - 1;
+
+          const label = `${fyStartYear}-${fyStartYear + 1}`;
+          totalsByFY[label] = (totalsByFY[label] || 0) + (value || 0);
         }
       }
     }
 
-    return res.json({
-      financialYear: `${fyStart.getFullYear()}-${fyEnd.getFullYear()}`,
-      totalBilledThisFY: +totalCurrentFY.toFixed(2),
-      totalBilledFuture: +totalFuture.toFixed(2),
-    });
+    const result = {
+      currentFY: currentFYLabel,
+      totalBilledThisFY: +(totalsByFY[currentFYLabel] || 0).toFixed(2),
+      futureFYs: Object.entries(totalsByFY)
+        .filter(([label]) => {
+          const [startYear] = label.split("-").map(Number);
+          return startYear > fyStart.getFullYear();
+        })
+        .map(([label, value]) => ({
+          financialYear: label,
+          total: +value.toFixed(2),
+        }))
+        .sort((a, b) =>
+          parseInt(a.financialYear) - parseInt(b.financialYear)
+        ),
+    };
+
+    return res.json(result);
   } catch (error) {
     console.error("Error in getToBeBilledSummary:", error);
     return res.status(500).json({ error: "Internal server error" });

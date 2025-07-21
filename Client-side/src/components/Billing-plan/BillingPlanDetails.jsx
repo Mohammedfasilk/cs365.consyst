@@ -31,7 +31,7 @@ import { fetchSettings } from "../../Redux/Slices/settingsSlice";
 
 const formSchema = z.object({
   currency: z.string().min(1, "Currency is required"),
-  salesOrderValue: z.number().min(0, "Sales Order Value is required"),
+  adjustedSalesValue: z.number().min(0, "Sales Order Value is required"),
   entries: z
     .array(
       z.object({
@@ -59,7 +59,7 @@ const BillingPlanDetails = ({ billingPlan, refresh, refreshPlan }) => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       currency: billingPlan?.currency || "",
-      salesOrderValue: billingPlan?.salesOrderValue || 0,
+      adjustedSalesValue: billingPlan?.adjustedSalesValue || 0,
       entries:
         billingPlan?.billing_plans?.map((plan) => ({
           date: new Date(plan.date),
@@ -189,10 +189,10 @@ const BillingPlanDetails = ({ billingPlan, refresh, refreshPlan }) => {
             {/* Sales Order Value */}
             <FormField
               control={form.control}
-              name="salesOrderValue"
+              name="adjustedSalesValue"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Sales Order Value</FormLabel>
+                  <FormLabel>Adjusted Sales Order Value</FormLabel>
                   <FormControl>
                     <Input {...field} readOnly />
                   </FormControl>
