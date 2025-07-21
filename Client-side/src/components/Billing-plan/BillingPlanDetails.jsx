@@ -31,7 +31,7 @@ import { fetchSettings } from "../../Redux/Slices/settingsSlice";
 
 const formSchema = z.object({
   currency: z.string().min(1, "Currency is required"),
-  adjustedSalesValue: z.number().min(0, "Sales Order Value is required"),
+  salesOrderValue: z.number().min(0, "Sales Order Value is required"),
   entries: z
     .array(
       z.object({
@@ -59,7 +59,7 @@ const BillingPlanDetails = ({ billingPlan, refresh, refreshPlan }) => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       currency: billingPlan?.currency || "",
-      adjustedSalesValue: billingPlan?.adjustedSalesValue || 0,
+      salesOrderValue: billingPlan?.salesOrderValue || 0,
       entries:
         billingPlan?.billing_plans?.map((plan) => ({
           date: new Date(plan.date),
@@ -80,15 +80,10 @@ const BillingPlanDetails = ({ billingPlan, refresh, refreshPlan }) => {
   const company = billingPlan?.company;
   const currency = billingPlan?.currency;
 
-  let exchangeRate = 1;
+  const usdToinr = settings?.usdToinr || 1;
+  const usdToaed = settings?.usdToaed || 1;
 
-  if (company === "CONSYST Middle East FZ-LLC" && currency === "USD") {
-    exchangeRate = settings?.usdToaed;
-  } else if (company === "CONSYST Digital Industries Pvt. Ltd" && currency === "USD") {
-    exchangeRate = settings?.usdToinr;
-  } else {
-    exchangeRate = settings?.usdToinr;
-  }
+  const isMiddleEast = company === "CONSYST Middle East FZ-LLC";
 
   const updatedBillingPlans = values.entries.map((plan, index) => {
     const original = billingPlan.billing_plans?.[index];
@@ -100,75 +95,65 @@ const BillingPlanDetails = ({ billingPlan, refresh, refreshPlan }) => {
     };
 
     let amount = plan.amount;
-    let convertedAmount = 0;
+    let convertedAmount = plan.converted_amount ?? 0;
 
-    // Handle company-specific logic
-    if (company === "CONSYST Digital Industries Pvt. Ltd") {
-      if (currency === "USD") {
-        convertedAmount = +(amount * exchangeRate).toFixed(2); // USD → INR
-      } else if (currency === "INR") {
-        amount = +(amount / exchangeRate).toFixed(2); // convert INR → USD
-        convertedAmount = +(plan.amount).toFixed(2); // keep original INR as converted
-      }
-    } else if (company === "CONSYST Middle East FZ-LLC" && currency === "USD") {
-      convertedAmount = +(amount / exchangeRate).toFixed(2); // USD → AED
-    } else {
-      convertedAmount = +(amount / exchangeRate).toFixed(2); // default USD → INR
+    if (currency === "INR") {
+      convertedAmount = plan.amount;
+      amount = +(convertedAmount / usdToinr).toFixed(2); // convert INR → USD
+    } else if (currency === "USD") {
+      amount = plan.amount;
+      convertedAmount = isMiddleEast
+        ? +(amount * usdToaed).toFixed(2)
+        : +(amount * usdToinr).toFixed(2);
+    } else if (currency === "AED") {
+      convertedAmount = plan.amount;
+      amount = +(convertedAmount / usdToaed).toFixed(2); // convert AED → USD
     }
 
-    // New entry
-    if (!original) {
-      return {
-        ...base,
-        amount,
-        converted_amount: convertedAmount,
-        status: "draft",
-      };
-    }
-
-    // Check changes
     const hasChanged =
-      plan.amount !== original.amount ||
-      new Date(plan.date).toISOString() !== new Date(original.date).toISOString() ||
-      plan.description !== original.description ||
-      plan.invoiced !== original.invoiced;
+      plan.amount !== original?.amount ||
+      plan.converted_amount !== original?.converted_amount ||
+      new Date(plan.date).toISOString() !== new Date(original?.date).toISOString() ||
+      plan.description !== original?.description ||
+      plan.invoiced !== original?.invoiced;
 
     return {
       ...base,
       amount,
-      converted_amount: plan.amount !== original.amount
-        ? convertedAmount
-        : original.converted_amount ?? convertedAmount,
-      status: hasChanged ? "draft" : original.status,
+      converted_amount: convertedAmount,
+      status: !original ? "draft" : hasChanged ? "draft" : original.status,
     };
   });
 
-    const payload = {
-      ...billingPlan,
-      billing_plans: updatedBillingPlans,
-    };
-    try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_CS365_URI}/api/billing-plan/create`,
-        payload
-      );
-      refreshPlan();
-      refresh();
-      toast({
-        title: "Billing Plan Saved",
-        description: "Billing plan has been successfully saved.",
-        icon: <CircleCheckIcon className="mr-4" color="green" />,
-      });
-    } catch (error) {
-      toast({
-        title: "Save Failed",
-        description: "There was an error saving the billing plan.",
-        variant: "destructive",
-        icon: <CircleXIcon className="mr-4" color="red" />,
-      });
-      console.log(error);
-    }
+  const payload = {
+    ...billingPlan,
+    billing_plans: updatedBillingPlans,
   };
+
+  try {
+    const res = await axios.post(
+      `${import.meta.env.VITE_CS365_URI}/api/billing-plan/create`,
+      payload
+    );
+    refreshPlan();
+    refresh();
+    toast({
+      title: "Billing Plan Saved",
+      description: "Billing plan has been successfully saved.",
+      icon: <CircleCheckIcon className="mr-4" color="green" />,
+    });
+  } catch (error) {
+    toast({
+      title: "Save Failed",
+      description: "There was an error saving the billing plan.",
+      variant: "destructive",
+      icon: <CircleXIcon className="mr-4" color="red" />,
+    });
+    console.log(error);
+  }
+};
+
+
 
   return (
     <div>
@@ -205,10 +190,10 @@ const BillingPlanDetails = ({ billingPlan, refresh, refreshPlan }) => {
             {/* Sales Order Value */}
             <FormField
               control={form.control}
-              name="adjustedSalesValue"
+              name="salesOrderValue"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Adjusted Sales Order Value</FormLabel>
+                  <FormLabel>Sales Order Value</FormLabel>
                   <FormControl>
                     <Input {...field} readOnly />
                   </FormControl>

@@ -206,28 +206,32 @@ export const columns = (fetchData) => {
       header: "Description",
     },
     {
-      accessorKey: "amount",
-      header: "Amount",
-      cell: ({ row }) => {
-        const value = row.getValue("amount");
-        const currency = row.original?.currency;
+  accessorKey: "amount",
+  header: "Amount",
+  cell: ({ row }) => {
+    const original = row.original;
+    const currency = original?.currency;
+    const rawAmount = original?.amount;
+    const convertedAmount = original?.converted_amount;
 
-        if (typeof value !== "number") return null;
+    const displayAmount = currency === "USD" ? rawAmount : convertedAmount;
 
-        const symbols = { INR: "₹", USD: "$" };
-        const currencySymbol = symbols[currency] || "";
+    if (typeof displayAmount !== "number") return null;
 
-        return (
-          <div>
-            {currencySymbol}{" "}
-            {value.toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
-          </div>
-        );
-      },
-    },
+    const symbols = { INR: "₹", USD: "$" };
+    const currencySymbol = symbols[currency] || "";
+
+    return (
+      <div>
+        {currencySymbol}{" "}
+        {displayAmount.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}
+      </div>
+    );
+  },
+},
     {
       accessorKey: "status",
       header: "Status",
