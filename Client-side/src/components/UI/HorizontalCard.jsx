@@ -1,49 +1,72 @@
-import React from "react";
-import { Card, CardHeader, CardContent, CardFooter, CardTitle } from "./Card";
-import { Megaphone } from "lucide-react";
+import { Bell, Calendar, Megaphone, PartyPopper } from "lucide-react";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./Card";
 import { Badge } from "./Badge";
+import { formatDistanceToNow } from "date-fns";
 
-function HorizontalCard({
-  title,
-  description,
-  category,
-  banner,
-  createdAt,
-  author = "Admin",
-}) {
+function HorizontalCard({ notice }) {
+  const {
+    title,
+    description,
+    category,
+    banner,
+    createdAt,
+    author = "Admin",
+  } = notice;
+
   return (
     <Card className="w-full bg-white rounded-xl shadow-sm overflow-hidden flex flex-col h-auto">
-      {/* Image at top (only if banner exists) */}
       {banner && (
-        <CardHeader className="p-1 h-40 overflow-hidden">
+        <CardHeader className="p-1 overflow-hidden">
           <img
-            src={banner}
-            alt="Announcement"
+            src={`${import.meta.env.VITE_CS365_URI}/${banner.replace(
+              /\\/g,
+              "/"
+            )}`}
+            alt="img"
             className="object-cover w-full h-full p-1 rounded-lg"
           />
         </CardHeader>
       )}
 
-      {/* Content below */}
       <CardContent className="flex-1 p-4 overflow-y-auto space-y-3">
         <div className="flex items-center space-x-2">
-          <div className="bg-amber-500 p-2 rounded-full text-white">
-            <Megaphone className="w-5 h-5" />
+          <div className={`${
+                category.toLowerCase() === "celebration"
+                  ? "bg-green-200 text-green-800"
+                  : category.toLowerCase() === "event"
+                  ? "bg-blue-200 text-blue-800"
+                  : "bg-orange-200 text-orange-800"
+              } p-2 rounded-full`}>
+
+             {category.toLowerCase() === "celebration" ? <PartyPopper className="w-4 h-4" /> :  
+            category.toLowerCase() === "event" ? <Calendar className="w-4 h-4"/> :
+            category.toLowerCase() === "reminder" ? <Bell className="w-4 h-4"/> :<Megaphone className="w-4 h-4" />} 
           </div>
-          <CardTitle className="text-lg font-serif font-semibold">
+          <CardTitle className="text-lg font-serif font-semibold break-words">
             {title}
           </CardTitle>
           {category && (
-            <Badge className="rounded-full bg-orange-200">{category}</Badge>
+            <span
+              className={`text-xs rounded-full ${
+                category.toLowerCase() === "celebration"
+                  ? "bg-green-200 text-green-800"
+                  : category.toLowerCase() === "event"
+                  ? "bg-blue-200 text-blue-800"
+                  : "bg-orange-200 text-orange-800"
+              } px-2 py-1 rounded-full truncate`}
+            >
+              {category}
+            </span>
           )}
         </div>
-        <p className="text-sm text-gray-600">{description}</p>
+        <p className="text-sm text-gray-600 break-words">{description}</p>
       </CardContent>
 
-      {/* Footer */}
       <CardFooter className="flex justify-between text-sm text-gray-500 px-4 py-2">
         <span className="font-medium text-gray-800">{author}</span>
-        <span>{new Date(createdAt).toLocaleString()}</span>
+        <span>
+          {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
+        </span>
       </CardFooter>
     </Card>
   );

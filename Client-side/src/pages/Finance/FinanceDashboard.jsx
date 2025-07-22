@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { Filter, SquareChartGantt } from "lucide-react";
+import { Filter, Receipt, SquareChartGantt } from "lucide-react";
 import axios from "axios";
 import {
   Tabs,
@@ -115,13 +115,13 @@ function SalesDashboard() {
   return (
     <div>
       <div className="mb-16 ml-20 mt-16 mx-8">
-        <h1 className="text-2xl font-bold">Sales</h1>
+        <h1 className="text-2xl font-bold">Finance</h1>
       </div>
 
       <Tabs defaultValue="billing">
         <TabsList className="ml-20 mt-16">
           <TabsTrigger value="billing">
-            <Filter className="mr-2 h-4 w-4" /> Billing
+            <Receipt className="mr-2 h-4 w-4" /> Billing
           </TabsTrigger>
         </TabsList>
 
@@ -162,12 +162,10 @@ function SalesDashboard() {
                 </div>
 
                 <div className="h-[250px]">
-                  {" "}
                   {/* Same fixed height for DonutChart */}
-                  <DonutChart isBill countrySummaryData={countrySummaryData} />
+                  <DonutChart isBill countrySummaryData={countrySummaryData?.invoicedDataOnly} />
                 </div>
                 <div className="h-[150px]">
-                  {" "}
                   {/* Same fixed height for DonutChart */}
                   <Card className="h-full bg-white p-5">
                     <CardTitle className="text-sm  flex justify-between">

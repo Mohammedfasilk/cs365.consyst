@@ -1,26 +1,29 @@
 import React from "react";
 import { Card, CardContent, CardFooter } from "./Card";
-import { Megaphone } from "lucide-react";
+import { Bell, Calendar, Megaphone, PartyPopper } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
 
-function VerticalCard({
-  title = "No Title",
-  description = "No Description",
-  category,
-  banner,
-  createdAt = new Date(),
-  author = "Admin",
-}) {
+function VerticalCard({ notice }) {
+  const {
+    title = "No Title",
+    description = "No Description",
+    category,
+    banner,
+    createdAt = new Date(),
+    author = "Admin",
+  } = notice;
   return (
     <Card
-      className={`flex bg-white rounded-xl shadow-sm overflow-hidden w-full max-w-3xl ${
-        banner ? "h-64" : "min-h-48"
-      }`}
+      className={`flex bg-white rounded-xl shadow-sm overflow-hidden w-full max-w-3xl `}
     >
       {/* Left Image (only if banner exists) */}
       {banner && (
-        <div className="w-1/3 min-w-[200px] flex items-center justify-center bg-gray-100 p-1">
+        <div className="w-1/3 min-w-[200px] flex items-center justify-center p-1">
           <img
-            src={banner}
+            src={`${import.meta.env.VITE_CS365_URI}/${banner.replace(
+              /\\/g,
+              "/"
+            )}`}
             alt="Announcement"
             className="max-h-full max-w-full object-contain"
           />
@@ -28,15 +31,48 @@ function VerticalCard({
       )}
 
       {/* Right Text Content */}
-      <div className={`${banner ? "w-2/3" : "w-full"} p-4 flex flex-col justify-between`}>
+      <div
+        className={`${
+          banner ? "w-2/3" : "w-full"
+        } p-4 flex flex-col justify-between`}
+      >
         <CardContent className="p-0 overflow-y-auto max-h-full pr-1">
           <div className="flex items-center space-x-2 mb-2">
-            <div className="bg-amber-500 p-2 rounded-full text-white">
-              <Megaphone className="w-5 h-5" />
+            <div
+              className={`${
+                category.toLowerCase() === "celebration"
+                  ? "bg-green-200 text-green-800"
+                  : category.toLowerCase() === "event"
+                  ? "bg-blue-200 text-blue-800"
+                  : category.toLowerCase() === "reminder"
+                  ? "bg-yellow-200 text-yellow-800"
+                  : "bg-orange-200 text-orange-800"
+              } p-2 rounded-full`}
+            >
+              {category.toLowerCase() === "celebration" ? (
+                <PartyPopper className="w-4 h-4" />
+              ) : category.toLowerCase() === "event" ? (
+                <Calendar className="w-4 h-4" />
+              ) : category.toLowerCase() === "reminder" ? (
+                <Bell className="w-4 h-4" />
+              ) : (
+                <Megaphone className="w-4 h-4" />
+              )}
             </div>
-            <h2 className="text-lg font-serif font-semibold truncate">{title}</h2>
+            <h2 className="text-lg font-serif font-semibold truncate">
+              {title}
+            </h2>
             {category && (
-              <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full truncate">
+              <span
+                className={`text-xs rounded-full ${
+                  category.toLowerCase() === "celebration"
+                    ? "bg-green-200 text-green-800"
+                    : category.toLowerCase() === "event"
+                    ? "bg-blue-200 text-blue-800"
+                    
+                    : "bg-orange-200 text-orange-800"
+                } px-2 py-1 rounded-full truncate`}
+              >
                 {category}
               </span>
             )}
@@ -46,7 +82,9 @@ function VerticalCard({
 
         <CardFooter className="flex justify-between text-sm text-gray-500 px-0 pt-4">
           <span className="font-medium text-gray-800">{author}</span>
-          <span>{new Date(createdAt).toLocaleString()}</span>
+          <span>
+            {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
+          </span>
         </CardFooter>
       </div>
     </Card>

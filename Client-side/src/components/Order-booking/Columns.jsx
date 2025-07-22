@@ -201,10 +201,10 @@ export const columns = (fetchData) => {
     cell: ({ row }) => row.getValue("subCategory"),
   },
 {
-  accessorKey: "salesOrderValue",
-  header: "Value",
+  accessorKey: "adjustedSalesValue",
+  header: "Adjusted Sale Value",
 cell: ({ row }) => {
-  const value = row.getValue("salesOrderValue");
+  const value = row.getValue("adjustedSalesValue");
   const currency = row.original?.currency;
 
   if (typeof value !== "number") return null;
@@ -222,6 +222,11 @@ cell: ({ row }) => {
   );
 },
 },
+{
+    accessorKey: "adjustedSalesValueUsd",
+    header: "Adjusted Sale Value (USD)",
+    cell: ({ row }) => row.getValue("adjustedSalesValueUsd"),
+  },
 {
     accessorKey: "Status",
     header: "Doc Status",

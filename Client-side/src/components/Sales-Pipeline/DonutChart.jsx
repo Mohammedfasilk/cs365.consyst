@@ -13,8 +13,8 @@ export default function DonutChart({ countrySummaryData = [] ,isBill }) {
 
   return (
     <div className="w-full h-full">
-      <div className="bg-white rounded-lg shadow p-4 flex flex-col items-center justify-center h-full w-full">
-        <span className="mb-2 text-sm font-semibold text-gray-700">
+      <div className="bg-white rounded-lg shadow p-4 flex flex-col justify-center h-full w-full">
+        <span className="mb-2 text-gray-700">
          {isBill ? 'Billing by Country (Total)' : ' Order Booking by Country (Total)'}
         </span>
         <div className="w-full h-[250px] flex items-center justify-center">

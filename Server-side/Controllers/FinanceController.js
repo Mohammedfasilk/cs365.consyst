@@ -28,14 +28,14 @@ exports.getBillingByCompany = async (req, res) => {
       if (!companyData[company]) continue;
 
       if (Array.isArray(order.billing_plans)) {
-        const approvedPlans = order.billing_plans.filter(
-          (plan) => plan.status === "approved"
+        const filteredPlans = order.billing_plans.filter(
+          (plan) => plan.status === "approved" && plan.invoiced === true
         );
 
         let total = 0;
         let totalUSD = 0;
 
-        for (const plan of approvedPlans) {
+        for (const plan of filteredPlans) {
           total += plan.amount || 0;
           totalUSD += plan.converted_amount || 0;
         }
@@ -96,50 +96,59 @@ exports.getBillingByCountry = async (req, res) => {
   try {
     const bills = await BillingPlan.find();
 
-    const countryData = {};
+    const allData = {};
+    const invoicedDataOnly = {};
 
     for (const bill of bills) {
       const country = bill.country || "Unknown";
 
-      // Swap logic for specific companies
       const isSwappedCompany =
-  bill.company?.toLowerCase().includes("middle east") ||
-  bill.company === "CONSYST Digital Industries Pvt. Ltd" ||
-  bill.company === "CONSYST Technologies (India) Pvt. Ltd.";
+        bill.company?.toLowerCase().includes("middle east") ||
+        bill.company === "CONSYST Digital Industries Pvt. Ltd" ||
+        bill.company === "CONSYST Technologies (India) Pvt. Ltd.";
 
-      if (!countryData[country]) {
-        countryData[country] = {
-          billingPlansTotal: 0,
-        };
+      if (!allData[country]) {
+        allData[country] = { billingPlansTotal: 0 };
+        invoicedDataOnly[country] = { billingPlansTotal: 0 };
       }
 
       if (Array.isArray(bill.billing_plans)) {
-        const approvedPlans = bill.billing_plans.filter(
-          (plan) => plan.status === "approved"
-        );
+        for (const plan of bill.billing_plans) {
+          if (plan.status !== "approved") continue;
 
-        const total = approvedPlans.reduce((sum, plan) => {
           const value = isSwappedCompany ? plan.amount : plan.converted_amount;
-          return sum + (value || 0);
-        }, 0);
 
-        countryData[country].billingPlansTotal += total;
+          allData[country].billingPlansTotal += value || 0;
+
+          if (plan.invoiced === true) {
+            invoicedDataOnly[country].billingPlansTotal += value || 0;
+          }
+        }
       }
     }
 
-    const result = Object.entries(countryData).map(([country, data]) => ({
+    const resultAll = Object.entries(allData).map(([country, data]) => ({
       country,
       total: +data.billingPlansTotal.toFixed(2),
     }));
 
-    res.json(result);
+    const resultInvoiced = Object.entries(invoicedDataOnly).map(
+      ([country, data]) => ({
+        country,
+        total: +data.billingPlansTotal.toFixed(2),
+      })
+    );
+
+    res.json({
+      allData: resultAll,
+      invoicedDataOnly: resultInvoiced,
+    });
   } catch (err) {
     console.error("Error in getBillingByCountry:", err);
-    res
-      .status(500)
-      .json({ error: "Failed to summarize billing plans by country" });
+    res.status(500).json({ error: "Failed to summarize billing plans by country" });
   }
 };
+
 
 
 exports.getMonthlyBillingSummary = async (req, res) => {
@@ -204,7 +213,8 @@ exports.getMonthlyBillingSummary = async (req, res) => {
           // Use raw amount for these two companies
           const useRawAmount =
             company === "CONSYST Middle East FZ-LLC" ||
-            company === "CONSYST Digital Industries Pvt. Ltd";
+            company === "CONSYST Digital Industries Pvt. Ltd" ||
+            company === "CONSYST Technologies (India) Pvt. Ltd.";
 
           const amountUSD = useRawAmount
             ? plan.amount || 0
@@ -404,15 +414,19 @@ exports.getToBeBilledSummary = async (req, res) => {
     for (const so of billing) {
       const company = (so.company || "").trim();
       const useRawAmount =
-  company === "CONSYST Middle East FZ-LLC" ||
-  company === "CONSYST Digital Industries Pvt. Ltd" ||
-  company === "CONSYST Technologies (India) Pvt. Ltd.";
+        company === "CONSYST Middle East FZ-LLC" ||
+        company === "CONSYST Digital Industries Pvt. Ltd" ||
+        company === "CONSYST Technologies (India) Pvt. Ltd.";
 
       for (const plan of so.billing_plans || []) {
         const planDate = new Date(plan.date);
         const value = useRawAmount ? plan.amount : plan.converted_amount;
 
-        if (plan.status === "approved" && !isNaN(planDate)) {
+        if (
+          plan.status === "approved" &&
+          plan.invoiced === false &&
+          !isNaN(planDate)
+        ) {
           const fyStartYear =
             planDate.getMonth() >= 3
               ? planDate.getFullYear()
