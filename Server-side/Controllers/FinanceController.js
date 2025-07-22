@@ -257,10 +257,13 @@ const { startOfMonth, endOfMonth, addMonths, format } = require("date-fns");
 
 exports.getMonthlyBilledSummary = async (req, res) => {
   try {
-    const { financialYear } = req.body;
+    let { financialYear } = req.body;
 
+    // Set to current FY start if not provided
     if (!financialYear) {
-      return res.status(400).json({ error: "financialYear is required" });
+      const now = new Date();
+      const year = now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1;
+      financialYear = `${year}-04-01`; // April 1st of the FY start
     }
 
     const fyStart = new Date(financialYear);
@@ -280,9 +283,9 @@ exports.getMonthlyBilledSummary = async (req, res) => {
       for (const so of billing) {
         const company = (so.company || "").trim();
         const useRawAmount =
-  company === "CONSYST Middle East FZ-LLC" ||
-  company === "CONSYST Digital Industries Pvt. Ltd" ||
-  company === "CONSYST Technologies (India) Pvt. Ltd.";
+          company === "CONSYST Middle East FZ-LLC" ||
+          company === "CONSYST Digital Industries Pvt. Ltd" ||
+          company === "CONSYST Technologies (India) Pvt. Ltd.";
 
         for (const plan of so.billing_plans || []) {
           const planDate = new Date(plan.date);
@@ -321,10 +324,12 @@ const { startOfQuarter, endOfQuarter, addQuarters } = require("date-fns");
 
 exports.getQuarterlyBilledSummary = async (req, res) => {
   try {
-    const { financialYear } = req.body;
-
-    if (!financialYear) {
-      return res.status(400).json({ error: "financialYear is required" });
+    let { financialYear } = req.body;
+    
+   if (!financialYear) {
+      const now = new Date();
+      const year = now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1;
+      financialYear = `${year}-04-01`; // April 1st of the FY start
     }
 
     const fyStart = new Date(financialYear);

@@ -223,10 +223,16 @@ cell: ({ row }) => {
 },
 },
 {
-    accessorKey: "adjustedSalesValueUsd",
-    header: "Adjusted Sale Value (USD)",
-    cell: ({ row }) => row.getValue("adjustedSalesValueUsd"),
-  },
+  accessorKey: "adjustedSalesValueUsd",
+  header: "Adjusted Sale Value (USD)",
+  cell: ({ row }) =>
+    parseFloat(row.getValue("adjustedSalesValueUsd") || 0).toLocaleString("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }),
+},
 {
     accessorKey: "Status",
     header: "Doc Status",

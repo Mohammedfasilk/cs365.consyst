@@ -1,5 +1,11 @@
 import { useEffect, useState, useMemo } from "react";
-import { ChevronLeft, ChevronRight, Filter, Receipt, SquareChartGantt } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Filter,
+  Receipt,
+  SquareChartGantt,
+} from "lucide-react";
 import axios from "axios";
 import {
   Tabs,
@@ -33,7 +39,7 @@ function FinanceDashboard() {
   const { settings } = useSelector((state) => state.settings);
 
   const [loading, setLoading] = useState(true);
-    const [index, setIndex] = useState(0);
+  const [index, setIndex] = useState(0);
 
   const [isChecked, setIsChecked] = useState(false);
   const [billingData, setBillingData] = useState([]);
@@ -42,7 +48,9 @@ function FinanceDashboard() {
   const [monthlyBillingData, setMonthlyBillingData] = useState([]);
   const [quarterlyBillingData, setQuarterlyBillingData] = useState([]);
   const [tobeBilled, setTobeBilled] = useState();
+  const [date, setDate] = useState();
 
+  
   // Fetch settings if not already available
   useEffect(() => {
     if (!settings || Object.keys(settings).length === 0) {
@@ -66,16 +74,13 @@ function FinanceDashboard() {
       const base = import.meta.env.VITE_CS365_URI;
 
       try {
-        const [billRes, countrySummaryRes, monthlyRes, quarterlyRes, toBeRes] =
+        const [billRes, countrySummaryRes, toBeRes] =
           await Promise.all([
             axios.get(`${base}/api/finance/summary-by-company`),
             axios.get(`${base}/api/finance/summary-by-country`),
-            axios.post(`${base}/api/finance/monthly-billed-summary`, {
-              financialYear: settings?.currentFyStartDate,
-            }),
-            axios.post(`${base}/api/finance/quarterly-billed-summary`, {
-              financialYear: settings?.currentFyStartDate,
-            }),
+            // axios.post(`${base}/api/finance/quarterly-billed-summary`, {
+            //   financialYear: settings?.currentFyStartDate,
+            // }),
             axios.post(`${base}/api/finance/to-be-billed`, {
               financialYear: settings?.currentFyStartDate,
             }),
@@ -83,8 +88,7 @@ function FinanceDashboard() {
 
         setBillingData(billRes.data);
         setCountrySummaryData(countrySummaryRes.data);
-        setMonthlyBillingData(monthlyRes.data);
-        setQuarterlyBillingData(quarterlyRes.data);
+        // setQuarterlyBillingData(quarterlyRes.data);
         setTobeBilled(toBeRes.data);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -95,6 +99,30 @@ function FinanceDashboard() {
 
     fetchData();
   }, [settings]);
+
+  useEffect(() => {
+    const fetchPeriodData = async () => {
+      const base = import.meta.env.VITE_CS365_URI;
+
+      try {
+        const [quarterlyRes , monthlyRes] =
+          await Promise.all([
+            axios.post(`${base}/api/finance/quarterly-billed-summary`, {
+              financialYear: date,
+            }),
+            axios.post(`${base}/api/finance/monthly-billed-summary`, {
+              financialYear: date,
+            }),
+          ]);
+        setQuarterlyBillingData(quarterlyRes.data);
+        setMonthlyBillingData(monthlyRes.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchPeriodData();
+  }, [date]);
 
   // Get USD value for a specific company
   const getCompanyUsdValue = (companyName) => {
@@ -117,12 +145,12 @@ function FinanceDashboard() {
   const maxIndex = tobeBilled?.summary?.length - 1;
 
   const handlePrev = () => {
-  setIndex((prev) => (prev > 0 ? prev - 1 : prev));
-};
+    setIndex((prev) => (prev > 0 ? prev - 1 : prev));
+  };
 
-const handleNext = () => {
-  setIndex((prev) => (prev < maxIndex ? prev + 1 : prev));
-};
+  const handleNext = () => {
+    setIndex((prev) => (prev < maxIndex ? prev + 1 : prev));
+  };
 
   return (
     <div>
@@ -175,9 +203,12 @@ const handleNext = () => {
 
                 <div className="h-[250px]">
                   {/* Same fixed height for DonutChart */}
+                 
                   <DonutChart
                     isBill
-                    countrySummaryData={countrySummaryData?.invoicedDataOnly}
+                    countrySummaryData={isChecked ? countrySummaryData?.allData  : countrySummaryData?.invoicedDataOnly }
+                    setIsChecked={setIsChecked}
+                    isChecked={isChecked}
                   />
                 </div>
                 <div className="h-[150px]">
@@ -185,42 +216,53 @@ const handleNext = () => {
                   <Card className="h-full bg-white p-5">
                     <CardTitle className="flex justify-between">
                       <h1 className="font-normal">To Be Billed</h1>
-
-                      {/* <div className="flex items-center space-x-2">
-                        <Switch
-                          onCheckedChange={(val) => setIsChecked(val)}
-                          checked={isChecked}
-                        />
-                        <Label>FY's</Label>
-                      </div> */}
                     </CardTitle>
                     <div className="relative w-full flex items-center justify-center h-full">
-                      <CardContent className="h-full flex items-center justify-center ">
+                      <CardContent className="h-full flex flex-col items-center justify-center gap-2">
                         {tobeBilled?.summary?.length > 0 ? (
-                          <div className="flex items-center gap-4 w-full  justify-center">
-                            <button
-                              onClick={handlePrev}
-                              className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm rounded disabled:opacity-50"
-                              disabled={index === 0}
-                            >
-                              <ChevronLeft className="w-4 h-4" />
-                            </button>
-                            <div className="text-center">
-                              <p className="text-sm text-gray-500">
-                                {tobeBilled?.summary[index].financialYear}
-                              </p>
-                              <p className="font-medium text-lg text-[var(--csblue)]">
-                                USD {formatToShorthand(tobeBilled?.summary[index].total)}
-                              </p>
+                          <>
+                            <div className="flex items-center gap-4 justify-center w-full">
+                              <button
+                                onClick={handlePrev}
+                                className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm rounded disabled:opacity-50"
+                                disabled={index === 0}
+                              >
+                                <ChevronLeft className="w-4 h-4" />
+                              </button>
+                              <div className="text-center">
+                                <p className="text-sm text-gray-500">
+                                  {tobeBilled?.summary[index].financialYear}
+                                </p>
+                                <p className="font-medium text-lg text-[var(--csblue)]">
+                                  USD{" "}
+                                  {formatToShorthand(
+                                    tobeBilled?.summary[index].total
+                                  )}
+                                </p>
+                              </div>
+                              <button
+                                onClick={handleNext}
+                                className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm rounded disabled:opacity-50"
+                                disabled={index === maxIndex}
+                              >
+                                <ChevronRight className="w-4 h-4" />
+                              </button>
                             </div>
-                            <button
-                              onClick={handleNext}
-                              className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm rounded disabled:opacity-50"
-                              disabled={index === maxIndex}
-                            >
-                              <ChevronRight className="w-4 h-4" />
-                            </button>
-                          </div>
+
+                            {/* Dots Indicator */}
+                            <div className="flex items-center gap-1 mt-2">
+                              {tobeBilled?.summary?.map((_, i) => (
+                                <div
+                                  key={i}
+                                  className={`w-2 h-2 rounded-full ${
+                                    i === index
+                                      ? "bg-[var(--csblue)]"
+                                      : "bg-gray-300"
+                                  }`}
+                                ></div>
+                              ))}
+                            </div>
+                          </>
                         ) : (
                           <p className="text-center font-medium text-gray-400">
                             No data
@@ -234,9 +276,7 @@ const handleNext = () => {
 
               <div className="md:w-[70%] w-full">
                 <Card className="h-full bg-white p-5">
-                  <p className=" text-gray-700 mb-10">
-                    Monthly Billing Trends
-                  </p>
+                  <p className=" text-gray-700 mb-10">Monthly Billing Trends</p>
                   <div className="h-full p-4 flex flex-col justify-center ">
                     <MonthlyBillingChart />
                   </div>
@@ -249,6 +289,8 @@ const handleNext = () => {
             <BillingByPeriodChart
               monthlydData={monthlyBillingData}
               quarterlyData={quarterlyBillingData}
+              date={date}
+              setDate={setDate}
             />
           </div>
         </TabsContent>
