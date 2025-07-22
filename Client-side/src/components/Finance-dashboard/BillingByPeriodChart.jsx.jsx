@@ -14,7 +14,7 @@ export default function BillingByPeriodChart({
   monthlydData = [],
   quarterlyData = [],
   date,
-  setDate
+  setDate,
 }) {
   const [isChecked, setIsChecked] = useState(false);
   const [data, setData] = useState(monthlydData); // Set default to monthly
@@ -85,12 +85,12 @@ export default function BillingByPeriodChart({
       <div className="flex items-center justify-between p-2 ml-5 space-x-2">
         <div className="flex items-center space-x-2">
           <span className="">Billing By FY</span>
-        <Switch
-          onCheckedChange={(val) => setIsChecked(val)}
-          checked={isChecked}
-          className="ml-5"
-        />
-        <Label>Quarterly</Label>
+          <Switch
+            onCheckedChange={(val) => setIsChecked(val)}
+            checked={isChecked}
+            className="ml-5"
+          />
+          <Label>Quarterly</Label>
         </div>
         <div className="flex items-center space-x-4 mb-4">
           <Popover>
@@ -110,7 +110,14 @@ export default function BillingByPeriodChart({
               <Calendar
                 mode="single"
                 selected={date}
-                onSelect={(val) => setDate(val)}
+                onSelect={(val) => {
+                  if (val) {
+                    const normalizedDate = new Date(
+                      Date.UTC(val.getFullYear(), val.getMonth(), val.getDate())
+                    );
+                    setDate(normalizedDate);
+                  }
+                }}
                 initialFocus
               />
             </PopoverContent>
