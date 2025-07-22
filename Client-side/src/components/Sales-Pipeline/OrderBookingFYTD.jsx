@@ -131,7 +131,7 @@ const OrderBookingFYTD = ({ company, usdValue, localValue, isGroup , isBill }) =
     <Card className= {`bg-white rounded-lg shadow p-4 flex flex-col items-center ${isBill ? 'justify-evenly' : 'justify-center'}  h-full w-full`}>
       <div className="flex justify-between items-start w-full">
         <div>
-          <p className="mb-1 text-sm font-semibold text-gray-700">
+          <p className="mb-1 text-gray-700">
             {isGroup
               ? isBill ?  "Consolidated Billing - This FY":"Consolidated Order Booking - This FY"
               : isBill ? "Billing - This FY" : "Order Booking - This FY"}

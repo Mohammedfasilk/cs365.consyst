@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { Filter, Receipt, SquareChartGantt } from "lucide-react";
+import { ChevronLeft, ChevronRight, Filter, Receipt, SquareChartGantt } from "lucide-react";
 import axios from "axios";
 import {
   Tabs,
@@ -26,13 +26,15 @@ import MonthlyBillingChart from "../../components/Finance-dashboard/MonthlyBilli
 import BillingByPeriodChart from "../../components/Finance-dashboard/BillingByPeriodChart.jsx.jsx";
 import { Label } from "../../components/UI/Label.jsx";
 
-function SalesDashboard() {
+function FinanceDashboard() {
   useAuthRedirect();
   const dispatch = useDispatch();
 
   const { settings } = useSelector((state) => state.settings);
 
   const [loading, setLoading] = useState(true);
+    const [index, setIndex] = useState(0);
+
   const [isChecked, setIsChecked] = useState(false);
   const [billingData, setBillingData] = useState([]);
   const [companySummaryData, setCompanySummaryData] = useState([]);
@@ -111,6 +113,16 @@ function SalesDashboard() {
       </div>
     );
   }
+  // const summary = tobeBilled?.summary || [];
+  const maxIndex = tobeBilled?.summary?.length - 1;
+
+  const handlePrev = () => {
+  setIndex((prev) => (prev > 0 ? prev - 1 : prev));
+};
+
+const handleNext = () => {
+  setIndex((prev) => (prev < maxIndex ? prev + 1 : prev));
+};
 
   return (
     <div>
@@ -163,50 +175,55 @@ function SalesDashboard() {
 
                 <div className="h-[250px]">
                   {/* Same fixed height for DonutChart */}
-                  <DonutChart isBill countrySummaryData={countrySummaryData?.invoicedDataOnly} />
+                  <DonutChart
+                    isBill
+                    countrySummaryData={countrySummaryData?.invoicedDataOnly}
+                  />
                 </div>
                 <div className="h-[150px]">
                   {/* Same fixed height for DonutChart */}
                   <Card className="h-full bg-white p-5">
-                    <CardTitle className="text-sm  flex justify-between">
-                      <h1>To Be Billed</h1>
+                    <CardTitle className="flex justify-between">
+                      <h1 className="font-normal">To Be Billed</h1>
 
-                      <div className="flex items-center space-x-2">
+                      {/* <div className="flex items-center space-x-2">
                         <Switch
                           onCheckedChange={(val) => setIsChecked(val)}
                           checked={isChecked}
                         />
-                        <Label>Next FY's</Label>
-                      </div>
+                        <Label>FY's</Label>
+                      </div> */}
                     </CardTitle>
-                    <div className="relative w-full">
-                      <CardContent className="h-full flex items-center justify-center">
-                        {isChecked ? (
-                          tobeBilled?.summary?.length > 0 ? (
-                            <div className="absolute top-full left-0 w-full z-10 bg-white border rounded-md shadow-md max-h-60 overflow-y-auto">
-                              {tobeBilled.summary.map((fy) => (
-                                <div
-                                  key={fy.financialYear}
-                                  className="px-3 py-2 border-b last:border-b-0"
-                                >
-                                  <p className="text-xs text-gray-500">
-                                    {fy.financialYear}
-                                  </p>
-                                  <p className="font-medium text-[var(--csblue)]">
-                                    USD {formatToShorthand(fy.total)}
-                                  </p>
-                                </div>
-                              ))}
+                    <div className="relative w-full flex items-center justify-center h-full">
+                      <CardContent className="h-full flex items-center justify-center ">
+                        {tobeBilled?.summary?.length > 0 ? (
+                          <div className="flex items-center gap-4 w-full  justify-center">
+                            <button
+                              onClick={handlePrev}
+                              className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm rounded disabled:opacity-50"
+                              disabled={index === 0}
+                            >
+                              <ChevronLeft className="w-4 h-4" />
+                            </button>
+                            <div className="text-center">
+                              <p className="text-sm text-gray-500">
+                                {tobeBilled?.summary[index].financialYear}
+                              </p>
+                              <p className="font-medium text-lg text-[var(--csblue)]">
+                                USD {formatToShorthand(tobeBilled?.summary[index].total)}
+                              </p>
                             </div>
-                          ) : (
-                            <p className="text-center font-medium text-gray-400">
-                              No data
-                            </p>
-                          )
+                            <button
+                              onClick={handleNext}
+                              className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-sm rounded disabled:opacity-50"
+                              disabled={index === maxIndex}
+                            >
+                              <ChevronRight className="w-4 h-4" />
+                            </button>
+                          </div>
                         ) : (
-                          <p className="text-center font-medium text-xl mt-10 text-[var(--csblue)]">
-                            USD{" "}
-                            {formatToShorthand(tobeBilled?.totalBilledThisFY)}
+                          <p className="text-center font-medium text-gray-400">
+                            No data
                           </p>
                         )}
                       </CardContent>
@@ -216,11 +233,11 @@ function SalesDashboard() {
               </div>
 
               <div className="md:w-[70%] w-full">
-                <Card className="h-full p-4 flex flex-col justify-center bg-white">
-                  <p className="text-sm font-semibold text-gray-700 mb-5 text-center">
+                <Card className="h-full bg-white p-5">
+                  <p className=" text-gray-700 mb-10">
                     Monthly Billing Trends
                   </p>
-                  <div className="">
+                  <div className="h-full p-4 flex flex-col justify-center ">
                     <MonthlyBillingChart />
                   </div>
                 </Card>
@@ -240,4 +257,4 @@ function SalesDashboard() {
   );
 }
 
-export default SalesDashboard;
+export default FinanceDashboard;

@@ -13,19 +13,19 @@ function Notice() {
   const [data, setData] = useState([]);
 
   const fetchData = async () => {
-    try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_CS365_URI}/api/signature`
-      );
+    // try {
+    //   const response = await axios.get(
+    //     `${import.meta.env.VITE_CS365_URI}/api/signature`
+    //   );
 
-      setData(response.data);
-    } catch (error) {
-      console.error("Error fetching Signatures:", error);
-    }
+    //   setData(response.data);
+    // } catch (error) {
+    //   console.error("Error fetching Signatures:", error);
+    // }
   };
-  useEffect(() => {
-    fetchData();
-  }, []);
+  // useEffect(() => {
+  //   fetchData();
+  // }, []);
 
   return (
     <div className="mx-8 ml-20 mt-16">

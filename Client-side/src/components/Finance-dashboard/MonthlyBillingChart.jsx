@@ -108,71 +108,76 @@ export default function MonthlyBillingChart() {
   };
 
   const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      display: true,
+      position: "bottom",
+      labels: {
+        font: {
+          size: 12,
+        },
+      },
+    },
+    tooltip: {
+      backgroundColor: "#ffffff",
+      titleColor: "#000000",
+      bodyColor: "#000000",
+      borderColor: "#dbdbdb",
+      borderWidth: 1,
+      cornerRadius: 8,
+      titleFont: {
+        size: 14,
+        weight: "bold",
+        family: "Arial",
+      },
+      bodyFont: {
+        size: 13,
+        family: "Arial",
+      },
+      padding: 12,
+      displayColors: true,
+      usePointStyle: true,
+      callbacks: {
+        label: function (context) {
+          const label = context.dataset.label || "";
+          const value = context.parsed.y || 0;
+          return `${label}: $${value.toLocaleString()}`;
+        },
+      },
+    },
+  },
+  scales: {
+    x: {
+      title: {
         display: true,
-        position: "bottom",
-        labels: {
-          font: {
-            size: 12,
-          },
-        },
       },
-      tooltip: {
-        backgroundColor: "#ffffff",
-        titleColor: "#000000",
-        bodyColor: "#000000",
-        borderColor: "#dbdbdb",
-        borderWidth: 1,
-        cornerRadius: 8,
-        titleFont: {
-          size: 14,
-          weight: "bold",
-          family: "Arial",
-        },
-        bodyFont: {
-          size: 13,
-          family: "Arial",
-        },
-        padding: 12,
-        displayColors: true,
-        usePointStyle: true,
-        callbacks: {
-          label: function (context) {
-            const label = context.dataset.label || "";
-            const value = context.parsed.y || 0;
-            return `${label}: ${value.toLocaleString()}`;
-          },
+      grid: {
+        display: false,
+      },
+    },
+    y: {
+      beginAtZero: true,
+      title: {
+        display: true,
+      },
+      grid: {
+        display: false,
+      },
+      ticks: {
+        callback: function (value) {
+          return `$${value.toLocaleString()}`;
         },
       },
     },
-    scales: {
-      x: {
-        title: {
-          display: true,
-        },
-        grid: {
-          display: false,
-        },
-      },
-      y: {
-        beginAtZero: true,
-        title: {
-          display: true,
-        },
-        grid: {
-          display: false,
-        },
-      },
-    },
-    interaction: {
-      mode: "nearest",
-      axis: "x",
-      intersect: false,
-    },
-  };
+  },
+  interaction: {
+    mode: "nearest",
+    axis: "x",
+    intersect: false,
+  },
+};
 
   return (
     <Box height={400}>
