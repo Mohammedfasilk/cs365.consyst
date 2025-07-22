@@ -397,19 +397,18 @@ exports.getToBeBilledSummary = async (req, res) => {
       return res.status(400).json({ error: "financialYear is required" });
     }
 
+    // Determine current FY start and label
     const fyDate = new Date(financialYear);
     const fyStart =
       fyDate.getMonth() >= 3
         ? new Date(fyDate.getFullYear(), 3, 1)
         : new Date(fyDate.getFullYear() - 1, 3, 1);
-    const fyEnd = new Date(fyStart.getFullYear() + 1, 2, 31, 23, 59, 59);
 
     const currentFYLabel = `${fyStart.getFullYear()}-${fyStart.getFullYear() + 1}`;
     const totalsByFY = {};
 
-    const billing = await BillingPlan.find({
-      "billing_plans.0": { $exists: true },
-    });
+    // Get all SOs with billing plans
+    const billing = await BillingPlan.find({ "billing_plans.0": { $exists: true } });
 
     for (const so of billing) {
       const company = (so.company || "").trim();
@@ -438,21 +437,17 @@ exports.getToBeBilledSummary = async (req, res) => {
       }
     }
 
+    const summary = Object.entries(totalsByFY)
+      .map(([label, value]) => ({
+        financialYear: label,
+        total: +value.toFixed(2),
+      }))
+      .sort((a, b) => parseInt(a.financialYear) - parseInt(b.financialYear));
+
     const result = {
       currentFY: currentFYLabel,
       totalBilledThisFY: +(totalsByFY[currentFYLabel] || 0).toFixed(2),
-      futureFYs: Object.entries(totalsByFY)
-        .filter(([label]) => {
-          const [startYear] = label.split("-").map(Number);
-          return startYear > fyStart.getFullYear();
-        })
-        .map(([label, value]) => ({
-          financialYear: label,
-          total: +value.toFixed(2),
-        }))
-        .sort((a, b) =>
-          parseInt(a.financialYear) - parseInt(b.financialYear)
-        ),
+      summary,
     };
 
     return res.json(result);

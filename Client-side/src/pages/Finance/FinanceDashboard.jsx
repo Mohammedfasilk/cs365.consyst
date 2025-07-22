@@ -182,9 +182,9 @@ function SalesDashboard() {
                     <div className="relative w-full">
                       <CardContent className="h-full flex items-center justify-center">
                         {isChecked ? (
-                          tobeBilled?.futureFYs?.length > 0 ? (
+                          tobeBilled?.summary?.length > 0 ? (
                             <div className="absolute top-full left-0 w-full z-10 bg-white border rounded-md shadow-md max-h-60 overflow-y-auto">
-                              {tobeBilled.futureFYs.map((fy) => (
+                              {tobeBilled.summary.map((fy) => (
                                 <div
                                   key={fy.financialYear}
                                   className="px-3 py-2 border-b last:border-b-0"
@@ -204,7 +204,7 @@ function SalesDashboard() {
                             </p>
                           )
                         ) : (
-                          <p className="text-center font-medium text-xl text-[var(--csblue)]">
+                          <p className="text-center font-medium text-xl mt-10 text-[var(--csblue)]">
                             USD{" "}
                             {formatToShorthand(tobeBilled?.totalBilledThisFY)}
                           </p>
