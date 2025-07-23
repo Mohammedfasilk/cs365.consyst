@@ -64,6 +64,11 @@ export function OpportunityDataTable({ columns, data, isDetail }) {
       columnVisibility,
       rowSelection,
     },
+    initialState: {
+    pagination: {
+      pageSize: 25,
+    },
+  },
   });
 
   const handleStageChange = (newPosition) => {

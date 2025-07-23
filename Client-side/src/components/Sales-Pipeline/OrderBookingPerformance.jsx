@@ -101,7 +101,7 @@ export default function OrderBookingPerformance({ orderBookingData, orderSummary
                 <div className="flex flex-col gap-2 h-full justify-between md:w-1/4 w-full">
                     {groupCards.map((item) => (
                         <div key={item.label} className="bg-white rounded-lg shadow p-4 flex flex-col items-center justify-center">
-                            <span className="mb-2 text-sm font-semibold text-gray-700">{item.label}</span>
+                            <span className="mb-2 text-gray-700">{item.label}</span>
                             <span className="font-medium text-2xl text-[var(--csblue)]">
                                 {item.value >= 1e6 ? (item.value / 1e6).toFixed(2) + 'M' : (item.value / 1e3).toFixed(2) + 'K'}
                             </span>
@@ -122,7 +122,7 @@ export default function OrderBookingPerformance({ orderBookingData, orderSummary
                         const subcategoryColors = ["#3fa0f9", "#34c759", "#ff9500", "#a259f7", "#f54291", "#f5a623", "#2dce98", "#ff6384"];
                         return (
                             <div key={item.label} className="bg-white rounded-lg shadow p-4 flex flex-col items-center justify-center h-full flex-1">
-                                <span className="mb-2 text-sm font-semibold text-gray-700">{item.label}</span>
+                                <span className="mb-2 text-gray-700">{item.label}</span>
                                 <div className="w-full h-full flex items-center justify-center">
                                     {
                                         subcategoryValues.every((val) => val === 0) ? (

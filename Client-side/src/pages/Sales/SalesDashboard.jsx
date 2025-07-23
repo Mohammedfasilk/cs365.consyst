@@ -276,7 +276,7 @@ function SalesDashboard() {
 
               <div className="md:w-[70%] w-full">
                 <Card className="h-full p-4 bg-white">
-                  <p className="text-sm font-semibold text-gray-700 mb-5 text-center">Monthly Order Booking Trends</p>
+                  <p className=" text-gray-700 mb-5">Monthly Order Booking Trends</p>
                   <div className="h-[300px]">
                     <MonthlyOrderBookingChart data={monthlyOrderBookingData} />
                   </div>
