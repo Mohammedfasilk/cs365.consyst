@@ -3,6 +3,7 @@ import projectSheetReducer from './Slices/projectSheetSlice';
 import usersReducer from './Slices/usersSlice';
 import settingsReducer from './Slices/settingsSlice';
 import signatureSheetReducer from './Slices/signatureSheetSlice';
+import noticeSheetReducer from './Slices/noticeSheetSlice';
 import selectedProject from './Slices/SelectedProject';
 import selectedSalesOrder from './Slices/orderBookingSlice';
 import costControlSheetReducer from './Slices/costControlsheet';
@@ -35,6 +36,9 @@ const store = configureStore({
 
     //Schedule
     scheduleSheet: scheduleSheetReducer,
+
+    //notice
+    noticeSheet: noticeSheetReducer,
 
     session : sessionReducer,
   },

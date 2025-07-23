@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "../UI/Button";
 import { Input } from "../UI/Input";
 import { Separator } from "../UI/Separator";
-import { Plus, SquareChartGantt } from "lucide-react";
+import { CircleCheckIcon, CircleXIcon, Plus, SquareChartGantt } from "lucide-react";
 
 import {
   Form,
@@ -29,10 +29,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../UI/Tabs";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  setIsOpen,
-  setSelectedSignatureName,
-} from "../../Redux/Slices/signatureSheetSlice";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -40,6 +36,12 @@ import {
   SelectValue,
 } from "../UI/Select";
 import { Textarea } from "../UI/TextArea";
+import {
+  setIsOpen,
+  setSelectedNoticeId,
+} from "../../Redux/Slices/noticeSheetSlice";
+
+import { useToast } from "../../Hooks/use-toast";
 
 const formSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
@@ -48,10 +50,10 @@ const formSchema = z.object({
   category: z.string().min(1, { message: "Category is required" }),
   banner: z.any().optional(),
 });
-function NoticeSheet() {
+function NoticeSheet({ onSuccess }) {
   const dispatch = useDispatch();
-  const { selectedSignatureName, isOpen } = useSelector(
-    (state) => state.signatureSheet
+  const { selectedNoticeId, isOpen } = useSelector(
+    (state) => state.noticeSheet
   );
 
   const categories = [
@@ -61,7 +63,7 @@ function NoticeSheet() {
     { label: "Event" },
   ];
 
-  const type = [{label:'Horizontal Card'},{label:'Vertical Card'}]
+  const type = [{ label: "Horizontal Card" }, { label: "Vertical Card" }];
 
   //   useEffect(()=>{
   //     async function fetchAddress(){
@@ -77,7 +79,7 @@ function NoticeSheet() {
   const [triggerRender, toggleTriggerRender] = useState(false);
   const [bannerImage, setBannerImage] = useState();
 
-  // const { toast } = useToast()
+  const { toast } = useToast()
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -95,16 +97,18 @@ function NoticeSheet() {
     const formData = new FormData();
     formData.append("title", values.title);
     formData.append("description", values.description);
-    formData.append("type",values.type);
-    formData.append("category",values.category);
+    formData.append("type", values.type);
+    formData.append("category", values.category);
 
     if (values.banner) {
       formData.append("banner", values.banner);
     }
-    for (const pair of formData.entries()) {
-  console.log(pair[0], pair[1]);
-}
-    
+
+    // If editing, include the ID
+    if (selectedNoticeId) {
+      formData.append("id", selectedNoticeId);
+    }
+
     try {
       await axios.post(
         `${import.meta.env.VITE_CS365_URI}/api/notices`,
@@ -113,9 +117,24 @@ function NoticeSheet() {
           headers: { "Content-Type": "multipart/form-data" },
         }
       );
+
+      toast({
+                title: "Notice Saved",
+                description: "Notice has been successfully saved.",
+                icon: <CircleCheckIcon className="mr-4" color="green" />,
+            });
+
       form.reset();
+      dispatch(setSelectedNoticeId(""));
+      dispatch(setIsOpen(false));
+      onSuccess();
     } catch (err) {
-      console.error(err);
+      toast({
+                title: "Notice Not Saved",
+                description: "There was an error saving the Notice.",
+                variant: "destructive",
+                icon: <CircleXIcon className="mr-4" color="red" />,
+            });
     }
   };
 
@@ -123,27 +142,31 @@ function NoticeSheet() {
   //   // your schema/resolver and defaults
   // });
   useEffect(() => {
-    async function fetchSelectedSignature(full_name) {
-      //   const response = await axios.get(
-      //     `${import.meta.env.VITE_CS365_URI}/api/signature`
-      //   );
-      //   const signatures = response.data;
-      //   const data = signatures.filter(
-      //     (signature) => signature?.full_name == full_name
-      //   )[0];
-      //   if (data) {
-      //     form.setValue("fullName", data.full_name);
-      //     form.setValue("phNumber", data.phNumber);
-      //     form.setValue("designation", data.designation);
-      //     form.setValue("addresses", data.addresses || []);
-      //     setResetKey((prevKey) => prevKey + 1);
-      //   }
+    async function fetchSelectedNotice(id) {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_CS365_URI}/api/notices/${id}`
+        );
+        const data = res.data;
+
+        form.setValue("title", data.title || "");
+        form.setValue("description", data.description || "");
+        form.setValue("category", data.category || "");
+        form.setValue("type", data.type || "");
+
+        // To show the existing banner as preview
+        if (data.banner) {
+          setBannerImage(`${import.meta.env.VITE_CS365_URI}/${data.banner}`);
+        }
+      } catch (error) {
+        console.error("Failed to fetch selected notice:", error);
+      }
     }
 
-    if (!selectedSignatureName) return;
-
-    fetchSelectedSignature(selectedSignatureName);
-  }, [selectedSignatureName]);
+    if (selectedNoticeId) {
+      fetchSelectedNotice(selectedNoticeId);
+    }
+  }, [selectedNoticeId]);
 
   useEffect(() => {
     async function fetchSettings() {
@@ -177,9 +200,10 @@ function NoticeSheet() {
       open={isOpen}
       onOpenChange={(value) => {
         if (!value) {
-          dispatch(setSelectedSignatureName(""));
+          dispatch(setSelectedNoticeId(""));
           toggleTriggerRender(false);
           form.reset();
+          setBannerImage(null); // clear preview
         }
         dispatch(setIsOpen(value));
       }}
@@ -232,7 +256,11 @@ function NoticeSheet() {
                           <FormItem>
                             <FormLabel>Description</FormLabel>
                             <FormControl>
-                              <Textarea className='w-xl h-20' placeholder="description" {...field} />
+                              <Textarea
+                                className="w-xl h-20"
+                                placeholder="description"
+                                {...field}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -241,36 +269,35 @@ function NoticeSheet() {
                     </div>
 
                     <div className="mt-5">
-                        <FormField
-                      control={form.control}
-                      name="category"
-                      render={({ field }) => (
-                        <FormItem className="col-span-2">
-                          <FormLabel>Category</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select Category" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {categories.map((cat) => (
-                                <SelectItem key={cat.label} value={cat.label}>
-                                  {cat.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                      <FormField
+                        control={form.control}
+                        name="category"
+                        render={({ field }) => (
+                          <FormItem className="col-span-2">
+                            <FormLabel>Category</FormLabel>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select Category" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {categories.map((cat) => (
+                                  <SelectItem key={cat.label} value={cat.label}>
+                                    {cat.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                     </div>
                     <div className="mt-5">
-                        
                       <FormField
                         control={form.control}
                         name="type"
@@ -320,7 +347,7 @@ function NoticeSheet() {
                         )}
                       />
 
-                      {form.watch("banner") && (
+                      {form.watch("banner") ? (
                         <div className="mt-2">
                           <img
                             src={URL.createObjectURL(form.watch("banner"))}
@@ -328,7 +355,15 @@ function NoticeSheet() {
                             className="w-full max-h-60 object-contain rounded border"
                           />
                         </div>
-                      )}
+                      ) : bannerImage ? (
+                        <div className="mt-2">
+                          <img
+                            src={bannerImage}
+                            alt="Banner"
+                            className="w-full max-h-60 object-contain rounded border"
+                          />
+                        </div>
+                      ) : null}
                     </div>
                   </form>
 

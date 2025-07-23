@@ -88,21 +88,27 @@ const BillingPlanDetails = ({ billingPlan, refresh, refreshPlan }) => {
 
   const isMiddleEast = company === "CONSYST Middle East FZ-LLC";
 
-  const updatedBillingPlans = values.entries.map((plan, index) => {
-    const original = billingPlan.billing_plans?.[index];
+ const updatedBillingPlans = values.entries.map((plan, index) => {
+  const original = billingPlan.billing_plans?.[index];
 
-    const base = {
-      ...plan,
-      date: new Date(plan.date),
-      invoiced: plan.invoiced ?? false,
-    };
+  const base = {
+    ...plan,
+    date: new Date(plan.date),
+    invoiced: plan.invoiced ?? false,
+  };
 
-    let amount = plan.amount;
-    let convertedAmount = plan.converted_amount ?? 0;
+  const amountChanged =
+    currency === "INR"
+      ? plan.amount !== original?.converted_amount
+      : plan.amount !== original?.amount;
 
+  let amount = original?.amount ?? plan.amount;
+  let convertedAmount = original?.converted_amount ?? plan.converted_amount;
+
+  if (amountChanged) {
     if (currency === "INR") {
       convertedAmount = plan.amount;
-      amount = +(convertedAmount / usdToinr).toFixed(2); // convert INR → USD
+      amount = +(convertedAmount / usdToinr).toFixed(2); // INR → USD
     } else if (currency === "USD") {
       amount = plan.amount;
       convertedAmount = isMiddleEast
@@ -110,23 +116,30 @@ const BillingPlanDetails = ({ billingPlan, refresh, refreshPlan }) => {
         : +(amount * usdToinr).toFixed(2);
     } else if (currency === "AED") {
       convertedAmount = plan.amount;
-      amount = +(convertedAmount / usdToaed).toFixed(2); // convert AED → USD
+      amount = +(convertedAmount / usdToaed).toFixed(2); // AED → USD
     }
+  }
 
-    const hasChanged =
-      plan.amount !== original?.amount ||
-      plan.converted_amount !== original?.converted_amount ||
-      new Date(plan.date).toISOString() !== new Date(original?.date).toISOString() ||
-      plan.description !== original?.description ||
-      plan.invoiced !== original?.invoiced;
+  const hasChanged =
+    amountChanged ||
+    convertedAmount !== original?.converted_amount ||
+    new Date(plan.date).toISOString() !== new Date(original?.date).toISOString() ||
+    plan.description !== original?.description ||
+    plan.invoiced !== original?.invoiced;
 
-    return {
-      ...base,
-      amount,
-      converted_amount: convertedAmount,
-      status: !original ? "draft" : hasChanged ? "draft" : original.status,
-    };
-  });
+  // 🛑 Don't touch approved plans
+  if (original?.status === "approved") {
+    return original;
+  }
+
+  return {
+    ...base,
+    amount,
+    converted_amount: convertedAmount,
+    status: !original ? "draft" : hasChanged ? "draft" : original.status,
+  };
+});
+
 
   const payload = {
     ...billingPlan,

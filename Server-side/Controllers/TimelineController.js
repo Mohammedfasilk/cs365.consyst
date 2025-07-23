@@ -334,7 +334,6 @@ exports.fetchScheduleProjects = async (req, res) => {
     const projects = await Project.find(query)
       .select("project_title project_name -_id")
       .limit(10);
-    console.log(projects);
 
     res.status(200).json(projects);
   } catch (error) {
@@ -562,7 +561,9 @@ exports.fetchProjectProgress = async (req, res) => {
     );
 
     // Calculate latest month progress
-    const latestSchedule = project.schedules[project.schedules.length - 1];
+    const latestSchedule = project.schedules
+      .filter((s) => s.status !== "draft") 
+      .sort((a, b) => new Date(b.month) - new Date(a.month))[0];
     const latestMonth = latestSchedule?.month || "";
     let latestMonthActual = 0;
 
@@ -608,43 +609,32 @@ exports.fetchProjectProgress = async (req, res) => {
       }
     }
 
-    const atRiskMilestones = [];
-    const onTrustMilestones = [];
-    const allMilestones = new Set();
-
     const now = new Date();
+    const atRisk = [];
+    const onTrust = [];
+    const delivered = [];
+    const watchlist = [];
 
-    for (const milestone of project.timeline) {
-      const name = milestone.milestone;
-      allMilestones.add(name);
+    if (latestSchedule?.milestones?.length) {
+      for (const m of latestSchedule.milestones) {
+        const start = new Date(m.start_date);
+        const end = new Date(m.end_date);
+        const totalDuration = (end - start) / (1000 * 60 * 60 * 24);
+        const elapsed = (now - start) / (1000 * 60 * 60 * 24);
+        const elapsedPercent = Math.min((elapsed / totalDuration) * 100, 100);
+        const progress = Number(m.progress) || 0;
 
-      const start = new Date(milestone.start_date);
-      const end = new Date(milestone.end_date);
-
-      const totalDuration = (end - start) / (1000 * 60 * 60 * 24); // in days
-      const elapsed = (now - start) / (1000 * 60 * 60 * 24); // in days
-
-      const elapsedPercent = Math.min((elapsed / totalDuration) * 100, 100);
-
-      const history =
-        project?.milestone_history?.find((m) => m.milestone === name)
-          ?.history || [];
-      const latestProgress =
-        history.sort((a, b) => new Date(b.month) - new Date(a.month))[0]
-          ?.progress || 0;
-
-      if (latestProgress >= 100) {
-        continue;
-      } else if (latestProgress < 80 && elapsedPercent >= 80) {
-        atRiskMilestones.push(name);
+        if (progress >= 100) {
+          delivered.push(m);
+        } else if (progress < 80 && elapsedPercent >= 80) {
+          atRisk.push(m);
+        } else if (progress >= 80) {
+          onTrust.push(m);
+        } else {
+          watchlist.push(m); // only if not in any above
+        }
       }
     }
-
-    // Now build the watchlist
-    const watchlist = Array.from(allMilestones).filter(
-      (name) =>
-        !onTrustMilestones.includes(name) && !atRiskMilestones.includes(name)
-    );
 
     // ✅ Response
     res.status(200).json({
@@ -655,8 +645,8 @@ exports.fetchProjectProgress = async (req, res) => {
       milestone_history,
       planned_days: totalProjectDays,
       current_days: currentDays,
-      at_risk: atRiskMilestones?.length,
-      on_trust: onTrustMilestones?.length,
+      at_risk: atRisk?.length,
+      on_trust: onTrust?.length,
       watch_list: watchlist?.length,
     });
   } catch (error) {

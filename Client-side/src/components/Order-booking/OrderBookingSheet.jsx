@@ -75,7 +75,6 @@ const OrderBookingSheet = ({ fetchData }) => {
     const settings = useSelector((state) => state.settings.settings);
     const usdToInr = settings?.usdToinr
 
-    console.log("OrderBookingSheet settings: ", selectedSalesOrder);
 
     useEffect(() => {
         if (!settings || Object.keys(settings).length === 0) {
@@ -192,6 +191,17 @@ const OrderBookingSheet = ({ fetchData }) => {
     }, [selectedSalesOrder, usdToInr]);
 
     async function onSubmit(values) {
+
+        
+            if(selectedSalesOrder.Status === "approved") {
+                toast({
+                title: "Approved Order Cannot be Saved",
+                description: "There was an error saving the order.",
+                variant: "destructive",
+                icon: <CircleXIcon className="mr-4" color="red" />,
+            });
+            return;
+            }
         try {
             const currency = values.currency;
             const adjustedValue = parseFloat(values.adjustedSalesValue) || 0;

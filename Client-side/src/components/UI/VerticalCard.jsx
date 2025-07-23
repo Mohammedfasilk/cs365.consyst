@@ -25,7 +25,7 @@ function VerticalCard({ notice }) {
               "/"
             )}`}
             alt="Announcement"
-            className="max-h-full max-w-full object-contain"
+            className="max-h-full max-w-full rounded object-contain"
           />
         </div>
       )}
@@ -69,9 +69,10 @@ function VerticalCard({ notice }) {
                     ? "bg-green-200 text-green-800"
                     : category.toLowerCase() === "event"
                     ? "bg-blue-200 text-blue-800"
-                    
+                    : category.toLowerCase() === "reminder"
+                    ? "bg-yellow-200 text-yellow-800"
                     : "bg-orange-200 text-orange-800"
-                } px-2 py-1 rounded-full truncate`}
+                } px-2 py-0 rounded-full truncate`}
               >
                 {category}
               </span>
@@ -80,8 +81,7 @@ function VerticalCard({ notice }) {
           <p className="text-sm text-gray-600 line-clamp-4">{description}</p>
         </CardContent>
 
-        <CardFooter className="flex justify-between text-sm text-gray-500 px-0 pt-4">
-          <span className="font-medium text-gray-800">{author}</span>
+        <CardFooter className="flex justify-end text-sm text-gray-500 px-0 pt-4">
           <span>
             {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
           </span>
