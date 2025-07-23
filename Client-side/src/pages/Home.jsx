@@ -98,14 +98,6 @@ export default function Home() {
       bg: "bg-pink-100",
       fg: "text-pink-600",
     },
-    {
-      Icon: Users,
-      title: "Notice",
-      subtitle: "create notice",
-      path: "/business-tools/notice",
-      bg: "bg-pink-100",
-      fg: "text-pink-600",
-    },
   ];
 
   const fetchNotice = async () => {

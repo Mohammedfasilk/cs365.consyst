@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import {
   BriefcaseBusiness,
   ChartNoAxesCombined,
+  Clipboard,
   DollarSign,
   FolderGit2Icon,
   SignatureIcon,
@@ -11,12 +12,6 @@ import { SettingsSheet } from "../Settings/settings-sheet";
 import { useSessionRole } from "../../Hooks/useSessionRole";
 import axios from "axios";
 import { useMsal } from "@azure/msal-react";
-// import { ModeToggle } from "@/components/ModeToggle"; // Assuming it's the same or converted to React
-// import { SettingsSheet } from "@/components/settings/settings-sheet"; // Assuming it's the same or converted to React
-// import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"; // Assuming it's the same or converted to React
-
-// Simulated authentication state (You can replace with real auth logic like MSAL or Firebase)
-// const simulatedSession = { user: { roles: ["admin"] } }; // Example of session object, replace with real session management
 
 export default function Sidebar() {
   const { accounts } = useMsal();
@@ -60,7 +55,7 @@ export default function Sidebar() {
       href: "#",
       subItems: [
         { label: "Finance Dashboard", href: "/Finance/finance-dashboard" },
-        { label: "Banking", href: "/Finance/Banking" },
+        // { label: "Banking", href: "/Finance/Banking" },
         { label: "Billing Plan", href: "/Finance/billing-plan" },
       ],
     },
@@ -79,9 +74,9 @@ export default function Sidebar() {
 
 const allowedMenuItems = [
    {
-      icon: <BriefcaseBusiness className="h-5 w-5" />,
-      label: "Business Tools",
-      href: "/business-tools/tools",
+      icon: <Clipboard className="h-5 w-5" />,
+      label: "Digital Notice Board",
+      href: "/business-tools/notice",
       subItems: [],
     },
 ];
@@ -170,10 +165,6 @@ menuItems.forEach((item) => {
           : "flex-row justify-start ml-4 "
           }  items-center py-4 gap-2  mt-auto border-t`}
       >
-        {/* <div>
-              <ModeToggle/>
-            </div>
-            <p>Toggle Mode</p> */}
         {userRole.includes("admin") ? (
           <div>
             <SettingsSheet />

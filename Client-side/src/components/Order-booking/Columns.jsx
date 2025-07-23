@@ -202,7 +202,7 @@ export const columns = (fetchData) => {
   },
 {
   accessorKey: "adjustedSalesValue",
-  header: "Adjusted Sale Value",
+   header: () => <div className="text-center">Adjusted Sale Value</div>,
 cell: ({ row }) => {
   const value = row.getValue("adjustedSalesValue");
   const currency = row.original?.currency;
@@ -213,7 +213,7 @@ cell: ({ row }) => {
   const currencySymbol = symbols[currency] || "";
 
   return (
-    <div>
+    <div className="text-right pr-5">
       {currencySymbol} {value.toLocaleString(undefined, {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
@@ -224,14 +224,17 @@ cell: ({ row }) => {
 },
 {
   accessorKey: "adjustedSalesValueUsd",
-  header: "Adjusted Sale Value (USD)",
-  cell: ({ row }) =>
-    parseFloat(row.getValue("adjustedSalesValueUsd") || 0).toLocaleString("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }),
+  header:()=> <div className="text-center">Adjusted Sale Value (USD)</div>,
+  cell: ({ row }) => (
+    <div className="text-right pr-5">
+      {parseFloat(row.getValue("adjustedSalesValueUsd") || 0).toLocaleString("en-US", {
+        style: "currency",
+        currency: "USD",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}
+    </div>
+  ),
 },
 {
     accessorKey: "Status",

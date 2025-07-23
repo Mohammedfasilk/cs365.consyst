@@ -207,7 +207,7 @@ export const columns = (fetchData) => {
     },
     {
   accessorKey: "amount",
-  header: "Amount",
+  header:()=> <div className="text-right pr-10">Amount</div>, 
   cell: ({ row }) => {
     const original = row.original;
     const currency = original?.currency;
@@ -222,7 +222,7 @@ export const columns = (fetchData) => {
     const currencySymbol = symbols[currency] || "";
 
     return (
-      <div>
+      <div className="text-right pr-10">
         {currencySymbol}{" "}
         {displayAmount.toLocaleString(undefined, {
           minimumFractionDigits: 2,

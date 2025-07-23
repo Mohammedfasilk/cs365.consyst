@@ -626,7 +626,7 @@ exports.fetchProjectProgress = async (req, res) => {
 
         if (progress >= 100) {
           delivered.push(m);
-        } else if (progress < 80 && elapsedPercent >= 80) {
+        } else if (progress < 80 && elapsedPercent >= 80  || elapsedPercent >= 100) {
           atRisk.push(m);
         } else if (progress >= 80) {
           onTrust.push(m);
