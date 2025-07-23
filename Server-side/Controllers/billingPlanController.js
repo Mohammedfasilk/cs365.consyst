@@ -138,7 +138,6 @@ exports.deleteBillingPlan = async (req, res) => {
     if (!salesId|| !planId) {
       return res.status(400).json({ error: "Invalid sales Order or Plan ID." });
     }
-    console.log(req.body);
     
     const updatedPlan = await BillingPlan.findOneAndUpdate(
       {salesOrderName:salesId},

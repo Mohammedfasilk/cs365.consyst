@@ -281,7 +281,6 @@ function ProjectDashboard() {
                     >
                       {showCurrent || ShowProjected
                         ? monthWiseData.map((months, index) => {
-                          console.log(months);
                             return (
                               <div
                                 key={index}

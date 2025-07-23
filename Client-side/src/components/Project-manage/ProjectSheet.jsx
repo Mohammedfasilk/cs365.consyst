@@ -190,7 +190,6 @@ const ProjectSheet = ({ fetchData }) => {
         const salesOrderId = {
           sales_order: selectedProject?.sales_order || "",
         };
-        console.log("salesorder",salesOrderId);
         
         const res = await axios.post(
           `${import.meta.env.VITE_CS365_URI}/api/projects/sales-order`,

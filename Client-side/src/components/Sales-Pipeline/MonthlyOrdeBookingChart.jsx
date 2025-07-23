@@ -45,7 +45,6 @@ export default function MonthlyOrderBookingChart() {
     const { settings } = useSelector((state) => state.settings);
     const targetValue = settings?.groupTarget || 0;
     const fyStartDate = settings?.currentFyStartDate ; // fallback default
-    console.log("FY Start Date:", fyStartDate);
     
 
 useEffect(() => {

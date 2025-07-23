@@ -75,11 +75,9 @@ function MeetingMinutes() {
 
   // Placeholder functions for now
   const handleEditMeeting = (meeting) => {
-    console.log('Edit meeting:', meeting);
   };
   
   const handleDeleteMeeting = (meeting) => {
-    console.log('Delete meeting:', meeting);
   };
   
   return (

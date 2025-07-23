@@ -725,7 +725,6 @@ function MonthwiseTable({
 
   const rows = [...dataRows];
   const columns = getColumns(showProjected, showCurrent);
-  console.log(columns);
 
   return <ReactGrid rows={rows} columns={columns} mergedCells={mergedCells} />;
 }

@@ -17,7 +17,6 @@ export const useAgendaItems = () => {
 
     setLoading(true);
     try {
-      console.log('Adding agenda item:', { meetingId, item });
 
       // Get the current max order_index for this meeting
     //   const { data: existingItems, error: fetchError } = await supabase

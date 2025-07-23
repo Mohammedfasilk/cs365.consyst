@@ -46,7 +46,6 @@ const MeetingDetailPage = () => {
   },[])
   const handleStartMeeting = async () => {
     if (!meeting) return;
-    console.log('MeetingDetailPage - Starting meeting:', meeting.id);
     try {
       await axios.post(`${import.meta.env.VITE_CS365_URI}/api/meeting/handle-status`,{
         id:meeting?._id,
@@ -114,15 +113,7 @@ const MeetingDetailPage = () => {
     setEmailLoading(false);
   }
 };
-  // if (loading) {
-  //   return <MeetingDetailLoading />;
-  // }
 
-  // if (!meeting) {
-  //   return <MeetingNotFound onNavigateBack={() => navigate("/")} />;
-  // }
-
-  // console.log('MeetingDetail - Rendering with meeting status:', meeting.status, 'statusLoading:', statusLoading);
 
   return (
     <div className="min-h-screen ml-14 bg-gradient-to-br from-blue-50 to-indigo-100">

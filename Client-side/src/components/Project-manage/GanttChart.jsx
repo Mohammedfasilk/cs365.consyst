@@ -60,7 +60,6 @@ task.id === updatedTask.id ? updatedTask : task
 task.id === updatedTask.id ? updatedTask : task
     );
     setTasks(updated);
-    console.log(updated);
     
   };
  

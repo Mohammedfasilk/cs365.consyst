@@ -131,7 +131,6 @@ exports.deleteProject = async (req,res) =>{
 exports.updateProjectField = async (req, res) => {
   try {
     const { project_name, field, value, month } = req.body;
-    console.log(month);
 
     const updated = await Project.findOneAndUpdate(
       { project_name,month },

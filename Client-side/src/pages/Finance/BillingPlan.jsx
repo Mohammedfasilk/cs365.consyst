@@ -32,7 +32,6 @@ function BillingPlan() {
     );
 
     setData(flatData);
-    console.log("Flattened Billing Plan:", flatData);
   } catch (error) {
     console.error("Error fetching Billing plan:", error);
   } finally {

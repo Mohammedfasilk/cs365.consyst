@@ -167,7 +167,6 @@ export default function GanttTaskTable({ task, onRowClick, refetch }) {
 
   const handleDelete = async (taskName) => {
     try {
-      console.log(selectedProject);
       const res = await axios.post(
         `${import.meta.env.VITE_CS365_URI}/api/timeline/task-delete`,
         { project_name: selectedProject, task: taskName }

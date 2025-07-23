@@ -9,11 +9,9 @@ function Signup() {
 
   const navigate = useNavigate();
   const {accounts} = useMsal()
-  console.log(accounts);
   
   useEffect(() => {
     const user = JSON.parse(sessionStorage.getItem('user'));
-    console.log(user);
         
     if (!user) {
       navigate('/');

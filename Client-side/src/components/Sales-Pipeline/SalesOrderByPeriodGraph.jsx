@@ -202,7 +202,6 @@ async function fetchData(fyDate) {
     data.forEach((order) => {
       const orderDate = new Date(order.salesOrderDate);
       const monthKey = new Date(orderDate.getFullYear(), orderDate.getMonth(), 1).toISOString().split("T")[0];
-      console.log("Month key:", monthKey);
 
       if (!monthlyMap[monthKey]) {
         monthlyMap[monthKey] = 0;
@@ -212,7 +211,6 @@ async function fetchData(fyDate) {
 
     // Align values to months array
     const aligned = monthsArr.map((m) => monthlyMap[m.iso] ?? 0);
-    console.log("Aligned values:", aligned);
     
     setDates(monthsArr);
     setValues(aligned);

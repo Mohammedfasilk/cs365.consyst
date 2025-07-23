@@ -18,7 +18,6 @@ function Schedule() {
       setLoading(true);
        const res = await axios.get(`${import.meta.env.VITE_CS365_URI}/api/timeline/schedules`);
       setData(res.data);
-      console.log(res.data);
       
     } catch (error) {
       console.error("Error fetching schedules:", error);
