@@ -14,16 +14,13 @@ function HorizontalCard({ notice }) {
   } = notice;
 
   return (
-    <Card className="w-full bg-white rounded-xl shadow-sm overflow-hidden flex flex-col h-auto">
+    <Card className="w-full bg-white rounded-xl shadow-sm overflow-hidden flex flex-col h-[400px]">
       {banner && (
         <CardHeader className="p-1 overflow-hidden">
           <img
-            src={`${import.meta.env.VITE_CS365_URI}/${banner.replace(
-              /\\/g,
-              "/"
-            )}`}
+            src={banner}
             alt="img"
-            className="object-cover w-full h-full p-1 rounded"
+            className="object-cover w-auto h-50 p-1 rounded"
           />
         </CardHeader>
       )}

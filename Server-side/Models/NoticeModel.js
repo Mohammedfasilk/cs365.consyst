@@ -2,13 +2,13 @@ const mongoose = require("mongoose");
 
 const noticeSchema = new mongoose.Schema(
   {
-    title: { type: String, required: true },
-    description: { type: String, default: '' },
-    type: { type: String, required: true },
-    category: { type: String, required: true },
-    banner: { type: String }, // image path
+    title: String,
+    description: String,
+    type: String,
+    category: String,
+    banner: String, // base64 string
   },
-  { timestamps: true }
+  { timestamps: true } 
 );
 
 module.exports = mongoose.model("Notice", noticeSchema);

@@ -14,21 +14,18 @@ function VerticalCard({ notice }) {
   } = notice;
   return (
     <Card
-      className={`flex bg-white rounded-xl shadow-sm overflow-hidden w-full max-w-3xl `}
+      className={`flex bg-white rounded-xl shadow-sm overflow-hidden w-full max-h-[400px] max-w-3xl `}
     >
       {/* Left Image (only if banner exists) */}
       {banner && (
-        <div className="w-1/3 min-w-[200px] flex items-center justify-center p-1">
-          <img
-            src={`${import.meta.env.VITE_CS365_URI}/${banner.replace(
-              /\\/g,
-              "/"
-            )}`}
-            alt="Announcement"
-            className="max-h-full max-w-full rounded object-contain"
-          />
-        </div>
-      )}
+  <div className="w-1/3 min-w-[200px] flex items-center justify-center p-1">
+    <img
+      src={banner}
+      alt="Announcement"
+      className="max-h-full max-w-full rounded object-contain"
+    />
+  </div>
+)}
 
       {/* Right Text Content */}
       <div

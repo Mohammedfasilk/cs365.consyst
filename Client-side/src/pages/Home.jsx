@@ -208,12 +208,18 @@ export default function Home() {
               important notices
             </CardDescription>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-4">
-            {notices.map((notice) =>
-              notice.type === "Horizontal Card" ? (
-               <VerticalCard key={notice._id} notice={notice} />
-              ) : (
-                 <HorizontalCard key={notice._id} notice={notice} />
+          <CardContent className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-4">
+            {notices.length === 0 ? (
+              <div className="col-span-full text-center text-gray-500 py-10">
+                No notices available.
+              </div>
+            ) : (
+              notices.map((notice) =>
+                notice.type === "Horizontal Card" ? (
+                  <HorizontalCard key={notice._id} notice={notice} />
+                ) : (
+                  <VerticalCard key={notice._id} notice={notice} />
+                )
               )
             )}
           </CardContent>

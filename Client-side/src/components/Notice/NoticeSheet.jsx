@@ -6,7 +6,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "../UI/Button";
 import { Input } from "../UI/Input";
 import { Separator } from "../UI/Separator";
-import { CircleCheckIcon, CircleXIcon, Plus, SquareChartGantt } from "lucide-react";
+import {
+  CircleCheckIcon,
+  CircleXIcon,
+  Plus,
+  SquareChartGantt,
+} from "lucide-react";
 
 import {
   Form,
@@ -79,7 +84,7 @@ function NoticeSheet({ onSuccess }) {
   const [triggerRender, toggleTriggerRender] = useState(false);
   const [bannerImage, setBannerImage] = useState();
 
-  const { toast } = useToast()
+  const { toast } = useToast();
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -94,35 +99,24 @@ function NoticeSheet({ onSuccess }) {
   const formValues = form.getValues();
 
   const onSubmit = async (values) => {
-    const formData = new FormData();
-    formData.append("title", values.title);
-    formData.append("description", values.description);
-    formData.append("type", values.type);
-    formData.append("category", values.category);
-
-    if (values.banner) {
-      formData.append("banner", values.banner);
-    }
-
-    // If editing, include the ID
-    if (selectedNoticeId) {
-      formData.append("id", selectedNoticeId);
-    }
-
     try {
+      const payload = {
+        ...values,
+        banner: values.banner || null, // include base64 image string if available
+        id: selectedNoticeId || undefined,
+      };
+
       await axios.post(
         `${import.meta.env.VITE_CS365_URI}/api/notices`,
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
+        payload,
+        { headers: { "Content-Type": "application/json" } }
       );
 
       toast({
-                title: "Notice Saved",
-                description: "Notice has been successfully saved.",
-                icon: <CircleCheckIcon className="mr-4" color="green" />,
-            });
+        title: "Notice Saved",
+        description: "Notice has been successfully saved.",
+        icon: <CircleCheckIcon className="mr-4" color="green" />,
+      });
 
       form.reset();
       dispatch(setSelectedNoticeId(""));
@@ -130,11 +124,11 @@ function NoticeSheet({ onSuccess }) {
       onSuccess();
     } catch (err) {
       toast({
-                title: "Notice Not Saved",
-                description: "There was an error saving the Notice.",
-                variant: "destructive",
-                icon: <CircleXIcon className="mr-4" color="red" />,
-            });
+        title: "Notice Not Saved",
+        description: "There was an error saving the Notice.",
+        variant: "destructive",
+        icon: <CircleXIcon className="mr-4" color="red" />,
+      });
     }
   };
 
@@ -156,7 +150,8 @@ function NoticeSheet({ onSuccess }) {
 
         // To show the existing banner as preview
         if (data.banner) {
-          setBannerImage(`${import.meta.env.VITE_CS365_URI}/${data.banner}`);
+          setBannerImage(data.banner);
+          form.setValue("banner", data.banner); 
         }
       } catch (error) {
         console.error("Failed to fetch selected notice:", error);
@@ -337,9 +332,18 @@ function NoticeSheet({ onSuccess }) {
                               <Input
                                 type="file"
                                 accept="image/*"
-                                onChange={(e) =>
-                                  field.onChange(e.target.files?.[0])
-                                }
+                                onChange={async (e) => {
+                                  const file = e.target.files?.[0];
+                                  if (!file) return;
+
+                                  const reader = new FileReader();
+                                  reader.onloadend = () => {
+                                    const base64 = reader.result;
+                                    field.onChange(base64); // store base64 string in form
+                                    setBannerImage(base64); // update preview
+                                  };
+                                  reader.readAsDataURL(file);
+                                }}
                               />
                             </FormControl>
                             <FormMessage />
@@ -350,7 +354,7 @@ function NoticeSheet({ onSuccess }) {
                       {form.watch("banner") ? (
                         <div className="mt-2">
                           <img
-                            src={URL.createObjectURL(form.watch("banner"))}
+                            src={form.watch("banner")} // base64 directly
                             alt="Preview"
                             className="w-full max-h-60 object-contain rounded border"
                           />
