@@ -26,6 +26,7 @@ const meetings = require('./Routes/MeetingRoute')
 const billingPlan = require("./Routes/billingPlanRoutes");
 const finance = require("./Routes/FinanceRoute");
 const noticeRoutes = require('./Routes/NoticeRoute');
+const calendar = require('./Routes/calendarRoute');
 
 
 //middlewares
@@ -54,6 +55,7 @@ app.use('/api/meeting',meetings);
 app.use("/api/billing-plan", billingPlan);
 app.use("/api/finance", finance);
 app.use('/api/notices', noticeRoutes);
+app.use('/api/calendar', calendar);
 app.use('/uploads', express.static('uploads'));
 
 

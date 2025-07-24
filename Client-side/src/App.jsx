@@ -7,6 +7,7 @@ import Project_management from './routes/home/Project_management'
 import { Toaster } from './components/UI/Toaster'
 import Business_Tools from './routes/BusinessTools'
 import Finance from './routes/home/Finance'
+import  Calendar  from './routes/Calendar'
 function App() {
 
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path='/home/*' element={<HomeRoute/>}/>
         <Route path='/sales/*' element={<Sales/>}/>
         <Route path='/finance/*' element={<Finance/>}/>
+        <Route path='/calendar/*' element={<Calendar/>}/>
         <Route path='/project-management/*' element={<Project_management/>}/>
         <Route path='/business-tools/*' element={<Business_Tools/>}/>
         </Route>

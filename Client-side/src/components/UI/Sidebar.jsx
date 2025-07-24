@@ -64,8 +64,8 @@ export default function Sidebar() {
       label: "Calendar",
       href: "#",
       subItems: [
-        { label: "Calendar View", href: "" },
-        { label: "Manage Calendar", href: "" },
+        { label: "Calendar View", href: "/calendar/view" },
+        { label: "Manage Calendar", href: "/calendar/manage-calendar" },
       ],
     },
     {
