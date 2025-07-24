@@ -16,6 +16,8 @@ function MeetingMinutes() {
   const [roleFilters,setRoleFilters] = useState([])
   const [showCompleted,setShowCompleted] = useState()
   const [searchQuery, setSearchQuery] = useState('');
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [selectedMeeting, setSelectedMeeting] = useState(null);
 
   const [meetingDialog,setMeetingDialog] = useState(false)
   const filteredQuery = {
@@ -121,17 +123,21 @@ function MeetingMinutes() {
         ) : (
           <MeetingsByStatus
             meetings={filteredMeetings}
-            onEditMeeting={handleEditMeeting}
             onDeleteMeeting={handleDeleteMeeting}
+            refresh={fetchMeetings}
+            onEditMeeting={(meeting) => {
+              setIsEditDialogOpen(true);
+              setSelectedMeeting(meeting);
+            }}
           />
         )}
 
         <MeetingDialogs
           isOpen={meetingDialog}
-          // isEditDialogOpen={isEditDialogOpen}
-          // selectedMeeting={selectedMeeting}
+          isEditDialogOpen={isEditDialogOpen}
+          selectedMeeting={selectedMeeting}
           onCloseDialog={() => setMeetingDialog(false)}
-          // onCloseEditDialog={handleCloseEditDialog}
+          onCloseEditDialog={() => setIsEditDialogOpen(false)}
           onCreateMeeting={fetchMeetings}
           // onUpdateMeeting={handleUpdateMeeting}
           // isUpdating={isUpdating}

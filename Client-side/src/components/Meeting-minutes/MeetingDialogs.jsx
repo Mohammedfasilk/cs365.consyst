@@ -1,5 +1,6 @@
 import React from 'react'
 import CreateMeetingDialog from './CreateMeetingDialog'
+import EditMeetingDialog from './EditMeetingDialog'
 
 function MeetingDialogs({
   isOpen,
@@ -19,15 +20,15 @@ function MeetingDialogs({
         onCreateMeeting={onCreateMeeting}
       />
 
-      {/* {selectedMeeting && (
+      {selectedMeeting && (
         <EditMeetingDialog
           isOpen={isEditDialogOpen}
           onClose={onCloseEditDialog}
           onUpdateMeeting={onUpdateMeeting}
           meeting={selectedMeeting}
-          isSubmitting={isUpdating}
+          // isSubmitting={isUpdating}
         />
-      )} */}
+      )}
     </>
   )
 }

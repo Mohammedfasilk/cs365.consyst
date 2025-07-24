@@ -4,107 +4,99 @@ import { Input } from "../UI/Input";
 import ProfileFields from "./ProfileFields";
 import { Button } from "../UI/Button";
 import { X } from "lucide-react";
-// You must implement or import these hooks and components:
-// import useProfileData from "../Hooks/useProfileData";
-// import useAttendeeSubmission from "../Hooks/useAttendeeSubmission";
-// import validateEmail from "../utils/validateEmail";
-// import EmailInput from "./EmailInput";
-// import ProfileFields from "./ProfileFields";
-// import FormActions from "./FormActions";
+import axios from "axios";
 
-const AddAttendeeForm = ({ meetingId, onSuccess, onCancel }) => {
+const AddAttendeeForm = ({ meetingId, onSuccess, onCancel,onRefresh }) => {
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
+  const [name, setName] = useState("");
+  const [organization, setOrganization] = useState("");
+  const [error, setError] = useState(""); 
 
-  // Replace with your actual hook paths
-  const { name, setName, organization, setOrganization, isInternalUser } = (email);
-  const { submitAttendee, loading } = ({ meetingId, onSuccess });
-
-  const handleEmailChange = (value) => {
+  const handleEmailChange = (e) => {
+    const value = e.target.value;
     setEmail(value);
     if (emailError) setEmailError("");
   };
-
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setEmailError("");
+  e.preventDefault();
+  setEmailError("");
 
-    if (!email.trim()) {
-      setEmailError("Email is required");
-      return;
-    }
-    if (!validateEmail(email.trim())) {
-      setEmailError("Please enter a valid email address");
-      return;
-    }
+  if (!email.trim()) return setEmailError("Email is required");
 
-    await submitAttendee(email, name, organization, isInternalUser);
-  };
+  try {
+    const payload = {
+      meetingId,
+      email,
+      name,
+      organization,
+    };
+
+    const res = await axios.post(`${import.meta.env.VITE_CS365_URI}/api/meeting/add-attendee`, payload);
+    onSuccess?.();
+    onRefresh?.();
+  } catch (err) {
+    console.error("Error adding attendee:", err);
+    setError(err.response?.data?.error);
+    setEmailError("Failed to add attendee");
+  }
+};
 
   return (
     <div className="border rounded-lg p-3 bg-blue-50 border-blue-200">
       <form onSubmit={handleSubmit} className="space-y-3">
-        {/* <EmailInput
-          value={email}
-          onChange={handleEmailChange}
-          error={emailError}
-          disabled={loading}
-        /> */}
         <div>
-      <Label htmlFor="attendee-email" className="text-sm font-medium">
-        Email *
-      </Label>
-      <Input
-        id="attendee-email"
-        type="email"
-        value={email}
-        onChange={handleEmailChange}
-        placeholder="Enter attendee email"
-        className={emailError ? "border-red-500" : ""}
-        disabled={loading}
-        required
-      />
-      {emailError && (
-        <p className="text-sm text-red-500 mt-1">{error}</p>
-      )}
-    </div>
+          <Label htmlFor="attendee-email" className="text-sm font-medium">
+            Email *
+          </Label>
+          <Input
+            id="attendee-email"
+            type="email"
+            value={email}
+            onChange={handleEmailChange}
+            placeholder="Enter attendee email"
+            className={emailError ? "border-red-500" : ""}
+            required
+          />
+          {emailError && <p className="text-sm text-red-500 mt-1">{error}</p>}
+        </div>
 
         <ProfileFields
           name={name}
           organization={organization}
           onNameChange={setName}
           onOrganizationChange={setOrganization}
-          isInternalUser={isInternalUser}
-          disabled={loading}
+          // isInternalUser={isInternalUser}
+          // disabled={loading}
         />
 
         {/* <FormActions
           loading={loading}
           onCancel={onCancel}
         /> */}
-         <div className="flex gap-2 pt-2">
-      <Button
-        type="submit"
-        size="sm"
-        className="flex-1"
-        disabled={loading}
-      >
-        {loading ? "Adding..." : "Add Attendee"}
-      </Button>
-      <Button
-        type="button"
-        size="sm"
-        variant="outline"
-        onClick={onCancel}
-        disabled={loading}
-        className="px-2"
-      >
-        <X className="h-4 w-4" />
-      </Button>
-    </div>
+        <div className="flex gap-2 pt-2">
+          <Button
+            type="submit"
+            size="sm"
+            className="flex-1"
+            // disabled={loading}
+          >
+            Add Attendee
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={onCancel}
+            // disabled={loading}
+            className="px-2"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
       </form>
     </div>
   );
 };
 
-export default AddAttendeeForm; 
+export default AddAttendeeForm;

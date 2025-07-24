@@ -60,7 +60,7 @@ export default function Home() {
     },
     {
       Icon: Cpu,
-      title: "ERP Next",
+      title: "ERPNext",
       subtitle: "Enterprise Resource Planning",
       path: "https://erp.consyst.biz",
       bg: "bg-purple-100",
@@ -77,23 +77,23 @@ export default function Home() {
     {
       Icon: Signature,
       title: "Email Signatures",
-      subtitle: "Email Signature System",
+      subtitle: "Generate your Personalized email Signatures",
       path: "/business-tools/email-signatures",
       bg: "bg-green-100",
       fg: "text-green-600",
     },
     {
       Icon: Calendar,
-      title: "Meeting Management",
-      subtitle: "Schedule & Meetings",
+      title: "Meeting Minutes",
+      subtitle: "Record and Distribute Meeting Minutes",
       path: "/business-tools/meeting-minutes",
       bg: "bg-orange-100",
       fg: "text-orange-600",
     },
     {
       Icon: Users,
-      title: "Odoo HR",
-      subtitle: "Human Resources",
+      title: "Odoo Recruitment",
+      subtitle: "HR Applicant Shortlisting System",
       path: "https://consystgroup.odoo.com/web/login",
       bg: "bg-pink-100",
       fg: "text-pink-600",
@@ -133,20 +133,6 @@ export default function Home() {
             Ready to make today productive? Access all your tools and insights
             here.
           </p>
-          <div className="flex flex-wrap gap-3">
-            <Link
-              to="/dashboards/sales"
-              className="px-4 py-2 bg-[var(--csblue)] text-white font-semibold rounded-lg hover:bg-[var(--csblue)]/90 transition-colors"
-            >
-              View Today's Reports
-            </Link>
-            <Link
-              to="/project-management/project"
-              className="px-4 py-2 border border-gray-300 font-semibold text-gray-700 rounded-lg hover:border-[var(--csblue)]/90 hover:bg-gray-50 transition-colors"
-            >
-              Team Updates
-            </Link>
-          </div>
         </div>
 
         {/* Right Panel */}
@@ -158,7 +144,6 @@ export default function Home() {
             to="/tasks"
             className="text-blue-600 text-sm font-semibold block mt-1 hover:underline flex items-center justify-center gap-1"
           >
-            {taskCount} Tasks <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
       </div>

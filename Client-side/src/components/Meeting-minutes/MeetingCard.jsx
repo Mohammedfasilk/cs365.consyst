@@ -5,7 +5,7 @@ import { Button } from '../UI/Button';
 import { Calendar, CheckSquare, Clock, FileText, User, UserCheck, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const MeetingCard = ({ meeting, onEditMeeting, onDeleteMeeting }) => {
+const MeetingCard = ({ meeting, onEditMeeting, onDeleteMeeting,refresh}) => {
   const navigate = useNavigate();
   const generalAgreements = meeting?.agreement?.filter((agreement)=>agreement.type === 'general').length || 0
   const tasks = meeting?.agreement?.filter((agreement)=>agreement.type === 'task_assignment').length || 0
@@ -16,6 +16,7 @@ const MeetingCard = ({ meeting, onEditMeeting, onDeleteMeeting }) => {
         meeting={meeting}
         onEditMeeting={onEditMeeting}
         onDeleteMeeting={onDeleteMeeting}
+        refresh={refresh}
       />
 
       <div className="flex justify-between mb-4 flex-1 gap-6">

@@ -488,3 +488,38 @@ exports.generateMeetingPDF = async (req, res) => {
     res.status(500).json({ error: "Failed to generate PDF" });
   }
 };
+
+exports.addAttendee = async (req, res) => {
+  try {
+    const { meetingId, name, email, role, organization } = req.body;
+
+    if (!meetingId || !email) {
+      return res.status(400).json({ error: "Meeting ID and email are required" });
+    }
+
+    const meeting = await Meeting.findById(meetingId);
+    if (!meeting) {
+      return res.status(404).json({ error: "Meeting not found" });
+    }
+
+    // Check for duplicate email
+    const exists = meeting.attendees.some(att => att.email === email);
+    if (exists) {
+      return res.status(400).json({ error: "Attendee already added" });
+    }
+
+    meeting.attendees.push({
+      name: name || null,
+      email,
+      organization: organization || null,
+      role: role || 'participant'
+    });
+
+    await meeting.save();
+
+    res.json({ message: "Attendee added successfully", attendees: meeting.attendees });
+  } catch (err) {
+    console.error("Error adding attendee:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};

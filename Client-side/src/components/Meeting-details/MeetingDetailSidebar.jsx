@@ -21,7 +21,7 @@ const MeetingDetailSidebar = ({
         onRefresh={refetch}
       />
       <MeetingActions
-        meetingId={meeting.id}
+        meetingId={meeting._id}
         meetingStatus={meeting.status}
         ownerId={meeting.owner_id}
         attendees={meeting.attendees}

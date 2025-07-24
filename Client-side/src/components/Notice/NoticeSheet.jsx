@@ -81,7 +81,6 @@ function NoticeSheet({ onSuccess }) {
   const [filteredAddresses, setFilteredAddresses] = useState([]);
   const [legalDisclaimer, setLegalDisclaimer] = useState("");
   const [resetKey, setResetKey] = useState(0);
-  const [triggerRender, toggleTriggerRender] = useState(false);
   const [bannerImage, setBannerImage] = useState();
 
   const { toast } = useToast();
@@ -178,25 +177,13 @@ function NoticeSheet({ onSuccess }) {
     fetchSettings();
   }, []);
 
-  const generateSignature = async () => {
-    const selected = form.getValues("addresses");
-    const ordered = selected
-      .map((sel) => addresses.find((a) => a.label === sel))
-      .filter((a) => a !== undefined);
-
-    setFilteredAddresses(ordered);
-
-    toggleTriggerRender(false);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    toggleTriggerRender(true);
-  };
+ 
   return (
     <Sheet
       open={isOpen}
       onOpenChange={(value) => {
         if (!value) {
           dispatch(setSelectedNoticeId(""));
-          toggleTriggerRender(false);
           form.reset();
           setBannerImage(null); // clear preview
         }
@@ -325,6 +312,7 @@ function NoticeSheet({ onSuccess }) {
                       <FormField
                         control={form.control}
                         name="banner"
+
                         render={({ field }) => (
                           <FormItem className="col-span-2">
                             <FormLabel>Banner Image</FormLabel>
@@ -371,28 +359,7 @@ function NoticeSheet({ onSuccess }) {
                     </div>
                   </form>
 
-                  {/* <Button
-                    className="mt-4 bg-[var(--csblue)] hover:bg-[var(--csblue)]/90 px-8"
-                    size="sm"
-                    onClick={generateSignature}
-                  >
-                    Preview
-                  </Button>
-
-                  <Separator className="mt-4 mb-4" /> */}
-
-                  {triggerRender && filteredAddresses.length !== 0 && (
-                    <div className="mt-4 gap-6">
-                      {/* <EmailSignature
-                        name={formValues.fullName}
-                        designation={formValues.designation}
-                        addresses={filteredAddresses}
-                        phone={formValues.phNumber}
-                        disclaimer={legalDisclaimer}
-                        banner={bannerImage}
-                      /> */}
-                    </div>
-                  )}
+  
                 </Form>
               </TabsContent>
             </Tabs>

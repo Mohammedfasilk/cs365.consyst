@@ -130,6 +130,7 @@ const AttendeesList = ({ meeting,attendees, meetingStatus, meetingId, meetingOwn
               meetingId={meetingId}
               onSuccess={handleAddSuccess}
               onCancel={() => setIsAddingAttendee(false)}
+              onRefresh={onRefresh}
             />
           )}
 

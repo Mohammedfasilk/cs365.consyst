@@ -4,7 +4,8 @@ import MeetingGrid from './MeetingGrid';
 const MeetingsByStatus = ({
   meetings,
   onEditMeeting,
-  onDeleteMeeting
+  onDeleteMeeting,
+  refresh
 }) => {
   const upcomingMeetings = meetings.filter(m => m.status === 'upcoming');
   const inProgressMeetings = meetings.filter(m => m.status === 'in-progress');
@@ -29,6 +30,7 @@ const MeetingsByStatus = ({
           meetings={meetings}
           onEditMeeting={onEditMeeting}
           onDeleteMeeting={onDeleteMeeting}
+          refresh={refresh}
         />
       </div>
     );

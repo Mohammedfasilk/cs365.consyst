@@ -3,12 +3,13 @@ import { Edit, Trash2 } from 'lucide-react';
 import { Badge } from '../UI/Badge';
 import { Button } from '../UI/Button';
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '../UI/Alert-dialog';
+import axios from 'axios';
 // Adjust path as needed
 
-const MeetingCardHeader = ({ meeting, onEditMeeting, onDeleteMeeting }) => {
+const MeetingCardHeader = ({ meeting, onEditMeeting , refresh }) => {
   const  user  = true
   const  isAdmin  = ''
-  const canEdit = meeting.status !== "completed" && !meeting.is_completed;
+  const canEdit = meeting.status !== "completed";
   // Check if user is host by role, not just owner_id
   const isHost = user && (
     meeting.owner_id === user.id ||
@@ -16,6 +17,16 @@ const MeetingCardHeader = ({ meeting, onEditMeeting, onDeleteMeeting }) => {
       attendee.user_id === user.id && attendee.role === 'host'
     ))
   );
+
+  const onDeleteMeeting = async (meetingId)=>{
+     try {
+      await axios.post(`${import.meta.env.VITE_CS365_URI}/api/meeting/delete/${meetingId}`);
+
+      refresh();
+    } catch (err) {
+      console.error('Delete failed:', err);
+    }
+  }
   
   // Determine if user can delete the meeting
   const canDelete = (isHost && !meeting.is_completed) || (meeting.is_completed && isAdmin);
@@ -72,7 +83,7 @@ const MeetingCardHeader = ({ meeting, onEditMeeting, onDeleteMeeting }) => {
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction 
-                      onClick={() => onDeleteMeeting(meeting.id || meeting._id)}
+                      onClick={() => onDeleteMeeting(meeting._id)}
                       className="bg-red-600 hover:bg-red-700"
                     >
                       Delete

@@ -32,6 +32,7 @@ const meetingSchema = new mongoose.Schema({
   attendees: [{
     name:{type:String,default:null},
     email:String,
+    organization: { type: String, default: 'consyst' },
     role:{type:String,default:'participant'}
   }],
   agreement: [{

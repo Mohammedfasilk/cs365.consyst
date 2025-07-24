@@ -155,7 +155,7 @@ const MeetingDetailPage = () => {
           <div classNa me="w-full lg:w-1/3 lg:max-w-md lg:min-w-80">
             <MeetingDetailSidebar
               meeting={meeting}
-              refetch={''}
+              refetch={fetchMeetingsbyId}
               handleGeneratePDF={handleGeneratePDF}
               // emailLoading={emailLoading}
               // statusLoading={statusLoading}
