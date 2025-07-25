@@ -22,7 +22,8 @@ function CalendarView() {
   const dispatch = useDispatch();
   const [calendars, setCalendars] = useState([]);
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const { getTodayEvents, getTomorrowEvents, getNext7DaysEvents } = useCalendarEvents();
+  const { getTodayEvents, getTomorrowEvents, getNext7DaysEvents } =
+    useCalendarEvents();
   const selectedCalendarId = useSelector(
     (state) => state.calendarSheet.selectedCalendarId
   );
@@ -32,31 +33,30 @@ function CalendarView() {
   const { accounts } = useMsal();
   const user = accounts[0]?.name;
 
-useEffect(() => {
-  const fetchCalendars = async () => {
-    try {
-      const res = await axios.get(
-        `${import.meta.env.VITE_CS365_URI}/api/calendar`
-      );
-      const allCalendars = res.data;
-      const filtered = allCalendars.filter((calendar) =>
-        calendar.shared_with?.includes(user)
-      );
-      setCalendars(filtered);
+  useEffect(() => {
+    const fetchCalendars = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_CS365_URI}/api/calendar`
+        );
+        const allCalendars = res.data;
+        const filtered = allCalendars.filter((calendar) =>
+          calendar.shared_with?.includes(user)
+        );
+        setCalendars(filtered);
 
-      if (filtered.length > 0 && !selectedCalendarId) {
-        const defaultCalendar = filtered[0];
-        dispatch(setSelectedCalendarId(defaultCalendar._id));
-        dispatch(setSelectedCalendar(defaultCalendar)); // ✅ Add this line
+        if (filtered.length > 0 && !selectedCalendarId) {
+          const defaultCalendar = filtered[0];
+          dispatch(setSelectedCalendarId(defaultCalendar._id));
+          dispatch(setSelectedCalendar(defaultCalendar)); // ✅ Add this line
+        }
+      } catch (err) {
+        console.error("Failed to fetch calendars:", err);
       }
-    } catch (err) {
-      console.error("Failed to fetch calendars:", err);
-    }
-  };
+    };
 
-  fetchCalendars();
-}, [user]);
-
+    fetchCalendars();
+  }, [user]);
 
   const handleTabChange = (calendarId) => {
     dispatch(setSelectedCalendarId(calendarId));
@@ -70,6 +70,13 @@ useEffect(() => {
       window.print();
     }, 100); // Wait for the DOM to update
   };
+
+  useEffect(() => {
+    return () => {
+      // Cleanup when component unmounts
+      dispatch(setSelectedCalendar(null));
+    };
+  }, [dispatch]);
 
   return (
     <div>
