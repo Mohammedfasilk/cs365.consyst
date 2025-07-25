@@ -10,6 +10,7 @@ import costControlSheetReducer from './Slices/costControlsheet';
 import billingPlanSheetReducer from './Slices/BillingPlanSlice';
 import scheduleSheetReducer from './Slices/scheduleSheetslice';
 import sessionReducer from './Slices/sessionSlice';
+import calendarSheetReducer from './Slices/calendarSheetSlice';
 
 const store = configureStore({
   reducer: {    
@@ -39,6 +40,9 @@ const store = configureStore({
 
     //notice
     noticeSheet: noticeSheetReducer,
+
+    //Calendar
+    calendarSheet: calendarSheetReducer,
 
     session : sessionReducer,
   },

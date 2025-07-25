@@ -38,20 +38,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "../UI/Popover";
 import { Separator } from "@radix-ui/react-dropdown-menu";
 import { cn } from "../../lib/utils";
 import { format } from "date-fns";
-import { Textarea } from "../UI/TextArea";
 import { Calendar } from "../UI/Calender";
-import CostEstimationTable from "../CostEstimationTable";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  clearSelectedProject,
-  setIsOpen,
-  setIsSaved,
-  setSelectedProjectName,
-  setSelectedProjectStatus,
-} from "../../Redux/Slices/SelectedProject";
 import { useToast } from "../../Hooks/use-toast";
 import { useSessionUser } from "../../Hooks/useSessionUser";
-import { fetchSettings } from "../../Redux/Slices/settingsSlice";
 import { MultiSelect } from "../UI/MultiSelect";
 import {
   Select,
@@ -63,58 +53,51 @@ import {
 import { Switch } from "../UI/Switch";
 import { EventsTable } from "./EventsTable";
 import { EventColumn } from "./EventColumns";
+import {
+  setIsOpen,
+  setSelectedCalendar,
+  setSelectedCalendarId,
+  setSelectedEventId,
+} from "../../Redux/Slices/calendarSheetSlice";
 
 const CalendarSheet = ({ fetchData }) => {
-  const [project, setProject] = useState(null);
   const dispatch = useDispatch();
-  const sessionUser = useSessionUser();
+  // const sessionUser = useSessionUser();
 
-  const selectedProject = useSelector((state) => state.selectedProject.project);
-  const { settings } = useSelector((state) => state.settings);
-
-  useEffect(() => {
-    if (!settings || Object.keys(settings).length === 0) {
-      dispatch(fetchSettings());
-    }
-  }, [dispatch, settings]);
-
-  const selectedProjectName = useSelector(
-    (state) => state.selectedProject.selectedProjectName
+  const selectedCalendarId = useSelector(
+    (state) => state.calendarSheet.selectedCalendarId
+  );
+  const selectedEventId = useSelector(
+    (state) => state.calendarSheet.selectedEventId
+  );
+  const selectedCalendar = useSelector(
+    (state) => state.calendarSheet.selectedCalendar
   );
 
-  const isOpen = useSelector((state) => state.selectedProject.isOpen);
+  const isOpen = useSelector((state) => state.calendarSheet.isOpen);
 
-  const isSaved = useSelector((state) => state.selectedProject.isSaved);
-
-  const selectedStatus = useSelector(
-    (state) => state.selectedProject.selectedProjectStatus
-  );
- const [users, setUsers] = useState([]);
-  const categories = [
-    { label: "Strict Dates" },
-    { label: "Flexible" },
-  ];
-  const [calendarId, setCalendarId] = useState("68822cadb7fa41dcaf2eab47");
+  const [users, setUsers] = useState([]);
+  const [events, setEvents] = useState([]);
+  const categories = [{ label: "Strict" }, { label: "Flexible" }];
   const { toast } = useToast();
 
   const calendarSchema = z.object({
-  calendarTitle: z.string().min(1, "Calendar title is required"),
-  yearType: z.enum(["FY", "CY"], {
-    required_error: "Year type is required",
-  }),
-  sharedWith: z.array(z.string()).optional(), // usernames/emails
-});
+    calendarTitle: z.string().min(1, "Calendar title is required"),
+    yearType: z.enum(["FY", "CY"], {
+      required_error: "Year type is required",
+    }),
+    sharedWith: z.array(z.string()).optional(), // usernames/emails
+  });
 
   const eventSchema = z.object({
-  eventTitle: z.string().min(1, "Event title is required"),
-  date: z.preprocess(
-    (val) => (val instanceof Date ? val : new Date(val)),
-    z.date({ required_error: "Date is required" })
-  ),
-  category: z.string().min(1, "Category is required"),
-  monthlyRecurring: z.boolean().optional(),
-});
-
+    eventTitle: z.string().min(1, "Event title is required"),
+    date: z.preprocess(
+      (val) => (val instanceof Date ? val : new Date(val)),
+      z.date({ required_error: "Date is required" })
+    ),
+    category: z.string().min(1, "Category is required"),
+    monthlyRecurring: z.boolean().optional(),
+  });
 
   const calendarForm = useForm({
     resolver: zodResolver(calendarSchema),
@@ -124,7 +107,7 @@ const CalendarSheet = ({ fetchData }) => {
       sharedWith: [],
     },
   });
-  
+
   const eventForm = useForm({
     resolver: zodResolver(eventSchema),
     defaultValues: {
@@ -136,175 +119,149 @@ const CalendarSheet = ({ fetchData }) => {
   });
 
   async function onSubmit(values) {
+    const calendarvalues = {
+      id: selectedCalendarId,
+      title: values.calendarTitle,
+      year_type: values.yearType,
+      shared_with: values.sharedWith,
+    };
 
-        const calendarvalues = {
-          title: values.calendarTitle,
-          year_type: values.yearType,
-          shared_with: values.sharedWith,
-        };
+    const createCalendar = async () => {
+      try {
+        const res = await axios.post(
+          `${import.meta.env.VITE_CS365_URI}/api/calendar/create`,
+          calendarvalues
+        );
+        // fetchData();
+        if (res == null || res?.error) {
+          toast({
+            title: "Calendar Not Saved",
+            description: "There was an error saving Calendar.",
+            variant: "destructive",
+            icon: <CircleXIcon className="mr-4" color="red" />,
+          });
+          return;
+        }
+        const selectedCalendarId = res.data?.data?._id;
+        dispatch(setSelectedCalendarId(selectedCalendarId));
+        fetchData();
 
-        const createCalendar = async () => {
+        toast({
+          title: "Calendar Saved",
+          description: "The calendar has been successfully saved.",
+          icon: <CircleCheckIcon className="mr-4" color="green" />,
+        });
+      } catch (error) {
+        console.error("Error Saving Calendar:", error);
+        toast({
+          title: "Calendar Not Saved",
+          description: "There was an error saving Calendar.",
+          variant: "destructive",
+          icon: <CircleXIcon className="mr-4" color="red" />,
+        });
+      }
+    };
 
-          try {
-            const res = await axios.post(
-              `${import.meta.env.VITE_CS365_URI}/api/calendar/create`,
-              calendarvalues
-            );
-            // fetchData();
-            if (res == null || res?.error) {
-              toast({
-                title: "Calendar Not Saved",
-                description: "There was an error saving Calendar.",
-                variant: "destructive",
-                icon: <CircleXIcon className="mr-4" color="red" />,
-              });
-              return;
-            }
-
-            // dispatch(setIsSaved(true));
-
-
-            toast({
-              title: "Calendar Saved",
-              description: "The calendar has been successfully saved.",
-              icon: <CircleCheckIcon className="mr-4" color="green" />,
-            });
-          } catch (error) {
-            console.error("Error Saving Calendar:", error);
-            toast({
-                title: "Calendar Not Saved",
-                description: "There was an error saving Calendar.",
-                variant: "destructive",
-                icon: <CircleXIcon className="mr-4" color="red" />,
-              });
-          }
-        };
-
-        createCalendar();
+    createCalendar();
   }
   async function onEventSubmit(values) {
-        console.log("Event Values:", values);
-        
-        const eventvalues = {
-          calendarId: calendarId,
-          eventId: null,
-          title: values.eventTitle,
-          date: values.date,
-          category: values.category,
-          recurring: values.monthlyRecurring,
-        };
+    const eventvalues = {
+      calendarId: selectedCalendarId,
+      eventId: selectedEventId,
+      title: values.eventTitle,
+      date: values.date,
+      category: values.category,
+      recurring: values.monthlyRecurring,
+    };
 
-        const createEvent = async () => {
+    const createEvent = async () => {
+      try {
+        const res = await axios.post(
+          `${import.meta.env.VITE_CS365_URI}/api/calendar/create-event`,
+          eventvalues
+        );
+        // fetchData();
+        if (res == null || res?.error) {
+          toast({
+            title: "Event Not Saved",
+            description: "There was an error saving Event.",
+            variant: "destructive",
+            icon: <CircleXIcon className="mr-4" color="red" />,
+          });
+          return;
+        }
+        fetchEvents(selectedCalendarId)   
 
-          try {
-            const res = await axios.post(
-              `${import.meta.env.VITE_CS365_URI}/api/calendar/create-event`,
-              eventvalues
-            );
-            // fetchData();
-            if (res == null || res?.error) {
-              toast({
-                title: "Event Not Saved",
-                description: "There was an error saving Event.",
-                variant: "destructive",
-                icon: <CircleXIcon className="mr-4" color="red" />,
-              });
-              return;
-            }
+        toast({
+          title: "Event Saved",
+          description: "The event has been successfully saved.",
+          icon: <CircleCheckIcon className="mr-4" color="green" />,
+        });
+      } catch (error) {
+        console.error("Error Saving Calendar:", error);
+        toast({
+          title: "Event Not Saved",
+          description: "There was an error saving event.",
+          variant: "destructive",
+          icon: <CircleXIcon className="mr-4" color="red" />,
+        });
+      }
+    };
 
-            // dispatch(setIsSaved(true));
-
-
-            toast({
-              title: "Event Saved",
-              description: "The event has been successfully saved.",
-              icon: <CircleCheckIcon className="mr-4" color="green" />,
-            });
-          } catch (error) {
-            console.error("Error Saving Calendar:", error);
-            toast({
-                title: "Event Not Saved",
-                description: "There was an error saving event.",
-                variant: "destructive",
-                icon: <CircleXIcon className="mr-4" color="red" />,
-              });
-          }
-        };
-
-        createEvent();
+    createEvent();
   }
 
-    useEffect(() => {
-      const fetchUsers = async () => {
-        try {
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_CS365_URI}/api/user`
+        );
+        setUsers(res.data?.map((user) => user.name));
+      } catch (error) {
+        console.error("Error fetching users list:", error);
+      }
+    };
 
-          const res = await axios.get(
-            `${import.meta.env.VITE_CS365_URI}/api/user`
-          );
-          setUsers(res.data?.map(user => user.name))
-          
-        } catch (error) {
-          console.error("Error fetching users list:", error);
-        }
-      };
+    fetchUsers();
+  }, []);
 
-      fetchUsers();
-    }, []);
+  const fetchEvents = async (id) => {
+     try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_CS365_URI}/api/calendar/${id}/events`
+        );
+          setEvents(res.data)
 
-  //   useEffect(() => {
-  //     async function fetchSelectedProject(project_name) {
-  //       try {
-  //         const res = await axios.get(
-  //           `${import.meta.env.VITE_CS365_URI}/api/projects`
-  //         );
+      } catch (error) {
+        console.error("Error fetching  events:", error);
+      }
+  }
 
-  //         const projects = res.data;
-
-  //         const data = await projects.filter(
-  //           (project) => project?.project_name == project_name
-  //         )[0];
-
-  //         if (data) {
-  //           dispatch(setSelectedProjectStatus(data.status));
-  //           dispatch(setIsSaved(true));
-  //           setProject(data);
-  //           form.setValue("customerName", data.customer_name);
-  //           form.setValue("projectCurrency", data.project_currency);
-  //           form.setValue("customerPoDate", new Date(data.customer_po_date));
-  //           form.setValue("customerPoValue", data.customer_po_value);
-  //           form.setValue("projectDescription", data.project_description);
-  //           form.setValue("company", data.company);
-  //           form.setValue("commencementDate", new Date(data.commencement_date));
-  //           form.setValue("contractEndDate", new Date(data.contract_end_date));
-  //           form.setValue("fatDate", new Date(data.fat_date));
-  //           form.setValue(
-  //             "materialDeliveryDate",
-  //             new Date(data.material_delivery_date)
-  //           );
-  //         } else {
-  //           form.reset();
-  //         }
-  //       } catch (error) {
-  //         console.error("Error fetching  projects:", error);
-  //       }
-  //     }
-
-  //     if (selectedProjectName) {
-  //       fetchSelectedProject(selectedProjectName);
-  //     }
-  //   }, [selectedProjectName]);
+  useEffect(() => {
+    async function fetchCalendar() {
+      if (selectedCalendar) {
+        calendarForm.setValue("calendarTitle", selectedCalendar.title);
+        calendarForm.setValue("yearType", selectedCalendar.year_type);
+        calendarForm.setValue("sharedWith", selectedCalendar.shared_with);
+        fetchEvents(selectedCalendar?._id)
+      }
+     
+    }
+    fetchCalendar();
+  }, [selectedCalendarId , selectedCalendar]);
 
   return (
     <Sheet
       open={isOpen}
       onOpenChange={(value) => {
         if (!value) {
-          dispatch(clearSelectedProject());
-          dispatch(setSelectedProjectName(""));
-          dispatch(setIsSaved(false));
-          setProject(null);
           eventForm.reset();
           calendarForm.reset();
+          dispatch(setSelectedCalendarId(null));
+          dispatch(setSelectedCalendar(null));
+          dispatch(setSelectedEventId(null))
+          setEvents([])
         }
         dispatch(setIsOpen(value));
       }}
@@ -507,6 +464,18 @@ const CalendarSheet = ({ fetchData }) => {
                           </FormItem>
                         )}
                       />
+
+                      <div className="flex justify-end">
+                        <Button
+                          className="bg-[var(--csblue)] hover:bg-[var(--csblue)]/90 px-8"
+                          onClick={()=>{
+                            eventForm.reset()
+                            dispatch(setSelectedEventId(null))
+                          }}
+                        >
+                          New
+                        </Button>
+                      </div>
                       <div className="col-span-2 max-w-xl">
                         <FormField
                           control={eventForm.control}
@@ -548,7 +517,7 @@ const CalendarSheet = ({ fetchData }) => {
                               </div>
                               <FormControl>
                                 <Switch
-                                    className="mt-1"
+                                  className="mt-1"
                                   checked={field.value}
                                   onCheckedChange={field.onChange}
                                 />
@@ -566,13 +535,12 @@ const CalendarSheet = ({ fetchData }) => {
                 <div>
                   <EventsTable
                     columns={EventColumn()}
-                    data={[]}
+                    data={events}
                     onRowClick={(row) => {
                       eventForm.setValue("eventTitle", row.title);
                       eventForm.setValue("date", row.date);
                       eventForm.setValue("category", row.category);
                       eventForm.setValue("monthlyRecurring", row.recurring);
-                      setResetKey((prevKey) => prevKey + 1);
                     }}
                   />
                 </div>

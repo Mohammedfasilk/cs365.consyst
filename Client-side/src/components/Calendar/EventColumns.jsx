@@ -32,41 +32,41 @@ const Actions = ({ row , onDelete}) => {
   });
   const {saved} = useSelector((state) => state.costControlSheet);
 
-  const month = row.getValue("month");
-  const projectName = row.getValue("project_name");
-  const status = row.getValue("status");
-  const stage = row.getValue("stage");
+  // const month = row.getValue("month");
+  // const projectName = row.getValue("project_name");
+  // const status = row.getValue("status");
+  // const stage = row.getValue("stage");
 
-  const handleFieldUpdate = async (field, value) => {
-    try {
-      await axios.post(`${import.meta.env.VITE_CS365_URI}/api/cost-control/monthly-data`, {
-        project_name: projectName,
-        monthlyData: {
-          month,
-          [field]: value,
-        }
-      });
-      onDelete(); // refresh table
+  // const handleFieldUpdate = async (field, value) => {
+  //   try {
+  //     await axios.post(`${import.meta.env.VITE_CS365_URI}/api/cost-control/monthly-data`, {
+  //       project_name: projectName,
+  //       monthlyData: {
+  //         month,
+  //         [field]: value,
+  //       }
+  //     });
+  //     onDelete(); // refresh table
 
-       const actData = {
-                    field: "cost_control",
-                    data: {
-                      username: sessionUser,
-                      date: new Date().toLocaleString("en-IN", {
-                        timeZone: "Asia/Kolkata",
-                      }),
-                      activity: `The project ${projectName} "${month}" ${field} is updated to ${value}`,
-                      type:`${field} updation`
-                    },
-                  };
-                  const act = await axios.post(
-                    `${import.meta.env.VITE_CS365_URI}/api/activity`,
-                    actData
-                  );
-    } catch (error) {
-      console.error(`Error updating ${field}:`, error);
-    }
-  };
+  //      const actData = {
+  //                   field: "cost_control",
+  //                   data: {
+  //                     username: sessionUser,
+  //                     date: new Date().toLocaleString("en-IN", {
+  //                       timeZone: "Asia/Kolkata",
+  //                     }),
+  //                     activity: `The project ${projectName} "${month}" ${field} is updated to ${value}`,
+  //                     type:`${field} updation`
+  //                   },
+  //                 };
+  //                 const act = await axios.post(
+  //                   `${import.meta.env.VITE_CS365_URI}/api/activity`,
+  //                   actData
+  //                 );
+  //   } catch (error) {
+  //     console.error(`Error updating ${field}:`, error);
+  //   }
+  // };
 
   return (
      <>
@@ -78,7 +78,7 @@ const Actions = ({ row , onDelete}) => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          {status === "draft" && (
+          {/* {status === "draft" && (
             <DropdownMenuItem
               onClick={() =>
                 setConfirmDialog({
@@ -105,7 +105,7 @@ const Actions = ({ row , onDelete}) => {
             >
               Release
             </DropdownMenuItem>
-          )}
+          )} */}
           <DropdownMenuItem onClick={() => setAlertOpen(true)}>Delete</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -116,7 +116,7 @@ const Actions = ({ row , onDelete}) => {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will update <b>{month}</b> budget to <b>{confirmDialog.value}</b>
+              This will update <b></b> budget to <b>{confirmDialog.value}</b>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -139,7 +139,7 @@ const Actions = ({ row , onDelete}) => {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete <b>{month} budget</b>.
+              This action cannot be undone. This will permanently delete <b> budget</b>.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -149,8 +149,8 @@ const Actions = ({ row , onDelete}) => {
               onClick={async () => {
                 try {
                   await axios.post(`${import.meta.env.VITE_CS365_URI}/api/cost-control/monthly-budget/delete`, {
-                    month,
-                    project_name: projectName,
+                  
+                    project_name: '',
                   });
                   onDelete();
                   dispatch(setSaved(!saved));
@@ -162,7 +162,7 @@ const Actions = ({ row , onDelete}) => {
                       date: new Date().toLocaleString("en-IN", {
                         timeZone: "Asia/Kolkata",
                       }),
-                      activity: `The project "${projectName}" ${month} cost is deleted`,
+                      activity: `The project cost is deleted`,
                       type:'Delete'
                     },
                   };
@@ -171,7 +171,7 @@ const Actions = ({ row , onDelete}) => {
                     actData
                   );
                   toast({
-                    title: `${month} Budget Removed`,
+                    title: `Budget Removed`,
                     description: "The Budget has been successfully removed.",
                     icon: <CircleCheckIcon className="mr-4" color="green" />,
                   });
@@ -194,15 +194,15 @@ export const EventColumn = (fetchData)=> {
     const baseColumns = [
   
   {
-    accessorKey: "",
+    accessorKey: "title",
     header: "Title",
   },
   {
-    accessorKey: "month",
+    accessorKey: "date",
     header: "Date",
   },
   {
-    accessorKey: "",
+    accessorKey: "category",
     header: "Category",
   },
 //   {

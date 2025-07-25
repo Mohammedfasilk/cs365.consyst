@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "tailwindcss/utilities";
 
+
+
 /* Custom Variables for Colors */
 :root {
   --background: #ffffff; /* Replace with your background color */

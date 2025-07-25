@@ -13,12 +13,16 @@ import { Input } from "../UI/Input";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "../UI/Dropdown-menu";
 import { Button } from "../UI/Button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../UI/Table";
+import { useDispatch } from "react-redux";
+import { setSelectedEventId } from "../../Redux/Slices/calendarSheetSlice";
 
 export function EventsTable({ columns, data, onRowClick }) {
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
   const [columnVisibility, setColumnVisibility] = useState({});
   const [rowSelection, setRowSelection] = useState({});
+
+  const dispatch = useDispatch();
 
   const table = useReactTable({
     data,
@@ -100,7 +104,11 @@ export function EventsTable({ columns, data, onRowClick }) {
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  onClick={() => onRowClick(row.original)}
+                  onClick={() => 
+                  {
+                    onRowClick(row.original)
+                    dispatch(setSelectedEventId(row.original._id))
+                  }}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>

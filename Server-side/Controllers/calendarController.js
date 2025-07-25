@@ -55,6 +55,9 @@ exports.createOrUpdateEvent = async (req, res) => {
       return res.status(404).json({ error: "Calendar not found" });
     }
 
+    // ✅ Normalize the date to remove time part
+   const dateOnly = new Date(date).toLocaleDateString("en-CA");
+
     if (eventId) {
       // Update existing event
       const event = calendar.events.id(eventId);
@@ -63,23 +66,60 @@ exports.createOrUpdateEvent = async (req, res) => {
       }
 
       event.title = title;
-      event.date = date;
+      event.date = dateOnly;
       event.category = category;
       event.recurring = recurring;
     } else {
       // Add new event
       calendar.events.push({
         title,
-        date,
+        date: dateOnly,
         category,
         recurring,
       });
     }
 
     await calendar.save();
-    return res.status(200).json({ message: eventId ? "Event updated" : "Event created", data: calendar });
+    return res.status(200).json({
+      message: eventId ? "Event updated" : "Event created",
+      data: calendar,
+    });
   } catch (err) {
     console.error("Error in createOrUpdateEvent:", err);
     res.status(500).json({ error: "Failed to create or update event" });
+  }
+};
+
+
+exports.getAllCalendars = async (req, res) => {
+  try {
+    const calendars = await Calendar.find();
+
+    return res.status(200).json(calendars);
+  } catch (err) {
+    console.error("Error in getAllCalendars:", err);
+    res.status(500).json({ error: "Failed to retrieve calendars" });
+  }
+};
+
+
+exports.getEventsByCalendar = async (req, res) => {
+  try {
+    const { calendarId } = req.params;
+
+    if (!calendarId) {
+      return res.status(400).json({ error: "Calendar ID is required" });
+    }
+
+    const calendar = await Calendar.findById(calendarId);
+
+    if (!calendar) {
+      return res.status(404).json({ error: "Calendar not found" });
+    }
+
+    return res.status(200).json(calendar?.events);
+  } catch (err) {
+    console.error("Error in getEventsByCalendar:", err);
+    res.status(500).json({ error: "Failed to retrieve events" });
   }
 };

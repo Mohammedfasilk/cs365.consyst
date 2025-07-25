@@ -1,33 +1,33 @@
 import { useEffect, useState } from "react";
-import { DataTable } from "../../components/Project-manage/DataTable"
 import { Separator } from "../../components/UI/Separator"
 import { useAuthRedirect } from "../../Hooks/useAuthRoute";
 import axios from "axios";
-import { columns } from "../../components/Project-manage/Columns";
 import CalendarSheet from "../../components/Calendar/CalendarSheet";
+import { columns } from "../../components/Calendar/Columns";
+import { DataTable } from "../../components/Calendar/DataTable";
 
 function ManageCalendar() {
      useAuthRedirect();
       const [loading,setLoading] = useState()
-      const [data,setData] = useState({})
+      const [data,setData] = useState([])
       
           const fetchData = async () => {
-            // try {
-            //   setLoading(true)
-            //   const res = await axios.get(
-            //     `${import.meta.env.VITE_CS365_URI}/api/projects`
-            //   );
+            try {
+              setLoading(true)
+              const res = await axios.get(
+                `${import.meta.env.VITE_CS365_URI}/api/calendar`
+              );
       
-            //   const projects = res.data ;
+              const calendars = res.data ;
     
-            //   setData(projects);
+              setData(calendars);
             
              
-            // } catch (error) {
-            //   console.error("Error fetching  calendar:", error);
-            // } finally{
-            //   setLoading(false)
-            // }
+            } catch (error) {
+              console.error("Error fetching  calendar:", error);
+            } finally{
+              setLoading(false)
+            }
           };
     
       useEffect(() => {
