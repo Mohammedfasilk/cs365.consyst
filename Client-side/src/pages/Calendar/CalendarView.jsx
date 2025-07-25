@@ -32,28 +32,31 @@ function CalendarView() {
   const { accounts } = useMsal();
   const user = accounts[0]?.name;
 
-  useEffect(() => {
-    const fetchCalendars = async () => {
-      try {
-        const res = await axios.get(
-          `${import.meta.env.VITE_CS365_URI}/api/calendar`
-        );
-        const allCalendars = res.data;
-        const filtered = allCalendars.filter((calendar) =>
-          calendar.shared_with?.includes(user)
-        );
-        setCalendars(filtered);
+useEffect(() => {
+  const fetchCalendars = async () => {
+    try {
+      const res = await axios.get(
+        `${import.meta.env.VITE_CS365_URI}/api/calendar`
+      );
+      const allCalendars = res.data;
+      const filtered = allCalendars.filter((calendar) =>
+        calendar.shared_with?.includes(user)
+      );
+      setCalendars(filtered);
 
-        if (filtered.length > 0 && !selectedCalendarId) {
-          dispatch(setSelectedCalendarId(filtered[0]._id));
-        }
-      } catch (err) {
-        console.error("Failed to fetch calendars:", err);
+      if (filtered.length > 0 && !selectedCalendarId) {
+        const defaultCalendar = filtered[0];
+        dispatch(setSelectedCalendarId(defaultCalendar._id));
+        dispatch(setSelectedCalendar(defaultCalendar)); // ✅ Add this line
       }
-    };
+    } catch (err) {
+      console.error("Failed to fetch calendars:", err);
+    }
+  };
 
-    fetchCalendars();
-  }, [user]);
+  fetchCalendars();
+}, [user]);
+
 
   const handleTabChange = (calendarId) => {
     dispatch(setSelectedCalendarId(calendarId));
